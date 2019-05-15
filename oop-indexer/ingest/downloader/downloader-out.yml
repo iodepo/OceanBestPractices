@@ -1,0 +1,397 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Describes the infrasturcture needed to ingest documents from Ocean Best
+  Practices.
+Outputs:
+  BitstreamsDownloaderArn:
+    Description: The ARN of the Lambda function responsible for downloading the source
+      [original] document.
+    Value:
+      Fn::GetAtt:
+      - BitstreamsDownloader
+      - Arn
+  DocumentMetadataBucketArn:
+    Description: The S3 bucket Arn where document metadata is stored.
+    Value:
+      Fn::GetAtt:
+      - DocumentMetadataBucket
+      - Arn
+  DocumentMetadataBucketName:
+    Description: The S3 bucket name where document metadata is stored.
+    Value:
+      Ref: DocumentMetadataBucket
+  DocumentSourceBucketArn:
+    Description: The S3 bucket Arn where the original (binary) document is stored.
+    Value:
+      Fn::GetAtt:
+      - DocumentSourceBucket
+      - Arn
+  DocumentSourceBucketName:
+    Description: The S3 bucket name where the original (binary) document is stored.
+    Value:
+      Ref: DocumentSourceBucket
+  TextExtractorTopic:
+    Description: The SNS Topic ARN where text extraction status is posted.
+    Value:
+      Ref: TextExtractorTopic
+Parameters:
+  AvailableDocumentTopicArn:
+    Description: The SNS Topic Arn where documents needing indexed are published.
+    Type: String
+  Environment:
+    Default: staging
+    Description: staging, prod, or a development environment uniquely named across
+      CF templates like stark
+    Type: String
+  IndexerFunctionName:
+    Description: The name of the function used to index a source document and its
+      metadata.
+    Type: String
+  TextExtractorBucketName:
+    Description: The bucket name where the final text extraction object is stored.
+    Type: String
+  TextExtractorFunctionName:
+    Description: The name of the function used to extract text from the source document.
+    Type: String
+  TextExtractorTempBucketName:
+    Description: The bucket name for temporary artifact storage during text extraction.
+    Type: String
+Resources:
+  AvailableDocumentSubscription:
+    Properties:
+      Endpoint:
+        Fn::GetAtt:
+        - MetadataDownloader
+        - Arn
+      Protocol: lambda
+      TopicArn:
+        Ref: AvailableDocumentTopicArn
+    Type: AWS::SNS::Subscription
+  BitstreamsDownloader:
+    Properties:
+      CodeUri: s3://obp-indexer-functions-iode/3715fd5440ac82d82d2eeb4a5b5bb400
+      Description: Downloads the binary file for a given document UID from the OBP
+        API
+      Environment:
+        Variables:
+          DOCUMENT_BINARY_BUCKET:
+            Fn::Sub: obp-document-source-${Environment}
+          INDEXER_FUNCTION_NAME:
+            Ref: IndexerFunctionName
+      FunctionName:
+        Fn::Sub: obp-bitstreams-downloader-${Environment}
+      Handler: bitstreams-downloader.handler
+      MemorySize: 1024
+      Role:
+        Fn::GetAtt:
+        - BitstreamsDownloaderExecutionRole
+        - Arn
+      Runtime: nodejs6.10
+      Timeout: 300
+    Type: AWS::Serverless::Function
+  BitstreamsDownloaderExecutionRole:
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action:
+          - sts:AssumeRole
+          Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+        Version: '2012-10-17'
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+      - PolicyDocument:
+          Statement:
+          - Action:
+            - S3:PutObject
+            Effect: Allow
+            Resource:
+            - Fn::Join:
+              - /
+              - - Fn::GetAtt:
+                  - DocumentSourceBucket
+                  - Arn
+                - '*'
+            - Fn::GetAtt:
+              - DocumentSourceBucket
+              - Arn
+          Version: '2012-10-17'
+        PolicyName:
+          Fn::Sub: AllowPutToSourceBucket-${Environment}
+      - PolicyDocument:
+          Statement:
+          - Action:
+            - lambda:InvokeFunction
+            Effect: Allow
+            Resource: '*'
+          Version: '2012-10-17'
+        PolicyName:
+          Fn::Sub: AllowInvokeIndexer-${Environment}
+      RoleName:
+        Fn::Sub: obp-bitstreams-dl-exec-role-${Environment}
+    Type: AWS::IAM::Role
+  DocumentMetadataBucket:
+    Properties:
+      BucketName:
+        Fn::Sub: obp-document-metadata-${Environment}
+      LifecycleConfiguration:
+        Rules:
+        - ExpirationInDays: 15
+          Id:
+            Fn::Sub: DeleteDocumentMetadata-${Environment}
+          Prefix: ''
+          Status: Enabled
+      NotificationConfiguration:
+        LambdaConfigurations:
+        - Event: s3:ObjectCreated:*
+          Function:
+            Fn::GetAtt:
+            - BitstreamsDownloader
+            - Arn
+    Type: AWS::S3::Bucket
+  DocumentSourceBucket:
+    Properties:
+      AccessControl: PublicRead
+      BucketName:
+        Fn::Sub: obp-document-source-${Environment}
+      CorsConfiguration:
+        CorsRules:
+        - AllowedHeaders:
+          - Authorization
+          AllowedMethods:
+          - GET
+          - HEAD
+          AllowedOrigins:
+          - '*'
+          MaxAge: 3000
+      NotificationConfiguration:
+        LambdaConfigurations:
+        - Event: s3:ObjectCreated:*
+          Function:
+            Fn::GetAtt:
+            - InvokeExtractor
+            - Arn
+    Type: AWS::S3::Bucket
+  DocumentSourceBucketPolicy:
+    Properties:
+      Bucket:
+        Ref: DocumentSourceBucket
+      PolicyDocument:
+        Statement:
+        - Action:
+          - s3:GetObject
+          Effect: Allow
+          Principal: '*'
+          Resource:
+            Fn::Sub: arn:aws:s3:::obp-document-source-${Environment}/*
+    Type: AWS::S3::BucketPolicy
+  InvokeBitstreamDownloaderFromS3Permission:
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName:
+        Fn::GetAtt:
+        - BitstreamsDownloader
+        - Arn
+      Principal: s3.amazonaws.com
+      SourceArn:
+        Fn::Join:
+        - ''
+        - - 'arn:aws:s3:::'
+          - Fn::Sub: obp-document-metadata-${Environment}
+    Type: AWS::Lambda::Permission
+  InvokeExtractor:
+    Properties:
+      CodeUri: s3://obp-indexer-functions-iode/3715fd5440ac82d82d2eeb4a5b5bb400
+      Description: Invokes the text extractor (3rd party library) functions for a
+        given document UID
+      Environment:
+        Variables:
+          TEXT_EXTRACTOR_BUCKET:
+            Fn::Join:
+            - '-'
+            - - Ref: TextExtractorBucketName
+              - Ref: Environment
+          TEXT_EXTRACTOR_FUNCTION_NAME:
+            Ref: TextExtractorFunctionName
+          TEXT_EXTRACTOR_TEMP_BUCKET:
+            Fn::Join:
+            - '-'
+            - - Ref: TextExtractorTempBucketName
+              - Ref: Environment
+      FunctionName:
+        Fn::Sub: obp-invoke-extractor-${Environment}
+      Handler: invoke-extractor.handler
+      Role:
+        Fn::GetAtt:
+        - InvokeExtractorExecutionRole
+        - Arn
+      Runtime: nodejs6.10
+      Timeout: 20
+    Type: AWS::Serverless::Function
+  InvokeExtractorExecutionRole:
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action:
+          - sts:AssumeRole
+          Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+        Version: '2012-10-17'
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+      - PolicyDocument:
+          Statement:
+          - Action:
+            - lambda:InvokeFunction
+            Effect: Allow
+            Resource: '*'
+          Version: '2012-10-17'
+        PolicyName:
+          Fn::Sub: AllowInvokeLambda-${Environment}
+      RoleName:
+        Fn::Sub: obp-invoke-extractor-exec-role-${Environment}
+    Type: AWS::IAM::Role
+  InvokeInvokeExtractorFromS3Permission:
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName:
+        Fn::GetAtt:
+        - InvokeExtractor
+        - Arn
+      Principal: s3.amazonaws.com
+      SourceArn:
+        Fn::Join:
+        - ''
+        - - 'arn:aws:s3:::'
+          - Fn::Sub: obp-document-source-${Environment}
+    Type: AWS::Lambda::Permission
+  InvokeMetadataDownloaderFromSNSPermission:
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName:
+        Fn::GetAtt:
+        - MetadataDownloader
+        - Arn
+      Principal: sns.amazonaws.com
+      SourceArn:
+        Ref: AvailableDocumentTopicArn
+    Type: AWS::Lambda::Permission
+  MetadataDownloader:
+    Properties:
+      CodeUri: s3://obp-indexer-functions-iode/3715fd5440ac82d82d2eeb4a5b5bb400
+      Description: Downloads the metadata for a given document UID from the OBP API
+      Environment:
+        Variables:
+          DOCUMENT_METADATA_BUCKET:
+            Fn::Sub: obp-document-metadata-${Environment}
+      FunctionName:
+        Fn::Sub: obp-metadata-downloader-${Environment}
+      Handler: metadata-downloader.handler
+      Role:
+        Fn::GetAtt:
+        - MetadataDownloaderExecutionRole
+        - Arn
+      Runtime: nodejs6.10
+      Timeout: 300
+    Type: AWS::Serverless::Function
+  MetadataDownloaderExecutionRole:
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action:
+          - sts:AssumeRole
+          Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+        Version: '2012-10-17'
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+      - PolicyDocument:
+          Statement:
+          - Action:
+            - s3:PutObject
+            Effect: Allow
+            Resource:
+            - Fn::Join:
+              - /
+              - - Fn::Join:
+                  - ''
+                  - - 'arn:aws:s3:::'
+                    - Fn::Sub: obp-document-metadata-${Environment}
+                - '*'
+            - Fn::Join:
+              - ''
+              - - 'arn:aws:s3:::'
+                - Fn::Sub: obp-document-source-${Environment}
+          Version: '2012-10-17'
+        PolicyName:
+          Fn::Sub: AllowPutToMetadataBucket-${Environment}
+      RoleName:
+        Fn::Sub: obp-metadata-dl-exec-role-${Environment}
+    Type: AWS::IAM::Role
+  TextExtractorDestinationBucket:
+    Properties:
+      BucketName:
+        Fn::Sub: ${TextExtractorBucketName}-${Environment}
+      LifecycleConfiguration:
+        Rules:
+        - ExpirationInDays: 15
+          Id:
+            Fn::Sub: DeleteTextExtractorText-${Environment}
+          Prefix: ''
+          Status: Enabled
+      NotificationConfiguration:
+        TopicConfigurations:
+        - Event: s3:ObjectCreated:*
+          Topic:
+            Ref: TextExtractorTopic
+    Type: AWS::S3::Bucket
+  TextExtractorTempBucket:
+    Properties:
+      BucketName:
+        Fn::Sub: ${TextExtractorTempBucketName}-${Environment}
+      LifecycleConfiguration:
+        Rules:
+        - ExpirationInDays: 5
+          Id:
+            Fn::Sub: DeleteTextExtractorArtifacts-${Environment}
+          Prefix: ''
+          Status: Enabled
+    Type: AWS::S3::Bucket
+  TextExtractorTopic:
+    Properties:
+      DisplayName:
+        Fn::Sub: Text Extractor Completed Topic-${Environment}
+    Type: AWS::SNS::Topic
+  TextExtractorTopicPolicy:
+    Properties:
+      PolicyDocument:
+        Statement:
+        - Action: sns:Publish
+          Condition:
+            ArnLike:
+              aws:SourceArn:
+                Fn::Join:
+                - ''
+                - - 'arn:aws:s3:::'
+                  - Fn::Join:
+                    - '-'
+                    - - Ref: TextExtractorBucketName
+                      - Ref: Environment
+          Effect: Allow
+          Principal:
+            AWS: '*'
+          Resource:
+            Ref: TextExtractorTopic
+        Version: '2012-10-17'
+      Topics:
+      - Ref: TextExtractorTopic
+    Type: AWS::SNS::TopicPolicy
+Transform: AWS::Serverless-2016-10-31

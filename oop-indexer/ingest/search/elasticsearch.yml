@@ -1,0 +1,60 @@
+AWSTemplateFormatVersion : '2010-09-09'
+Description: Describes the Elasticsearch resources for indexing and searching the OBP library.
+
+Parameters:
+
+  Environment:
+    Type: String
+    Description: staging, prod, or a development environment uniquely named across CF templates like stark
+    Default: staging
+
+  ElasticsearchVersion:
+    Type: String
+    Description: Version of Elasticsearch to use
+    Default: 6.0
+
+  InstanceCount:
+    Type: Number
+    Default: 1
+    Description: Number of EC2 instances used in the Elasticsearch cluster
+
+  InstanceType:
+    Type: String
+    Default: t2.small.elasticsearch
+    AllowedValues: [t2.small.elasticsearch, t2.medium.elasticsearch, c4.large.elasticsearch, c4.xlarge.elasticsearch]
+    ConstraintDescription: Please choose a valid instance type.
+    Description: EC2 instance type used in the Elasticsearch cluster
+
+Resources:
+
+  ElasticsearchDomain:
+    Type: AWS::Elasticsearch::Domain
+    Properties:
+      DomainName: !Sub obp-${Environment}
+      ElasticsearchVersion: !Ref ElasticsearchVersion
+      ElasticsearchClusterConfig:
+        InstanceType: !Ref InstanceType
+        InstanceCount: !Ref InstanceCount
+      AdvancedOptions:
+        rest.action.multi.allow_explicit_index: true
+      EBSOptions:
+        EBSEnabled: true
+        Iops: 0
+        VolumeSize: 10
+        VolumeType: gp2
+      AccessPolicies:
+        Version: "2012-10-17"
+        Statement:
+          -
+            Effect: Allow
+            Principal:
+              AWS: "*"
+            Action: "es:*"
+            Resource: !Sub "arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/obp-${Environment}/*"
+
+Outputs:
+
+  ElasticsearchDomainEndpoint:
+    Value: !GetAtt ElasticsearchDomain.DomainEndpoint
+    Description: The domain endpoint for the Elasticsearch cluster
+    

@@ -1,0 +1,40 @@
+AWSTemplateFormatVersion : '2010-09-09'
+Description: Describes the S3 buckets used to store Lambda code and libraries.
+
+Parameters:
+
+  Environment:
+    Type: String
+    Description: staging, prod, or a development environment uniquely named across CF templates like stark
+    Default: staging
+
+Resources:
+
+  SchedulerFunctionsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub obp-scheduler-functions-${Environment}
+
+  IndexerFunctionsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub obp-indexer-functions-${Environment}
+
+  SearchApiFunctionsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub obp-search-api-functions-${Environment}
+
+Outputs:
+
+  SchedulerFunctionsBucketName:
+    Value: !Ref SchedulerFunctionsBucket
+    Description: Name of the scheduler functions bucket
+
+  IndexerFunctionsBucketName:
+    Value: !Ref IndexerFunctionsBucket
+    Description: Name of the indexer functions bucket
+
+  SearchApiFunctionsBucketName:
+    Value: !Ref SearchApiFunctionsBucket
+    Description: Name of the search API functions bucket

@@ -1,0 +1,334 @@
+AWSTemplateFormatVersion : '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Describes the resources for the OBP Search API.
+
+Parameters:
+
+  Environment:
+    Type: String
+    Description: staging, prod, or a development environment uniquely named across CF templates like stark
+    Default: staging
+
+  ElasticSearchHost:
+    Type: String
+    Description: The Elastic Search host (without protocol) to use for indexing.
+
+  OntologyStoreHost:
+    Type: String
+    Description: The host (without protocol) of the triple store containing ontology terms.
+
+  OntologyStorePort:
+    Type: Number
+    Default: 8890
+    Description: The port associated with the ontology triple store host.
+
+Resources:
+
+  SearchApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: !Ref Environment
+      DefinitionBody:
+        swagger: '2.0'
+        info:
+          title: !Ref AWS::StackName
+        components:
+          schemas:
+            Document:
+              properties:
+                contents:
+                  type: string
+                title:
+                  type: string
+        paths:
+          "/documents":
+            get:
+              summary: Search for documents by keywords.
+              parameters:
+                - 
+                  in: query
+                  name: keywords
+                  schema: 
+                    type: array
+                    items:
+                      type: string
+                  required: true
+                  description: >
+                    A comma separated list of keywords used to search documents. 
+                    Multiple keywords will be combined as an OR query.
+                -
+                  in: query
+                  name: from
+                  schema:
+                    type: integer
+                  required: false
+                  description: >
+                    This parameter supports pagination by allowing you to specify
+                    the offset to start returning search results. Use in conjunction
+                    with the limit parameter.
+                -
+                  in: query
+                  name: limit
+                  schema:
+                    type: integer
+                  required: false
+                  description: >
+                    This parameter limits the number of results returned. Use in conjunction
+                    with the from parameter to support pagination.
+                -
+                  in: query
+                  name: synonyms
+                  schema:
+                    type: boolean
+                  required: false
+                  default: false
+                  description: >
+                    This parameter determines whether or not exact synonyms - obtained from the available 
+                    ontologies - of the given keywords are included in the query.
+                -
+                  in: query
+                  name: fields
+                  schema:
+                    type: array
+                    items:
+                      type: string
+                  required: false
+                  description: >
+                    A comma separated list of metadata field names (e.g. author) which restricts
+                    the search query to only these fields. Otherwise, the default fields will be used.
+                -
+                  in: query
+                  name: refereed
+                  schema:
+                    type: boolean
+                  required: false
+                  default: false
+                  description: >
+                    This parameter - if set to true - will limit the results to those that have the
+                    refereed metadata value set to "Refereed".
+              x-amazon-apigateway-integration:
+                httpMethod: POST
+                type: aws_proxy
+                uri:
+                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${SearchByKeywords.Arn}/invocations
+              responses:
+                "200":
+                  description: Returns the results of the keyword search.
+                "500":
+                  description: An error occurred.  
+          "/documents/autocomplete":
+            get:
+              summary: Provides a list of suggested keywords based on the input text.
+              parameters:
+                -
+                  in: query
+                  name: input
+                  schema:
+                    type: string
+                  required: true
+                  description: >
+                    The text used to fuzzy match suggested keywords.
+                -
+                  in: query
+                  name: synonyms
+                  schema:
+                    type: boolean
+                  required: false
+                  default: false
+                  description: >
+                    This parameter determines whether or not exact synonyms - obtained from the available 
+                    ontologies - of the given input are included in the query.
+              x-amazon-apigateway-integration:
+                httpMethod: POST
+                type: aws_proxy
+                uri:
+                  Fn::Sub: 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${SearchAutocomplete.Arn}/invocations'
+              responses:
+                "200":
+                  description: Returns a list of suggested keywords based on the input text.
+                "500":
+                  description: An error occurred. 
+          "documents/preview":
+            post:
+              summary: Returns the results of our ontology term tagging routine against the provided document body and title.
+              parameters:
+                -
+                  in: query
+                  name: form
+                  schema:
+                    type: string
+                  required: false
+                  default: "json"
+                  description: >
+                    This paramter controls the format of the results. Valid values are "json" or "csv".
+                    Defaults to "json".
+              requestBody:
+                description: The document body and title used in our tagging routine.
+                required: true
+                content:
+                  application/json:
+                    schema: 
+                      $ref: '#/components/schemas/Document'
+              x-amazon-apigateway-integration:
+                httpMethod: POST
+                type: aws_proxy
+                uri:
+                  Fn::Sub: 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${DocumentPreview.Arn}/invocations'
+              responses:
+                '200':
+                  description: List of terms that match the given document body and title based on our tagging routine.
+                '500':
+                  description: An error occurred.
+          "/statistics":
+            get:
+              summary: Provides statistics including document and ontological term counts.
+              x-amazon-apigateway-integration:
+                httpMethod: POST
+                type: aws_proxy
+                uri:
+                  Fn::Sub: 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetStatistics.Arn}/invocations'
+              responses:
+                "200":
+                  description: Returns an object containing document and ontological term counts.
+                "500":
+                  description: An error occurred.
+          "/terms/graph":
+            get:
+              summary: Provides a relational graph of an ontological term including subclasses and relationships.
+              parameters:
+                -
+                  in: query
+                  name: term
+                  schema:
+                    type: string
+                  required: true
+                  description: >
+                    The term used as the root node when building the relational graph.
+              x-amazon-apigateway-integration:
+                httpMethod: POST
+                type: aws_proxy
+                uri:
+                  Fn::Sub: 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetTermsGraph.Arn}/invocations'
+              responses:
+                "200":
+                  description: Returns an object describing the relationships found in the searched ontologies for the given term.
+                "500":
+                  description: An error occurred.
+
+  # TODO: Define SearchByKeywords role that Lambda can execute and has access to ElasticSearch.
+
+  SearchByKeywords:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub obp-search-by-keywords-function-${Environment}
+      Description: Searches the OBP index for documents matching the given keywords.
+      Handler: search.handler
+      Runtime: nodejs6.10
+      Timeout: 300
+      CodeUri: .
+      Environment:
+        Variables:
+          ELASTIC_SEARCH_HOST:
+            Ref: ElasticSearchHost
+          REGION:
+            Ref: AWS::Region
+          ONTOLOGY_STORE_HOST:
+            Ref: OntologyStoreHost
+          ONTOLOGY_STORE_PORT:
+            Ref: OntologyStorePort
+      Events:
+        Search:
+          Type: Api
+          Properties:
+            Path: '/documents'
+            Method: GET
+            RestApiId:
+              Ref: SearchApi
+
+  SearchAutocomplete:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub obp-search-autocomplete-function-${Environment}
+      Description: Returns a subset of ontology terms that complete the given keyword.
+      Handler: search-autocomplete.handler
+      Runtime: nodejs6.10
+      Timeout: 100
+      CodeUri: .
+      Environment:
+        Variables:
+          ONTOLOGY_STORE_HOST: !Ref OntologyStoreHost
+          ONTOLOGY_STORE_PORT: !Ref OntologyStorePort
+      Events:
+        SearchAutocomplete:
+          Type: Api
+          Properties:
+            Path: '/documents/autocomplete'
+            Method: GET
+            RestApiId:
+              Ref: SearchApi
+
+  DocumentPreview:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub obp-document-preview-function-${Environment}
+      Description: Returns the result of running our Ontology term tagging routine against the given document body and title.
+      Handler: preview.handler
+      Runtime: nodejs8.10
+      Timeout: 100
+      CodeUri: .
+      Environment:
+        Variables:
+          ELASTIC_SEARCH_HOST:
+            Ref: ElasticSearchHost
+      Events:
+        DocumentPreview:
+          Type: Api
+          Properties:
+            Path: '/documents/preview'
+            Method: POST
+            RestApiId:
+              Ref: SearchApi
+
+  GetStatistics:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub obp-get-statistics-function-${Environment}
+      Description: Returns general statistics about the OBP index size and ontology count.
+      Handler: get-statistics.handler
+      Runtime: nodejs6.10
+      CodeUri: .
+      Environment:
+        Variables:
+          ELASTIC_SEARCH_HOST: !Ref ElasticSearchHost
+          ONTOLOGY_STORE_HOST: !Ref OntologyStoreHost
+          ONTOLOGY_STORE_PORT: !Ref OntologyStorePort
+      Events:
+        GetStatistics:
+          Type: Api
+          Properties:
+            Path: '/statistics'
+            Method: GET
+            RestApiId:
+              Ref: SearchApi
+
+  GetTermsGraph:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub obp-terms-graph-function-${Environment}
+      Description: Queries ontologies for terms related to the given term.
+      Handler: terms-graph.handler
+      Runtime: nodejs6.10
+      Timeout: 100
+      CodeUri: .
+      Environment:
+        Variables:
+          ONTOLOGY_STORE_HOST: !Ref OntologyStoreHost
+          ONTOLOGY_STORE_PORT: !Ref OntologyStorePort
+      Events:
+        GetTermsGraph:
+          Type: Api
+          Properties:
+            Path: '/terms/graph'
+            Method: GET
+            RestApiId:
+              Ref: SearchApi

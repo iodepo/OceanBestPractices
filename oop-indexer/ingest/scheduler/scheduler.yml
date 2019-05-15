@@ -1,0 +1,93 @@
+AWSTemplateFormatVersion : '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Leverages the Ocean Best Practices RSS feed to discover documents needing ingest.
+
+Parameters:
+
+  Environment:
+    Type: String
+    Description: staging, prod, or a development environment uniquely named across CF templates like stark
+    Default: staging
+
+  ScheduleInterval:
+    Type: Number
+    Description: >-
+      The amount of time in seconds to consider published documents valid to index. Also may just be how often
+      this function is scheduled to run by e.g. CloudWatch events.
+    Default: 300
+
+Resources:
+
+  AvailableDocumentTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      DisplayName: !Sub "Available Documents Topic-#{Environment}"
+
+  SchedulerExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub obp-scheduler-execution-role-${Environment}
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+      Policies:
+        -
+          PolicyName: AllowPublishToDocumentTopic
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              -
+                Effect: "Allow"
+                Resource: !Ref AvailableDocumentTopic
+                Action:
+                  - "SNS:Publish"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          -
+            Effect: "Allow"
+            Principal:
+              Service:
+                - "lambda.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+
+  SchedulerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: scheduler.handler
+      Runtime: nodejs6.10
+      Timeout: 60
+      CodeUri: .
+      Role: !GetAtt SchedulerExecutionRole.Arn
+      FunctionName: !Sub obp-scheduler-function-${Environment}
+      Description: Periodically checks the OBP RSS feed for documents that need indexing.
+      Environment:
+        Variables:
+          DOCUMENT_TOPIC_ARN: !Ref AvailableDocumentTopic
+          SCHEDULE_INTERVAL: !Ref ScheduleInterval
+
+  SchedulerEventRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Description: Schedules the RSS checker (scheduler) to execute at a specific interval
+      Name: !Sub obp-scheduler-interval-rule-${Environment}
+      ScheduleExpression: "rate(5 minutes)"
+      Targets:
+        -
+          Arn: !GetAtt SchedulerFunction.Arn
+          Id: !Sub scheduler-event-id-${Environment}
+      State: ENABLED
+
+  InvokeSchedulerFromEventPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt SchedulerFunction.Arn
+      Action: "lambda:InvokeFunction"
+      Principal: "events.amazonaws.com"
+      SourceArn: !GetAtt SchedulerEventRule.Arn
+
+Outputs:
+
+  AvailableDocumentTopicArn:
+    Description: The topic ARN for available document subscribers.
+    Value: !Ref AvailableDocumentTopic

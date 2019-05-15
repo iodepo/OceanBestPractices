@@ -1,0 +1,23 @@
+AWSTemplateFormatVersion : '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Describes the infrasturcture to fetch items (documents) directly from the Ocean Best Practices /items API. This API can be used to bulk index items as opposed to using the RSS feed methods.
+
+Resources:
+
+  BulkItems:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: bulk-items.handler
+      Runtime: nodejs6.10
+      Timeout: 500
+      Events:
+        GetItems:
+          Type: Api
+          Properties:
+            Path: '/items'
+            Method: get
+      # Role: !GetAtt MetadataDownloaderExecutionRole.Arn
+      # Environment:
+      #   Variables:
+      #     DOCUMENT_METADATA_BUCKET: !Ref DocumentMetadataBucketName
+      # CodeUri: s3://oop-indexer-functions/items.zip

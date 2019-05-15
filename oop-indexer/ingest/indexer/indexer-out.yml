@@ -1,0 +1,114 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Describes the infrasture needed to index Ocean Best Practices metadata
+  and text documents.
+Parameters:
+  DocumentExtractedBucketArn:
+    Description: The bucket ARN where the extracted document is stored.
+    Type: String
+  DocumentExtractedBucketName:
+    Description: The bucket name where the extracted document is stored.
+    Type: String
+  DocumentMetadataBucketArn:
+    Description: The bucket ARN where document metadata is stored.
+    Type: String
+  DocumentMetadataBucketName:
+    Description: The bucket name where document metadata is stored.
+    Type: String
+  ElasticSearchHost:
+    Description: The Elastic Search host (without protocol) to use for indexing.
+    Type: String
+  Environment:
+    Default: staging
+    Description: staging, prod, or a development environment uniquely named across
+      CF templates like stark
+    Type: String
+  TextExtractorStatusTopicArn:
+    Description: The SNS Topic ARN that posts text extractor status (when text documents
+      are made available).
+    Type: String
+Resources:
+  IndexerExecutionRole:
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action:
+          - sts:AssumeRole
+          Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+        Version: '2012-10-17'
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+      - PolicyDocument:
+          Statement:
+          - Action:
+            - S3:GetObject
+            Effect: Allow
+            Resource:
+            - Fn::Join:
+              - /
+              - - Ref: DocumentMetadataBucketArn
+                - '*'
+            - Ref: DocumentMetadataBucketArn
+          - Action:
+            - S3:GetObject
+            Effect: Allow
+            Resource:
+            - Fn::Join:
+              - /
+              - - Ref: DocumentExtractedBucketArn
+                - '*'
+            - Ref: DocumentExtractedBucketArn
+          Version: '2012-10-17'
+        PolicyName:
+          Fn::Sub: obp-allow-get-to-document-buckets-${Environment}
+      RoleName:
+        Fn::Sub: obp-indexer-exec-role-${Environment}
+    Type: AWS::IAM::Role
+  IndexerFunction:
+    Properties:
+      CodeUri: s3://obp-indexer-functions-uat/eb7b0e3e0857eb64dae54e4a784d671b
+      Description: Responsible for percolating (tagging) and indexing document metadata
+        based on a given document UID
+      Environment:
+        Variables:
+          DOCUMENT_CONTENT_BUCKET:
+            Ref: DocumentExtractedBucketName
+          DOCUMENT_METADATA_BUCKET:
+            Ref: DocumentMetadataBucketName
+          ELASTIC_SEARCH_HOST:
+            Ref: ElasticSearchHost
+      FunctionName:
+        Fn::Sub: obp-indexer-function-${Environment}
+      Handler: indexer.handler
+      Role:
+        Fn::GetAtt:
+        - IndexerExecutionRole
+        - Arn
+      Runtime: nodejs6.10
+      Timeout: 300
+    Type: AWS::Serverless::Function
+  InvokeIndexerFromSNSPermission:
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName:
+        Fn::GetAtt:
+        - IndexerFunction
+        - Arn
+      Principal: sns.amazonaws.com
+      SourceArn:
+        Ref: TextExtractorStatusTopicArn
+    Type: AWS::Lambda::Permission
+  TextExtractorStatusSubscription:
+    Properties:
+      Endpoint:
+        Fn::GetAtt:
+        - IndexerFunction
+        - Arn
+      Protocol: lambda
+      TopicArn:
+        Ref: TextExtractorStatusTopicArn
+    Type: AWS::SNS::Subscription
+Transform: AWS::Serverless-2016-10-31
