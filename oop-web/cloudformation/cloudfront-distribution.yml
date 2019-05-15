@@ -1,0 +1,74 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: "Describes the Cloud Front distribution for the OBP static website."
+
+Parameters:
+
+  Environment:
+    Type: String
+    Description: staging, prod, or a development environment uniquely named across CF templates like stark
+    Default: staging
+
+  MainWebsiteAliases:
+    Type: List<String>
+    Default: "oceanbestpractices.org,www.oceanbestpractices.org"
+    Description: URL for the website without protocol.
+  
+  MainWebsiteS3WebsiteURL:
+    Type: String
+    Description: S3 bucket website URL without protocol
+
+  AcmCertificateArn:
+    Type: String
+    Default: ""
+    Description: The ARN of the Acm certificate to use with this cloudfront distribution. If blank, the default CloudFront certificate is used.
+
+Conditions:
+
+  HasAcmCertificate: !Not [ !Equals [ !Ref AcmCertificateArn, "" ]]
+
+Resources:
+
+  WebsiteCloudFrontDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Origins:
+          - DomainName: !Ref MainWebsiteS3WebsiteURL
+            Id: MainWebsiteBucketOrigin
+            CustomOriginConfig:
+              HTTPPort: 80
+              HTTPSPort: 443
+              OriginProtocolPolicy: http-only
+        DefaultRootObject: "index.html"
+        Enabled: true
+        # Aliases: !Ref MainWebsiteAliases
+        ViewerCertificate:
+          !If 
+            - HasAcmCertificate
+            - 
+              AcmCertificateArn: !Ref AcmCertificateArn
+              SslSupportMethod: sni-only
+              MinimumProtocolVersion: TLSv1.1_2016
+            - CloudFrontDefaultCertificate: true  
+        HttpVersion: http2
+        DefaultCacheBehavior:
+          TargetOriginId: MainWebsiteBucketOrigin
+          AllowedMethods: ["GET", "HEAD"]
+          ForwardedValues:
+            QueryString: true
+            Cookies:
+              Forward: all
+            # Headers:
+            #     - "*"
+          ViewerProtocolPolicy: redirect-to-https
+        CustomErrorResponses:
+          - ErrorCode: 404
+            ResponseCode: 200
+            ResponsePagePath: "/index.html"
+
+Outputs: 
+  DistributionId:
+    Value: !Ref WebsiteCloudFrontDistribution
+
+  DistributionDomainName:
+    Value: !GetAtt [WebsiteCloudFrontDistribution, DomainName]

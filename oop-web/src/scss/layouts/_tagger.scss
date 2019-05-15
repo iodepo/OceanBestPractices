@@ -1,0 +1,138 @@
+.tagger{
+  padding: 1rem 0;
+  text-align: center;
+  background-color: $light-gray;
+  
+  span{
+    display: block;
+  }
+  
+  @media #{$screen-s} {
+    padding-top: 3rem;
+  }
+}
+
+.tagger__header {
+  color: $primary-blue;
+  font-weight: bold;
+  font-size: 1.25em;
+  text-transform: uppercase;
+}
+
+.tagger__info, .tagger__title, .tagger__body, .tagger__recaptcha, .tagger-results__button-container {
+  padding: 1rem 0;
+  margin-left: auto;
+  margin-right: auto;
+  width: 75%;
+  
+  input, textarea {
+    width: 100%;
+    color: rgba(0, 0, 0, .4);
+    font-weight: 400;
+    outline: 0;
+    border: 0;
+    transition: all 0.2s ease-in-out;
+    border-radius:.3rem;
+    border: 1px solid $light-med-gray;
+    padding: 1rem;
+    font-size: 1.1rem;
+    
+    &:focus {
+      background-color: #fff;
+      color:$dark-gray;
+    }
+  }
+  
+  @media #{$screen-s} {
+    width: 65%;
+  }
+}
+
+.tagger__title {
+  input {
+    height: 2.5rem;
+    line-height: 2.5rem;
+  }
+}
+
+.tagger__body {
+  textarea {
+    resize: none;
+    height: 12em;
+    
+    @media #{$screen-m} {
+      height: 15em;
+    }
+    
+    @media #{$screen-l} {
+      height: 20em;
+    }
+  }
+}
+
+.tagger__submit-button {
+  width: 65%;
+  
+  @media #{$screen-s} {
+    width: 20%;
+  }
+}
+
+.tagger__button-disable {
+  background-color: $light-med-gray !important;
+}
+
+.tagger__recaptcha {
+  padding-bottom: 1.5em;
+  .g-recaptcha {
+    div{
+      margin-left: auto;
+      margin-right: auto;
+    }
+  }
+}
+
+.tagger-results__container {
+  display: flex;
+  flex-direction: column;
+}
+
+.tagger-results__table {
+  background-color: #fff;
+  border: 1px solid #D8D8D8;
+  padding: .7em;
+  width: 90%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.tagger-results__table--header-row {
+  text-align: left;
+}
+
+.tagger-results__table--row {
+  text-align: left;
+}
+
+.tagger-results__back-button {
+  text-transform: uppercase;
+  font-size: 1.1em;
+  font-weight: bold;
+  color: $primary-blue;
+  cursor: pointer;
+  padding-bottom: .8em;
+
+  i {
+    padding-right: .3em;
+  }
+}
+
+.tagger-results__status {
+  margin: .7em;
+}
+
+.tagger-results__button-container {
+  button {
+    margin: 0 .7em;
+  }
+}

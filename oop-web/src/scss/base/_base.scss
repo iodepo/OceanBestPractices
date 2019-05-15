@@ -1,0 +1,41 @@
+@import 'node_modules/normalize-scss/sass/_normalize.scss';
+@include normalize();
+@import "_colors.scss";
+
+html {
+  box-sizing: border-box;
+}
+
+body{
+  font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
+  font-size:15px;
+  line-height: 1.4;
+}
+
+a{
+  color:$primary-blue;
+  text-decoration:none;
+  &:hover{
+    color:$primary-blue-dark;
+  }
+}
+*, *:before, *:after {
+  box-sizing: inherit;
+}
+
+button:focus {
+  outline: 1px dashed #007ABB;
+  outline-offset: 2px;
+}
+
+@keyframes spin {
+  from {
+      transform: rotate(0deg);
+  }
+  to {
+      transform: rotate(360deg);
+  }
+}
+.loading-spinner{
+  animation: spin infinite 2s linear;
+}

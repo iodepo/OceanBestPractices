@@ -1,0 +1,137 @@
+.ReactModal__Overlay {
+  z-index: 10;
+  background-color: rgba(0, 0, 0, .55) !important;
+}
+
+.ReactModal__Content {
+  padding: 0 !important;
+  width:96%;
+  @media #{$screen-s} {
+    width:90%;
+  }
+  @media #{$screen-l} {
+    margin-right: -25% !important;
+  }
+}
+
+.tip__modal {
+  width: 100%;
+  color: #718092;
+}
+
+.tip__modal-body {
+  overflow-y: scroll;
+  height: 70vh;
+  padding: 1.5rem;
+
+  .row{
+    border-bottom:1px solid $light-gray;
+    margin-bottom:3rem;
+    padding-bottom:1.5rem;
+    
+    iframe {
+      width: 23em;
+      height: 13em;
+      @media #{$screen-s} {
+        width: 35em;
+        height: 27em;
+      }
+      @media #{$screen-m} {
+        width: 55em;
+        height: 32em;
+      }
+      @media #{$screen-l} {
+        width: 72em;
+        height: 37em;
+      }
+    }
+  }
+
+  h5{margin:.5rem 0;}
+}
+
+.tip__label {
+  margin-bottom: 5rem;
+  cursor: pointer;
+  color: $primary-blue;
+  font-weight: bold;
+}
+
+.tip__modal-header {
+  background-color: white;
+  border-bottom: 1px solid $light-med-gray;
+  padding: 1.5rem 1rem;
+  font-size: 1.5rem;
+  font-weight: bolder;
+  
+  i {
+    cursor: pointer;
+    color: gray;
+    font-size: 2rem;
+    float: right;
+  }
+}
+
+.tip__modal-item {
+  margin-bottom: 2rem;
+}
+
+.tip__modal-item-screenshot {
+  text-align: left;
+  
+  img {
+    display: none;
+    
+    @media #{$screen-s} {
+      max-width:100%;
+      display: inline-block;
+    }
+  }
+}
+
+.tip__modal-item-header {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: .5rem;
+  margin-top:0;
+}
+
+.tip__modal-item-body {
+  margin-bottom: .5rem;
+}
+
+.tip__modal-item-children {
+  div {
+    padding: .5rem 0;
+  }
+}
+
+.tip__modal-footer {
+  background-color: $light-gray;
+  border-top:1px solid $light-med-gray;
+  padding: 1rem;
+  
+  button {
+    display: inline;
+    cursor: pointer;
+    width: 50%;
+    height: 2rem;
+    border-radius: .2rem;
+    color: white;
+    font-size: .9rem;
+    font-weight: bold;
+    
+    @media #{$screen-l} {
+      width: 16%;
+      margin: 0 .5rem;
+    }
+  }
+}
+
+.tip__modal-footer-cta {
+  background-color: #007ABB;
+}
+
+.tip__modal-footer-close {
+  background-color: #7f8fa6;
+}

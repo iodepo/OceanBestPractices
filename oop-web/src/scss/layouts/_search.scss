@@ -1,0 +1,11 @@
+.search {
+
+  display: grid;
+  grid-template-rows: max-content auto;
+  min-width: 0;
+
+  @media #{$screen-s} {
+    grid-template-columns: max-content auto;
+    grid-template-rows: none;
+  }
+}

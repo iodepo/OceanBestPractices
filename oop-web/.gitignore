@@ -1,0 +1,13 @@
+# Ignore the build directory. This can always be created with `npm install npm-run-all --save-dev`.
+/build
+
+# Remove all CSS files from the source control
+src/**/sass/*.css
+
+# Remove MacOS system files
+.DS_Store
+
+# Get rid of the Babel cache
+node_modules
+
+.env

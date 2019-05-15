@@ -1,0 +1,327 @@
+.search-sidebar {
+  bottom:0;
+  left:0;
+  width: 100%;
+  background: #F4F5FA;
+  color: #6D7B90;
+  transition:all 0.3s;
+  height:0;
+  &.active{
+    position:fixed;
+    bottom:0;
+    z-index:9;
+    height:300px;
+    overflow-y:auto;
+    box-shadow:-1px -5px 18px rgba(0,0,0,0.2);
+    .search-sidebar__content {
+      display:block;
+      &:before{
+        content:'Filter by Tags';
+        display:block;
+        border-bottom:1px solid $light-med-gray;
+        line-height:1.5rem;
+        padding:.5rem 1rem;
+        text-transform:uppercase;
+        font-size:0.7rem;
+        color:$med-gray;
+        @media #{$screen-s} {
+          display:none;
+        }
+      }
+    }
+  }
+
+  .search-sidebar__close-button{
+    background:transparent;
+    color:$dark-gray;
+    border:none;
+    position:absolute;
+    top:.65rem;
+    right:.5rem;
+    font-size:1rem;
+    &:hover{cursor:pointer;color:$primary-blue;}
+  }
+
+  @media #{$screen-s} {
+    position: relative;
+    min-width: 15em;
+    width: 12em;
+    transition: all 0.2s ease-in-out;
+    height:100%;
+    &.active{
+      position:relative;
+      height:100%;
+      box-shadow:none;
+    }
+    .search-sidebar__close-button{display:none;}
+  }
+
+  @media #{$screen-m} {
+    width: 18em;
+  }
+
+  .search-sidebar__content {
+    display:none;
+    @media #{$screen-s} {
+      display: flex;
+      flex-direction: column;
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      overflow-y: scroll;
+    }
+  }
+  
+  .tip__label {
+    padding: .6em 0 .6em 0;
+    margin-bottom: 0;
+    text-align: center;
+    border-bottom: 1px solid $light-med-gray;
+    text-transform: uppercase;
+      
+  }
+}
+
+.search-sidebar__tabs {
+  position: relative;
+  z-index: 1;
+  height: 3em;
+}
+
+.search-sidebar__tab {
+  position: relative;
+  z-index: 1;
+  height: 3rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-align: center;
+  color: #fff;
+  text-transform: uppercase;
+  line-height: 3rem;
+  width: 50%;
+  background: #7A8AA3;
+  border: none;
+}
+
+.search-sidebar__tab--active {
+  background: #F4F5FA;
+  color: #7A8AA3;
+}
+
+.search-sidebar__header {
+  padding: 1rem;
+  text-align: center;
+}
+
+.search-sidebar__relationship-tag-icon {
+  color: #BA55D3;
+}
+
+.search-sidebar__relationship-tag-icon-header, .search-sidebar__relationship-tag-icon-children {
+  padding-left: .3em;
+}
+
+.search-sidebar__relationship-tag-icon-parent {
+  padding-right: .3em;
+}
+
+.search-sidebar__memo {
+
+  display: block;
+  width: 100%;
+  margin-bottom: 1rem;
+  white-space: normal;
+  overflow: visible;
+  font-size: 0.825rem;
+}
+
+.search-sidebar__intro {
+  display: block;
+  margin-top: 2rem;
+  font-size: 0.825rem;
+  font-style: italic;
+}
+
+.search-sidebar__icon {
+  padding-bottom: .8rem;
+  display:none;
+  @media #{$screen-s} {
+    display:block;
+    margin-top:1.5rem;
+  }
+}
+
+.search-sidebar__message {
+  font-size: 0.825rem;
+  opacity: .7;
+}
+
+.search-sidebar__term-list {
+  margin:0;
+  padding: 0;
+  list-style: none;
+}
+
+.search-sidebar__term-item{
+  width:100%;
+  padding:0;
+  border-bottom:1px solid #EBEDF3;
+  &:first-of-type{border-top:1px solid #EBEDF3;}
+
+  &>span{
+    width:100%;
+    display:block;
+  }
+  &:hover{
+    background: #EBEDF3;
+  }
+}
+.search-sidebar__term-button {
+  background: none;
+  padding: 0.5rem 0;
+  padding-right:1.5rem;
+  border: none;
+  outline: none;
+  text-align: left;
+  color: $primary-blue;
+  font-size: 0.825rem;
+  font-weight: 700;
+  line-height: 1.25rem;
+  width: 80%;
+  cursor: pointer;
+  position:relative;
+  justify-content:center;
+}
+
+.search-sidebar__term-button:hover{
+  color: $primary-blue-dark;
+}
+
+.search-sidebar__term-tag {
+  font-weight: 500;
+  font-size: 0.625rem;
+  color: $dark-gray;
+  display: block;
+  text-transform: uppercase;
+}
+
+.search-sidebar__term-filter-button {
+  margin-left:1rem;
+  margin-right:1rem;
+}
+
+.search-sidebar__term-filter-logo {
+  width: 10px;
+  height:15px;
+  position: absolute;
+  right: .5rem;
+  top:50%;
+  margin-top:-7.5px;//vertically center
+}
+
+.search-sidebar__term-button--view-all {
+  font-size: 0.625rem;
+  text-align: center;
+  text-transform: uppercase;
+  color: $primary-blue;
+  background:#EBEDF3;
+  width:100%;
+  padding:.5rem 0;
+}
+
+.search-sidebar__term-button--view-all:hover {
+  color: $primary-blue-dark;
+  text-decoration: underline;
+  background: transparent;
+}
+
+.search-sidebar__term-button--quantity {
+  font-weight: 300;
+  font-style: italic;
+  font-size: 0.75rem;
+}
+
+.search-sidebar__back-button {
+  background: none;
+  padding: 0.325rem 0;
+  border: none;
+  outline: none;
+  text-align: left;
+  color: $primary-blue;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  line-height: 1.25rem;
+  width: 100%;
+  cursor: pointer;
+
+  i{margin-right:.5rem;}
+}
+
+.search-sidebar__relationships-list {
+  margin: 0;
+  padding: 0;
+}
+
+.search-sidebar__relationship {
+  border-top: 1px solid #EBEDF3;
+}
+
+.search-sidebar__relationship-parents {
+  &:after {
+   content: " _____";
+   color: $darkest-gray;
+  }
+}
+
+.search-sidebar__relationship-children {
+  &:before {
+    content: "_____ ";
+    color: $darkest-gray;
+  }
+}
+
+.search-sidebar__relationship-name {
+  display: block;
+  padding: 1rem;
+  color: $darkest-gray;
+  font-size: 0.825rem;
+  font-weight: 700;
+  line-height: 1.25rem;
+  text-transform: uppercase;
+}
+
+.search-sidebar__relationship-list {
+  margin:0;
+  padding: 1rem;
+  background: #EBEDF3;
+  border-bottom: 1px solid #EBEDF3;
+}
+
+.search-sidebar__relationship-item {
+  font-size: 0.825rem;
+  font-weight: 500;
+  line-height: 1.25rem;
+  padding-left: 1rem;
+  color: #393F4B;
+  
+}
+
+.search-sidebar__relationship-item-active {
+  color: $primary-blue;
+  font-weight: 700;
+}
+
+.search-sidebar__relationship-item--active {
+  font-weight: 700;
+}
+
+.search-sidebar__relationship-label {
+  cursor: pointer;
+}
+
+.search-sidebar__relationship-input {
+  margin-right: 0.5rem;
+}

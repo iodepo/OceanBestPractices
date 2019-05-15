@@ -1,0 +1,73 @@
+.header {
+  display: grid;
+  grid-template-rows: max-content max-content;
+  background-color: #eaecf3;
+  text-align: center;
+  border-bottom: solid 2px $med-gray;
+}
+
+.header__under-beta-container {
+  background-color: #ffe0dd;
+  padding: .3rem 0;
+
+  span {
+    font-size: .85rem;
+    font-weight: bold;
+    padding: 0 .3rem;
+    text-transform: uppercase;
+    color: #ff7066;
+  }
+}
+
+.header__main-container {
+  position: relative;
+  padding: 1rem;
+  display:flex;
+  align-items:center;
+}
+
+.header__search-container {
+  margin: 0 auto;
+  flex:6;
+}
+
+.header__logo-link {
+  margin: 0;
+  padding: 0;
+  width: 0;
+  height: 0;
+  color: transparent;
+  text-decoration: none;
+  @media #{$screen-m} {
+    display:block;
+    min-width:15em;
+    width:15em;
+    height:60px;
+    margin-right:2rem;
+  }
+}
+
+.header__logo {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 60px;
+  background-image: url('../images/unesco-ioc-ocb-lockup-logo.png');
+  background-repeat: no-repeat;
+  background-size: 100%;
+  color: transparent;
+  text-decoration: none;
+  cursor: pointer;
+
+  @media #{$screen-l} {
+    visibility: visible;
+  }
+
+  @media #{$screen-xl} {
+    height: 60px;
+  }
+
+  @media #{$screen-hippi} {
+    background-image: url('../images/unesco-ioc-ocb-lockup-logo.png');
+  }
+}

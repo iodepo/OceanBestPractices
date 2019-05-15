@@ -1,0 +1,1 @@
+export const SET_ACTIVE_FIELDS = "SET_ACTIVE_FIELDS";

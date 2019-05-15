@@ -1,0 +1,52 @@
+.search-pagination {
+  display: block;
+  margin: 1rem 0;
+  text-align: center;
+}
+
+.search-pagination__list {
+  list-style: none;
+  margin: 0 auto;
+  padding: 0;
+}
+
+.search-pagination__item {
+  display: inline-block;
+  margin: 0.25rem;
+  color: #949494;
+}
+
+.search-pagination__button {
+  border: 1px solid #D8D8D8;
+  background: none;
+  outline: none;
+  font-size: 0.75rem;
+  line-height: 1.75rem;
+  margin: 0;
+  padding: 0 0.5rem;
+  height: 1.75rem;
+  min-width: 1.75rem;
+  border-radius: 0.25rem;
+  color: #949494;
+  font-weight: bold;
+  transition: all 0.1s ease-in-out;
+  cursor: pointer;
+}
+
+.search-pagination__button:hover {
+  background: #a9a9a9;
+  border: 1px solid #949494;
+  color: #fff;
+}
+
+.search-pagination__button:active {
+  background: #949494;
+  border: 1px solid #949494;
+  color: #fff;
+}
+
+.search-pagination__button--is-active {
+  border: 1px solid #007ABB;
+  color: #fff;
+  background: #007ABB;
+}

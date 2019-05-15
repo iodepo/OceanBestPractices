@@ -1,0 +1,47 @@
+[
+  {
+    "label": "RELEVANCE",
+    "direction": false,
+    "filter": false
+  },
+  {
+    "label": "AUTHOR",
+    "direction": "asc",
+    "filter": "author.raw:asc"
+  },
+  {
+    "label": "AUTHOR",
+    "direction": "desc",
+    "filter": "author.raw:desc"
+  },
+  {
+    "label": "PUBLISHER",
+    "direction": "asc",
+    "filter": "publisher.raw:asc"
+  },
+  {
+    "label": "PUBLISHER",
+    "direction": "desc",
+    "filter": "publisher.raw:desc"
+  },
+  {
+    "label": "TITLE",
+    "direction": "asc",
+    "filter": "title.raw:asc"
+  },
+  {
+    "label": "TITLE",
+    "direction": "desc",
+    "filter": "title.raw:desc"
+  },
+  {
+    "label": "YEAR",
+    "direction": "asc",
+    "filter": "issued_date:asc"
+  },
+  {
+    "label": "YEAR",
+    "direction": "desc",
+    "filter": "issued_date:desc"
+  }
+]

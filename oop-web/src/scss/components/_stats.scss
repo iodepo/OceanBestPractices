@@ -1,0 +1,21 @@
+.stats {
+  strong {
+    white-space: nowrap;
+    color: #7f8fa6;
+  }
+}
+
+.stats__modal {
+  
+  padding-left: .5em;
+  
+  li {
+    list-style: none;
+    padding: .5em 0;
+  }
+  
+  @media #{$screen-s} {
+    padding-left: 1.8em;
+  }
+  
+}

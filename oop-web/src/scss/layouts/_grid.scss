@@ -1,0 +1,39 @@
+@media #{$screen-s} {
+    .row{
+        display:flex;
+        width:100%;
+    }
+
+    .col{
+        flex:1;
+    }
+    div[class^="col-"] {
+        margin-right:2%;
+        &:last-of-type{margin-right:0;}
+    }
+    .col-1{
+        width:4.6666666667%;
+    }
+    .col-2{
+        width:13.3333333333%;
+    }
+    .col-3{
+        width:22%;
+    }
+    .col-4{
+        width:32%;
+    }
+
+    .col-6{
+        width:48%;
+    }
+    .col-8{
+        width:65.3333333333%;
+    }
+    .col-9{
+        width:74%;
+    }
+    .col-10{
+        width:82.6666666667%;
+    }
+}

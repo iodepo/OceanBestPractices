@@ -1,0 +1,163 @@
+.link-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.link-list--horizontal {
+  .link-list__item {
+    display: inline-block;
+  }
+}
+
+.link-list--landing {
+
+  display: flex;
+  flex-wrap: wrap;
+  text-align: center;
+  line-height: 1.75rem;
+  width: 100%;
+  background: #a4acb7;
+  justify-content: center;
+
+  @media #{$screen-s} {
+    line-height: 1.25rem;
+    justify-content: left;
+  }
+
+  .link-list__item {
+    line-height: 1.5rem;
+  }
+  
+  // For the recommend citation modal label
+  .link-list__item:nth-child(2) {
+    cursor: pointer;
+  }
+
+  .link-list__item:nth-child(5) {
+
+    display: block;
+    margin-top: 0.75rem;
+
+    @media #{$screen-xs} {
+      margin-top: 0rem;
+      display: inline-block;
+    }
+  }
+
+  .link-list__link {
+
+    padding: 0.125rem 1rem;
+    color: #e8e9ed;
+    font-weight: 500;
+    text-decoration: none;
+    text-transform: uppercase;
+    font-size: 0.625rem;
+    letter-spacing: 0.02em;
+
+    @media #{$screen-xs} {
+      font-size: 0.825rem;
+    }
+
+    &:hover {
+      color: #69788e;
+    }
+    
+    // for the full screen modal in the header link
+    div {
+      display: inline;
+    }
+  }
+
+  @media #{$screen-s} {
+
+    .link-list__item:nth-child(0) .link-list__link,
+    .link-list__item:nth-child(1) .link-list__link,
+    .link-list__item:nth-child(2) .link-list__link {
+      border-right: 1px solid #919aa7;
+    }
+
+    .link-list__item:nth-child(3) .link-list__link {
+      border-right: 1px solid #919aa7;
+    }
+  }
+
+  .link-list__link--emphasis {
+
+    display: inline-block;
+    position: relative;
+    word-wrap: break-word;
+    text-transform: uppercase;
+    color: #e8e9ed;
+    background: #307ab6;
+    font-weight: bold;
+    padding: 0 .7rem;
+    cursor: pointer;
+    
+    
+    @media #{$screen-s} {
+      margin-left: auto;
+    }
+    
+    li {
+      list-style: none;
+    }
+    
+    i {
+      padding-left: .5rem;
+    }
+  }
+
+  .link__list-toggle {
+    position: absolute;
+    background-color: white;
+    z-index: 1;
+    right: .1rem;
+    display: none;
+    width: 100%;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    
+    a, .link-list__label {
+      display: block;
+      text-align: left;
+      padding: .7rem .7rem;
+      text-transform: none;
+      color: $dark-gray;
+      font-weight: normal;
+      font-size: .725em;
+      
+      @media #{$screen-xs} {
+        font-size: .825em;
+        padding: 1rem .7rem;
+      }
+      
+      &:hover {
+        background-color: #69788e;
+        color: white;
+        cursor: pointer;
+      }
+      
+    }
+    
+    @media #{$screen-s} {
+      margin-left: auto;
+    }
+    
+    &.down {
+      @media #{$screen-s} {
+        top: 1.5rem;
+      }
+    }
+  }
+
+  .link__list-toggle-active {
+    display: block;
+  }
+}
+
+.link__list-toggle-modal {
+  padding: 1.2rem;
+  a{
+    display: block;
+  }
+}

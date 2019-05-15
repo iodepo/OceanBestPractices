@@ -1,0 +1,23 @@
+.citation{
+    margin-top:.5rem;
+    padding:1.5rem 1.5rem 2.5rem 1.5rem;
+    box-shadow:$box-shadow-medium;
+    background:#fff;
+    font-size:.75rem;
+    position:relative;
+    border-radius:4px;
+    &:after{
+        display:block;
+        background:$light-gray;
+        color:$med-gray;
+        content:'To reference the above citation, highlight and Copy/Paste text.';
+        position:absolute;
+        left:0rem;
+        bottom:0rem;
+        border-radius:0 0 4px 4px;
+        padding:.25rem;
+        width:100%;
+        font-size:0.7rem;
+        text-align:center;
+    }
+}

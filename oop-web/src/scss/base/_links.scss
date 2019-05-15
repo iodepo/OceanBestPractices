@@ -1,0 +1,35 @@
+.bold-link-text {
+  font-weight: 500;
+}
+
+
+.link-text {
+  
+  @media #{$screen-xxs} {
+    text-align: center;
+  }
+  
+  @media #{$screen-xs} {
+    text-align: center;
+  }
+
+  
+  span {
+    font-family: "Helvetica Neue";
+    font-size: 14px;
+
+  }
+  
+  a:link {
+    text-decoration: none;
+  }
+  
+  a:hover {
+    text-decoration: underline;
+  }
+}
+
+.copyright-text {
+  font-weight: 500;
+  color: #575F6D;
+}
