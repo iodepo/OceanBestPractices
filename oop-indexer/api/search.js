@@ -187,6 +187,12 @@ function buildElasticsearchQuery(keywords, terms, termURIs, fields, refereed) {
   return query;
 }
 
+/**
+ * Returns the list of fields that should be targeted in an Elasticsearch query. All fields
+ * are set to the default Elasticsearch boost value unless otherwise denoted by ^n.
+ * 
+ * @returns {array} Array of field names to target in a query
+ */
 function queryFields() {
   return [
           "contents", 
@@ -200,7 +206,20 @@ function queryFields() {
           "essential_ocean_variables", 
           "sustainable_development_goals", 
           "refereed",
-          "abstract^2"
+          "abstract^2",
+          "publication_status",
+          "current_status",
+          "relation_uri",
+          "language",
+          "bptype",
+          "relation_is_part_of_series",
+          "type",
+          "subjects_other",
+          "identifier_orcid",
+          "identifier_doi",
+          "maturity_level",
+          "notes",
+          "coverage_spatial"
          ];
 }
 
