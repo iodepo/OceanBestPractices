@@ -3,14 +3,31 @@
 
 ## Prereqs
 
-Install npm (either via homebrew or https://docs.npmjs.com/getting-started/installing-node)
+Install npm (either via homebrew on OSX or https://docs.npmjs.com/getting-started/installing-node)
 
 ## To run the app
 
 1. Clone the repo
 2. Navigate to the folder in your terminal
-3. run the commands `npm run watch-css` followed by `npm start`
-4. To build for production, run the commands `npm run watch-css` followed by `npm build`
+3. Copy the file 'dot_env_example' to '.env' and correct it's content to meet your installation
+4. run the command `npm start`
+    - seems like `npm start` invokes `npm run watch-css` (`npm run watch-css` itself is hanging when run alone)
+    - in case of problems with packages that cannot be found (like [event-stream@3.3.6](https://stackoverflow.com/questions/53578201/npm-err-404-not-found-event-stream3-3-6))
+         - remove the lock file 
+         
+         ```rm -rf package-lock.json ```
+         - remove the node_modules dir 
+         
+         ```rm -rf node_modules/```
+         - reinstall the packages 
+         
+         ```npm install```
+         
+         - fix issues, run command and see suggestions, **can break code**
+         
+         ```npm audit```
+5. To build for production, run the command `npm run build`
+    - nps run gives a lot of errors
 
 
 ## Changes to package.json
