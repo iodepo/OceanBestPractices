@@ -129,7 +129,7 @@ function getSearchDocument(opts) {
  * 
  * e.g. "+ocean current" becomes "AND \"ocean current\""
  **/
-function formatKeyword(k) {
+function formatKeyword(k, i) {
   // Map the UI operators to ES operators.
   const opTransforms = { "+": "AND", "-": "NOT" };
   
@@ -144,7 +144,7 @@ function formatKeyword(k) {
   // performing a quoted query in ES.
   fk = fk.replace(/["]/g, "");
   
-  return op + " \"" + fk + "\"";
+  return i > 0 ? op + " \"" + fk + "\"" : "\"" + fk + "\"";
 }
 
 function buildElasticsearchQuery(keywords, terms, termURIs, fields, refereed) {
@@ -152,7 +152,7 @@ function buildElasticsearchQuery(keywords, terms, termURIs, fields, refereed) {
     "must": {
       "query_string": {
         "fields": fields,
-        "query": keywords.length > 0 ? keywords.map(formatKeyword).join(" ") : "*",
+        "query": keywords.length > 0 ? keywords.map(formatKeyword).join(" ") : "*"
       }
     }
   };
