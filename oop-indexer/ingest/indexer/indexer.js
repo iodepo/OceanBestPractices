@@ -13,30 +13,45 @@ const esEndpoint = new AWS.Endpoint(esHost);
 
 const creds = new AWS.EnvironmentCredentials('AWS');
 
+/**
+ * The mapping defines the translations between the DSpace repository field names
+ * and our internal Elasticsearch index.
+ */
 const mapping = { 
-                  "contents": "contents",
-                  "sourceKey": "sourceKey",
-                  "dc.date.issued": "issued_date",
-                  "dc.title": "title",
-                  "dc.description.abstract": "abstract",
-                  "dc.publisher": "publisher",
-                  "dc.contributor.author": "author",
-                  "dc.language.iso": "language", 
-                  "thumbnail": "thumbnail",
-                  "uuid": "uuid",
-                  "handle": "handle",
-                  "terms": "terms",
-                  "dc.title.alternative": "title_alt",
-                  "dc.contributor.corpauthor": "corp_author",
-                  "dc.contributor.editor": "editor",
-                  "dc.bibliographicCitation.title": "journal_title",
-                  "dc.description.eov": "essential_ocean_variables",
-                  "dc.description.sdg": "sustainable_development_goals",
-                  "dc.identifier.doi": "identifier_doi",
-                  "dc.resource.uri": "resource_uri",
-                  "dc.description.refereed": "refereed",
-                  "dc.identifier.citation": "citation"
-                };
+  "contents": "contents",
+  "dc.bibliographicCitation.title": "journal_title",
+  "dc.contributor.author": "author",
+  "dc.contributor.corpauthor": "corp_author",
+  "dc.contributor.editor": "editor",
+  "dc.coverage.spatial": "coverage_spatial",
+  "dc.date.issued": "issued_date",
+  "dc.description.abstract": "abstract",
+  "dc.description.bptype": "bptype",
+  "dc.description.currentstatus": "current_status",
+  "dc.description.eov": "essential_ocean_variables",
+  "dc.description.maturitylevel": "maturity_level",
+  "dc.description.notes": "notes",
+  "dc.description.refereed": "refereed",
+  "dc.description.sdg": "sustainable_development_goals",
+  "dc.description.status": "publication_status",
+  "dc.identifier.citation": "citation",
+  "dc.identifier.doi": "identifier_doi",
+  "dc.identifier.orcid": "identifier_orcid",
+  "dc.language.iso": "language",
+  "dc.publisher": "publisher",
+  "dc.relation.ispartofseries": "relation_is_part_of_series",
+  "dc.relation.uri": "relation_uri",
+  "dc.resource.uri": "resource_uri",
+  "dc.subject.other": "subjects_other",
+  "dc.title": "title",
+  "dc.title.alternative": "title_alt",
+  "dc.type": "type",
+  "handle": "handle",
+  "sourceKey": "sourceKey",
+  "terms": "terms",
+  "thumbnail": "thumbnail",
+  "uuid": "uuid"
+};
 
 exports.handler = (event, context, callback) => {
   var uuid, contentBucketName, contentKey, sourceKey, metadataKey = undefined;
@@ -90,6 +105,12 @@ exports.handler = (event, context, callback) => {
   });
 };
 
+/**
+ * Fetches the document content (the extracted document text) from S3.
+ * @param {string} bucket The content bucket
+ * @param {string} key The object key (typically the document UUID) within the content bucket
+ * @param {function} callback Callback function to process the S3 response
+ */
 function getContent(bucket, key, callback) {
   var docContent = '';
   
@@ -114,6 +135,12 @@ function getContent(bucket, key, callback) {
   .send();
 }
 
+/**
+ * Fetches the document metadata from S3.
+ * @param {string} bucket The metadata bucket
+ * @param {string} key The object key (typicallyt he document UUID) within the metadata bucket
+ * @param {function} callback Callback function to process the S3 response
+ */
 function getMetadata(bucket, key, callback) {
   s3.getObject({
     Bucket: bucket,
@@ -127,6 +154,13 @@ function getMetadata(bucket, key, callback) {
   });
 }
 
+/**
+ * Iterates through our target fields and extracts the values from the original
+ * document matadata copying them to a map that matches our internal Elasticsearch
+ * index. Processes fields individually to handle special cases like arrays.
+ * @param {object} metadata The original document metadata
+ * @returns Object with keys/values ready for indexing in our Elasticsearch index 
+ */
 function mapMetadata(metadata) {
   var indexDoc = {};
 
@@ -137,7 +171,7 @@ function mapMetadata(metadata) {
 
       // Check if we have a value for this index key. This can happen e.g. authors
       // where the metadata has multiple entries for the same metadata key.
-      // If we multiple entries for the same key, index them as an array.
+      // If we have multiple entries for the same key, index them as an array.
       if (indexValue !== undefined) {
         // We already have a value for this metadata key. Either add it to an existing
         // array of values or convert this index value into an array of metadata values.

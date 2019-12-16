@@ -142,6 +142,9 @@ PUT documents
                 "identifier_doi": {
                     "type": "keyword"
                 },
+                "identifier_orcid": {
+                    "type": "keyword"
+                },
                 "resource_uri": {
                     "type": "keyword"
                 },
@@ -152,6 +155,36 @@ PUT documents
                     "type": "text"
                 },
                 "sourceKey": {
+                    "type": "keyword"
+                },
+                "publication_status": {
+                    "type": "keyword"
+                },
+                "current_status": {
+                    "type": "keyword"
+                },
+                "relation_uri": {
+                    "type": "keyword"
+                },
+                "bptype": {
+                    "type": "keyword"
+                },
+                "relation_is_part_of_series": {
+                    "type": "keyword"
+                },
+                "type": {
+                    "type": "keyword"
+                },
+                "subjects_other": {
+                    "type": "keyword"
+                },
+                "maturity_level": {
+                    "type": "keyword"
+                },
+                "notes": {
+                    "type": "text"
+                },
+                "coverage_spatial": {
                     "type": "keyword"
                 }
             }
