@@ -2236,6 +2236,9 @@ html {
   margin-bottom: .5rem;
   margin-top: 0; }
 
+.tips__modal-header-wrapper {
+  display: inline; }
+
 .tip__modal-item-body {
   margin-bottom: .5rem; }
 
@@ -2278,6 +2281,17 @@ html {
   @media (min-width: 641px) {
     .stats__modal {
       padding-left: 1.8em; } }
+
+.terminology-descriptions {
+  padding-left: 1em; }
+  .terminology-descriptions .terminology-descriptions__terms {
+    font-weight: bold; }
+
+.terminology-modal__label {
+  padding-left: .5em;
+  display: inline;
+  width: 50%;
+  cursor: pointer; }
 
 .dropdown {
   position: relative; }
