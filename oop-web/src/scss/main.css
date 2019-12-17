@@ -679,7 +679,7 @@ html {
 .footer-links {
   line-height: 1rem; }
   .footer-links a {
-    color: #718092;
+    color: #292929;
     text-decoration: none; }
     .footer-links a:hover {
       color: #3D4352; }
@@ -769,9 +769,11 @@ html {
 
 .footer-modal__label {
   padding: 0 .5rem;
+  color: #292929;
+  font-size: .9rem;
   cursor: pointer;
   border-right: 0;
-  font-weight: normal; }
+  font-weight: bold; }
   .footer-modal__label:last-of-type {
     padding-right: 0; }
   .footer-modal__label:hover {
@@ -1158,7 +1160,7 @@ html {
   text-align: center;
   line-height: 1.75rem;
   width: 100%;
-  background: #a4acb7;
+  background: #79828f;
   justify-content: center; }
   @media (min-width: 641px) {
     .link-list--landing {
@@ -1653,7 +1655,9 @@ html {
     display: inline-block;
     margin: 0 .6rem 0 0; }
     .searchbar__advanced--status li:last-child {
-      margin-right: 0; }
+      margin-right: 0;
+      font-size: 0.9rem;
+      text-decoration: underline; }
   .searchbar__advanced--status div,
   .searchbar__advanced--status .tip__label {
     display: block;
@@ -2172,7 +2176,7 @@ html {
 
 .tip__modal {
   width: 100%;
-  color: #718092; }
+  color: #575e66; }
 
 .tip__modal-body {
   overflow-y: scroll;
