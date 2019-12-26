@@ -85,7 +85,7 @@ class Stats extends Component {
       <span className='fa fa-question-circle-o'></span>
     );
     const termDescriptionModal = (
-      <FullScreenModal modalCTA={termDescriptionCTA} modalTitle='Descriptions of Terminologies' modalClass='terminology-modal' location="landing">
+      <FullScreenModal smallModal="50%" modalCTA={termDescriptionCTA} modalTitle='Descriptions of Terminologies' modalClass='terminology-modal' location="landing">
         {termDescriptions}
       </FullScreenModal>
     );

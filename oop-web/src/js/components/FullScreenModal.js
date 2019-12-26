@@ -76,6 +76,7 @@ class FullScreenModal extends Component {
     (
       null
     );
+    if(this.props.smallModal && this.props.smallModal !== 'true') customSmallStyles.content.width = this.props.smallModal;
     let modal = this.props.smallModal ?
     (
       <Modal

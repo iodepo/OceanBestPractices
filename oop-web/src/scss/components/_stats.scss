@@ -22,15 +22,6 @@
 
 .terminology-descriptions {
   padding-left: 1em;
-  width: 100%;
-  
-  @media #{$screen-s} {
-    width: 85%;
-  }
-  
-  @media #{$screen-l} {
-    width: 65%;
-  }
   
   .terminology-descriptions__terms {
     font-weight: bold
