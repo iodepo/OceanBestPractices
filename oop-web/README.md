@@ -10,7 +10,7 @@ Install npm (either via homebrew or https://docs.npmjs.com/getting-started/insta
 1. Clone the repo
 2. Navigate to the folder in your terminal
 3. run the commands `npm run watch-css` followed by `npm start`
-4. To build for production, run the commands `npm run watch-css` followed by `npm build`
+4. To build for production, run the commands `npm run watch-css` followed by `npm run build`
 
 
 ## Changes to package.json
