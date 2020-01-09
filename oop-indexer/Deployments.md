@@ -27,7 +27,7 @@ This stack creates S3 buckets we'll need in order to store Lambda functions late
 `aws cloudformation deploy --template-file text-extractor-permissions.yml --stack-name obp-text-extractor-permissions-{ENVIRONMENT} --parameter-overrides Environment={ENVIRONMENT}  --capabilities CAPABILITY_NAMED_IAM --profile {AWS_PROFILE}`
 
 ## Text Extractor
-Please refer to the instructions [here](./README.md) for installation of textextractor.
+Please refer to the [README](./README.md) and [TextExtractor repo](https://github.com/Element84/lambda-text-extractor) for installation of textextractor.
 
 ## Elasticsearch
 
