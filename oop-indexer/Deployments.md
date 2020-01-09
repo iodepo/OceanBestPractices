@@ -42,6 +42,8 @@ Please refer to the instructions [here](./README.md) for creating the document a
 
 ## Virtuoso Instance
 
+Refer to the instructions in [Virtuoso.md](./Virtuoso.md)
+
 ## Ingest and Indexer
 
 The ingest and indexer pipeline is made up of a few different stacks, each with a specific responsibility. It's best to create these stacks in order as some of them depend on inputs from the others.
