@@ -55,7 +55,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: scheduler.handler
-      Runtime: nodejs6.10
+      Runtime: nodejs12.x
       Timeout: 60
       CodeUri: .
       Role: !GetAtt SchedulerExecutionRole.Arn
