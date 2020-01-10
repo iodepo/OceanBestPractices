@@ -33,7 +33,7 @@ Install npm (either via homebrew on OSX or https://docs.npmjs.com/getting-starte
 3. Navigate to the folder in your terminal
 4. `npm start`
 
-## To push to the web app (hosted in an s3 bucket)
+## To push to the web app (hosted in a s3 bucket)
 
 1. To build for production, run the command `npm build`
 2. `cd public/`
