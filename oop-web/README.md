@@ -35,6 +35,8 @@ Install npm (either via homebrew on OSX or https://docs.npmjs.com/getting-starte
 
 ## To push to the web app (hosted in a s3 bucket)
 
+**REMARK** there is also a CloudFormation instruction in [Deployments.md](https://github.com/iodepo/OceanBestPractices/blob/master/oop-indexer/Deployments.md#static-site)
+
 1. To build for production, run the command `npm build`
 2. `cd public/`
 3. `s3 sync . s3://{whatever-the-s3-bucket-is-for-the-web-app} --profile {AWS_PROFILE}`
