@@ -75,6 +75,8 @@ The indexer is launched once a document has finished the text extraction process
 
 ## Search API
 
+**TBD** missing [README](https://github.com/iodepo/OceanBestPractices/blob/master/oop-indexer/api/)  
+
 ## Static Site
 
 ### Website
