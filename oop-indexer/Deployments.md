@@ -81,6 +81,8 @@ The indexer is launched once a document has finished the text extraction process
 
 ### Website
 
+main-site.yml can be found in **oop-web/cloudformation/**
+
 `aws cloudformation deploy --template-file main-site.yml --stack-name obp-website-{ENVIORNMENT} --parameter-overrides Environment={ENVIRONMENT} WebsiteDomain={ENVIRONMENT}.oceanbestpractices.org --profile {AWS_PROFILE}`
 
 ### CloudFront Distribution
