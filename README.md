@@ -1,4 +1,4 @@
-# OceanBestPracites
+# OceanBestPractices
 Repository to store the OpenSource version of the code made for OceanBestPractices.org by [Element84](https://www.element84.com).
 
 If you wish to reuse this code:
