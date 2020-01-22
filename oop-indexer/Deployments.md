@@ -75,8 +75,9 @@ The indexer is launched once a document has finished the text extraction process
 
 ## Search API
 
-**TBD** missing [README](https://github.com/iodepo/OceanBestPractices/blob/master/oop-indexer/api/)  
-
+`aws cloudformation package --template-file search.yml --output-template-file search-out.yml --s3-bucket obp-search-api-functions-minsem --profile {PROFILE}`
+ 
+`aws cloudformation deploy --template-file search-out.yml --stack-name obp-search-api-{ENVIRONMENT} --parameter-overrides Environment={ENVIRONMENT} ElasticSearchHost={ELASTIC_SEARCH_HOST} OntologyStoreHost={VIRTUOSO_HOST} OntologyStorePort={VIRTUOSO_PORT} --capabilities CAPABILITY_NAMED_IAM --profile {PROFILE}`
 ## Static Site
 
 ### Website
