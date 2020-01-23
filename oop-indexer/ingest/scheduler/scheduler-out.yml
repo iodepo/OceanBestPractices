@@ -96,7 +96,7 @@ Resources:
         Fn::GetAtt:
         - SchedulerExecutionRole
         - Arn
-      Runtime: nodejs6.10
+      Runtime: nodejs12.x
       Timeout: 60
     Type: AWS::Serverless::Function
 Transform: AWS::Serverless-2016-10-31

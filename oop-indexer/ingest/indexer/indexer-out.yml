@@ -87,7 +87,7 @@ Resources:
         Fn::GetAtt:
         - IndexerExecutionRole
         - Arn
-      Runtime: nodejs6.10
+      Runtime: nodejs12.x
       Timeout: 300
     Type: AWS::Serverless::Function
   InvokeIndexerFromSNSPermission:

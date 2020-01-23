@@ -27,7 +27,6 @@ Install npm (either via homebrew on OSX or https://docs.npmjs.com/getting-starte
          
          ```npm audit```
 5. To build for production, run the command `npm run build`
-    - nps run gives a lot of errors
 =======
 2. `npm i`
 3. Navigate to the folder in your terminal

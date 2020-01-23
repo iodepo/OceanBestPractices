@@ -65,7 +65,7 @@ Resources:
       FunctionName:
         Fn::Sub: obp-get-statistics-function-${Environment}
       Handler: get-statistics.handler
-      Runtime: nodejs6.10
+      Runtime: nodejs12.x
     Type: AWS::Serverless::Function
   GetTermsGraph:
     Properties:
@@ -88,7 +88,7 @@ Resources:
       FunctionName:
         Fn::Sub: obp-terms-graph-function-${Environment}
       Handler: terms-graph.handler
-      Runtime: nodejs6.10
+      Runtime: nodejs12.x
       Timeout: 100
     Type: AWS::Serverless::Function
   SearchApi:
@@ -315,7 +315,7 @@ Resources:
       FunctionName:
         Fn::Sub: obp-search-autocomplete-function-${Environment}
       Handler: search-autocomplete.handler
-      Runtime: nodejs6.10
+      Runtime: nodejs12.x
       Timeout: 100
     Type: AWS::Serverless::Function
   SearchByKeywords:
@@ -343,7 +343,7 @@ Resources:
       FunctionName:
         Fn::Sub: obp-search-by-keywords-function-${Environment}
       Handler: search.handler
-      Runtime: nodejs6.10
+      Runtime: nodejs12.x
       Timeout: 300
     Type: AWS::Serverless::Function
 Transform: AWS::Serverless-2016-10-31
