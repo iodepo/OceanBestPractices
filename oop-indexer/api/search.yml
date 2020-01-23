@@ -223,7 +223,7 @@ Resources:
       FunctionName: !Sub obp-search-by-keywords-function-${Environment}
       Description: Searches the OBP index for documents matching the given keywords.
       Handler: search.handler
-      Runtime: nodejs6.10
+      Runtime: nodejs12.x
       Timeout: 300
       CodeUri: .
       Environment:
