@@ -38,7 +38,7 @@ Resources:
       FunctionName:
         Fn::Sub: obp-document-preview-function-${Environment}
       Handler: preview.handler
-      Runtime: nodejs8.10
+      Runtime: nodejs12.x
       Timeout: 100
     Type: AWS::Serverless::Function
   GetStatistics:

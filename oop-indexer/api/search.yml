@@ -273,7 +273,7 @@ Resources:
       FunctionName: !Sub obp-document-preview-function-${Environment}
       Description: Returns the result of running our Ontology term tagging routine against the given document body and title.
       Handler: preview.handler
-      Runtime: nodejs8.10
+      Runtime: nodejs12.x
       Timeout: 100
       CodeUri: .
       Environment:
