@@ -34,6 +34,29 @@ class Stats extends Component {
         title: 'SeaVoX Device Catalogue (L22)',
       },
     ];
+    
+    const terminology_descriptions = [
+      {
+        term: 'Controlled vocabulary',
+        description: 'A list of terms controlled by some authority - e.g. a dropdown list.'
+      },
+      {
+        term: 'Glossary',
+        description: 'A collection of terms and their definitions, possibly with synonyms - e.g. NSIDC\'s Cryosphere Glossary: https://nsidc.org/cryosphere/glossary'
+      },
+      {
+        term: 'Thesaurus',
+        description: 'A structured controlled vocabulary where each term is annotated with information and/or metadata (e.g. definition, source) and its hierarchical, associative, or equivalence relationships to other terms in the thesaurus.'
+      },
+      {
+        term: 'Taxonomy',
+        description: 'A hierarchy of terms organized as a tree structure without formal relationships to terms in other trees. Terms that are deeper in the tree (i.e. towards the leaves) may gain and lose properties relative to their ancestors.'
+      },
+      {
+        term: 'Ontology',
+        description: 'A formal representation of knowledge, typically in a graph or network structure, with both human and machine-readable definitions, with logical relationships (axioms) between the terms, which together define a domain of knowledge.'
+      },
+    ]
 
     const {
       documents,
@@ -47,11 +70,27 @@ class Stats extends Component {
           <Superlink to={link.to}>{link.title}</Superlink>
         </li>
       )
+    );
+    const termDescriptions = (
+      terminology_descriptions.map((description, index) =>
+      <div className='terminology-descriptions'>
+        <p className='terminology-descriptions__terms'>{description.term}</p>
+        <p>{description.description}</p>
+      </div>
+      )
     )
     const hasErrored = this.props.statsReducer.hasErrored;
     const terminologies = `terminolog${ ontologies > 1 ? 'ies' : 'y' }`;
+    const termDescriptionCTA = (
+      <span className='fa fa-question-circle-o'></span>
+    );
+    const termDescriptionModal = (
+      <FullScreenModal smallModal="50%" modalCTA={termDescriptionCTA} modalTitle='Descriptions of Terminologies' modalClass='terminology-modal' location="landing">
+        {termDescriptions}
+      </FullScreenModal>
+    );
     const termModal = (
-      <FullScreenModal modalCTA={terminologies} modalTitle='Terminologies' modalClass='stats-modal' location="landing">
+      <FullScreenModal modalCTA={terminologies} modalTitle='Terminologies' modalClass='stats-modal' location="landing" titleCTA={termDescriptionModal}>
         <ul className='stats__modal'>
           {termLinks}
         </ul>

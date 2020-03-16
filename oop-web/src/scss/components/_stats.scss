@@ -19,3 +19,18 @@
   }
   
 }
+
+.terminology-descriptions {
+  padding-left: 1em;
+  
+  .terminology-descriptions__terms {
+    font-weight: bold
+  }
+}
+
+.terminology-modal__label {
+  padding-left: .5em;
+  display: inline;
+  width: 50%;
+  cursor: pointer;
+}

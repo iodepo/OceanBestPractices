@@ -69,6 +69,14 @@ class FullScreenModal extends Component {
 
   render() {
     var labelClass = `${this.props.modalClass}__label`;
+    var titleCTA = this.props.titleCTA ?
+    (
+      this.props.titleCTA
+    ):
+    (
+      null
+    );
+    if(this.props.smallModal && this.props.smallModal !== 'true') customSmallStyles.content.width = this.props.smallModal;
     let modal = this.props.smallModal ?
     (
       <Modal
@@ -79,7 +87,7 @@ class FullScreenModal extends Component {
         shouldCloseOnEsc={true}
       >
         <div className='tip__modal-header'>
-          <span>{this.props.modalTitle}</span>
+          <span>{this.props.modalTitle}{titleCTA}</span>
           <span><i className='fa fa-close' onClick={this.closeModal}></i></span>
         </div>
         {this.props.children}
@@ -97,7 +105,7 @@ class FullScreenModal extends Component {
         shouldCloseOnEsc={true}
       >
         <div className='tip__modal-header'>
-          <span>{this.props.modalTitle}</span>
+          <span>{this.props.modalTitle}{titleCTA}</span>
           <span><i className='fa fa-close' onClick={this.closeModal}></i></span>
         </div>
         {this.props.children}
@@ -107,7 +115,7 @@ class FullScreenModal extends Component {
       </Modal>
     )
     return (
-      <div>
+      <div className='tips__modal-header-wrapper'>
         <Superlink event_category={this.props.location || 'website'} event_action="link" event_label={`modal | ${this.props.modalCTA}`}>
           <div className={labelClass} onClick={this.openModal}>{this.props.modalCTA}</div>
         </Superlink>
