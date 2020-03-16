@@ -176,7 +176,16 @@ PUT documents
                     "type": "keyword"
                 },
                 "subjects_other": {
-                    "type": "keyword"
+                    "type": "text"
+                },
+                "subjects_instrument_type": {
+                    "type": "text"
+                },
+                "subjects_parameter_discipline": {
+                    "type": "text"
+                },
+                "subjects_dm_processes": {
+                    "type": "text"
                 },
                 "maturity_level": {
                     "type": "keyword"
