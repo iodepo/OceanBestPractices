@@ -52,7 +52,7 @@ Resources:
       Handler: scheduler.handler
       Runtime: nodejs12.x
       Timeout: 60
-      CodeUri: s3://obp-indexer-functions-staging/39e905e08cfe4e1a08c6966109f6c57b
+      CodeUri: s3://obp-indexer-functions-staging/e7c9ca81506cf98f7d7ae2b57d31fd88
       Role:
         Fn::GetAtt:
         - SchedulerExecutionRole
