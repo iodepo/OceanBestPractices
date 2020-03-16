@@ -19,6 +19,79 @@ Parameters:
     Default: 8890
     Description: The port associated with the ontology triple store host.
 Resources:
+  DocumentPreview:
+    Properties:
+      CodeUri: s3://obp-search-api-functions-iode/d01ada3c1d2d167a67fc21c30d600f8f
+      Description: Returns the result of running our Ontology term tagging routine
+        against the given document body and title.
+      Environment:
+        Variables:
+          ELASTIC_SEARCH_HOST:
+            Ref: ElasticSearchHost
+      Events:
+        DocumentPreview:
+          Properties:
+            Method: POST
+            Path: /documents/preview
+            RestApiId:
+              Ref: SearchApi
+          Type: Api
+      FunctionName:
+        Fn::Sub: obp-document-preview-function-${Environment}
+      Handler: preview.handler
+      Runtime: nodejs12.x
+      Timeout: 100
+    Type: AWS::Serverless::Function
+  GetStatistics:
+    Properties:
+      CodeUri: s3://obp-search-api-functions-iode/d01ada3c1d2d167a67fc21c30d600f8f
+      Description: Returns general statistics about the OBP index size and ontology
+        count.
+      Environment:
+        Variables:
+          ELASTIC_SEARCH_HOST:
+            Ref: ElasticSearchHost
+          ONTOLOGY_STORE_HOST:
+            Ref: OntologyStoreHost
+          ONTOLOGY_STORE_PORT:
+            Ref: OntologyStorePort
+      Events:
+        GetStatistics:
+          Properties:
+            Method: GET
+            Path: /statistics
+            RestApiId:
+              Ref: SearchApi
+          Type: Api
+      FunctionName:
+        Fn::Sub: obp-get-statistics-function-${Environment}
+      Handler: get-statistics.handler
+      Runtime: nodejs12.x
+    Type: AWS::Serverless::Function
+  GetTermsGraph:
+    Properties:
+      CodeUri: s3://obp-search-api-functions-iode/d01ada3c1d2d167a67fc21c30d600f8f
+      Description: Queries ontologies for terms related to the given term.
+      Environment:
+        Variables:
+          ONTOLOGY_STORE_HOST:
+            Ref: OntologyStoreHost
+          ONTOLOGY_STORE_PORT:
+            Ref: OntologyStorePort
+      Events:
+        GetTermsGraph:
+          Properties:
+            Method: GET
+            Path: /terms/graph
+            RestApiId:
+              Ref: SearchApi
+          Type: Api
+      FunctionName:
+        Fn::Sub: obp-terms-graph-function-${Environment}
+      Handler: terms-graph.handler
+      Runtime: nodejs12.x
+      Timeout: 100
+    Type: AWS::Serverless::Function
   SearchApi:
     Type: AWS::Serverless::Api
     Properties:
@@ -257,7 +330,7 @@ Resources:
         Fn::Sub: obp-search-autocomplete-function-${Environment}
       Description: Returns a subset of ontology terms that complete the given keyword.
       Handler: search-autocomplete.handler
-      Runtime: nodejs6.10
+      Runtime: nodejs12.x
       Timeout: 100
       CodeUri: s3://obp-search-api-functions-prod/18965b86b6e79864e51f50eedb585ec9
       Environment:
@@ -327,23 +400,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName:
-        Fn::Sub: obp-terms-graph-function-${Environment}
-      Description: Queries ontologies for terms related to the given term.
-      Handler: terms-graph.handler
-      Runtime: nodejs6.10
-      Timeout: 100
-      CodeUri: s3://obp-search-api-functions-prod/18965b86b6e79864e51f50eedb585ec9
-      Environment:
-        Variables:
-          ONTOLOGY_STORE_HOST:
-            Ref: OntologyStoreHost
-          ONTOLOGY_STORE_PORT:
-            Ref: OntologyStorePort
-      Events:
-        GetTermsGraph:
-          Type: Api
-          Properties:
-            Path: /terms/graph
-            Method: GET
-            RestApiId:
-              Ref: SearchApi
+        Fn::Sub: obp-search-by-keywords-function-${Environment}
+      Handler: search.handler
+      Runtime: nodejs12.x
+      Timeout: 300
+    Type: AWS::Serverless::Function
+Transform: AWS::Serverless-2016-10-31

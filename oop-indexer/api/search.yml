@@ -223,7 +223,7 @@ Resources:
       FunctionName: !Sub obp-search-by-keywords-function-${Environment}
       Description: Searches the OBP index for documents matching the given keywords.
       Handler: search.handler
-      Runtime: nodejs6.10
+      Runtime: nodejs12.x
       Timeout: 300
       CodeUri: .
       Environment:
@@ -251,7 +251,7 @@ Resources:
       FunctionName: !Sub obp-search-autocomplete-function-${Environment}
       Description: Returns a subset of ontology terms that complete the given keyword.
       Handler: search-autocomplete.handler
-      Runtime: nodejs6.10
+      Runtime: nodejs12.x
       Timeout: 100
       CodeUri: .
       Environment:
@@ -273,7 +273,7 @@ Resources:
       FunctionName: !Sub obp-document-preview-function-${Environment}
       Description: Returns the result of running our Ontology term tagging routine against the given document body and title.
       Handler: preview.handler
-      Runtime: nodejs8.10
+      Runtime: nodejs12.x
       Timeout: 100
       CodeUri: .
       Environment:
@@ -295,7 +295,7 @@ Resources:
       FunctionName: !Sub obp-get-statistics-function-${Environment}
       Description: Returns general statistics about the OBP index size and ontology count.
       Handler: get-statistics.handler
-      Runtime: nodejs6.10
+      Runtime: nodejs12.x
       CodeUri: .
       Environment:
         Variables:
@@ -317,7 +317,7 @@ Resources:
       FunctionName: !Sub obp-terms-graph-function-${Environment}
       Description: Queries ontologies for terms related to the given term.
       Handler: terms-graph.handler
-      Runtime: nodejs6.10
+      Runtime: nodejs12.x
       Timeout: 100
       CodeUri: .
       Environment:

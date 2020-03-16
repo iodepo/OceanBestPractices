@@ -85,7 +85,7 @@ Resources:
         Fn::GetAtt:
         - BitstreamsDownloaderExecutionRole
         - Arn
-      Runtime: nodejs6.10
+      Runtime: nodejs12.x
       Timeout: 300
     Type: AWS::Serverless::Function
   BitstreamsDownloaderExecutionRole:
@@ -227,7 +227,7 @@ Resources:
         Fn::GetAtt:
         - InvokeExtractorExecutionRole
         - Arn
-      Runtime: nodejs6.10
+      Runtime: nodejs12.x
       Timeout: 20
     Type: AWS::Serverless::Function
   InvokeExtractorExecutionRole:
@@ -296,7 +296,7 @@ Resources:
         Fn::GetAtt:
         - MetadataDownloaderExecutionRole
         - Arn
-      Runtime: nodejs6.10
+      Runtime: nodejs12.x
       Timeout: 300
     Type: AWS::Serverless::Function
   MetadataDownloaderExecutionRole:

@@ -1,4 +1,4 @@
-# OceanBestPracites
+# OceanBestPractices
 Repository to store the OpenSource version of the code made for OceanBestPractices.org by [Element84](https://www.element84.com).
 
 If you wish to reuse this code:
@@ -7,9 +7,9 @@ If you wish to reuse this code:
 
 Documentation on each module can be found in the following READMEs:
 
-https://github.com/iodepo/OceanBestPractices/blob/master/oop-web/README.md
-https://github.com/iodepo/OceanBestPractices/blob/master/oop-indexer/README.md
-https://github.com/iodepo/OceanBestPractices/blob/master/oop-indexer/Deployments.md
-https://github.com/iodepo/OceanBestPractices/blob/master/oop-indexer/Virtuoso.md
+* https://github.com/iodepo/OceanBestPractices/blob/master/oop-web/README.md
+* https://github.com/iodepo/OceanBestPractices/blob/master/oop-indexer/README.md
+* https://github.com/iodepo/OceanBestPractices/blob/master/oop-indexer/Deployments.md
+* https://github.com/iodepo/OceanBestPractices/blob/master/oop-indexer/Virtuoso.md
 
 Narrative documents on the development of the system can be found in the ./developmentReports directory.

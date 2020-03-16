@@ -16,7 +16,7 @@ The Virtuoso Triple Store instance is running on an EC2 instance and can be laun
 You can launch new instances of Virtuoso for recovery or testing purposes by launching a new cloudformation stack:
 
 ```
-aws cloudformation deploy --template-file virtuoso-instance.yml --stack-name {NAME} --parameter-overrides Environment={ENVIRONMENT} KeyPairName={KEY_PAIR} --profile {AWS_PROFILE}
+aws cloudformation deploy --template-file virtuoso-instance.yml --stack-name {NAME} --parameter-overrides VpcId={VPCID} Environment={ENVIRONMENT} KeyPairName={KEY_PAIR} --profile {AWS_PROFILE}
 ```
 
 There are other parameters you can provide. Please refer to the CloudFormation template for details.

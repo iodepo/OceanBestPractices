@@ -521,7 +521,7 @@ _Assuming that you are assuming an admin role within the account and do not actu
 
 ### Metadata and Document Source Management
 
-Document metadata and sources are downloaded and saved when new documents are made available. These tasks are preformed by various Lambda functions and will be automatically triggered based on SNS and S3 notifications.
+Document metadata and sources are downloaded and saved when new documents are made available. These tasks are preformed by various Lambda functions and will be automatically triggered based on [SNS](https://docs.aws.amazon.com/sns/latest/dg/welcome.html) and S3 notifications.
 
 #### Metadata Management
 

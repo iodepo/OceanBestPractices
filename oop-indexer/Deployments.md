@@ -27,6 +27,7 @@ This stack creates S3 buckets we'll need in order to store Lambda functions late
 `aws cloudformation deploy --template-file text-extractor-permissions.yml --stack-name obp-text-extractor-permissions-{ENVIRONMENT} --parameter-overrides Environment={ENVIRONMENT}  --capabilities CAPABILITY_NAMED_IAM --profile {AWS_PROFILE}`
 
 ## Text Extractor
+Please refer to the [README](./README.md), [TextExtractor repo](https://github.com/Element84/lambda-text-extractor) and [apex](https://apex.run/) for installation of textextractor.
 
 ## Elasticsearch
 
@@ -41,6 +42,8 @@ The Elasticsearch stack deploys an instance of Elasticsearch we'll use later on.
 Please refer to the instructions [here](./README.md) for creating the document and terms indices.
 
 ## Virtuoso Instance
+
+Refer to the instructions in [Virtuoso.md](./Virtuoso.md)
 
 ## Ingest and Indexer
 
@@ -72,9 +75,15 @@ The indexer is launched once a document has finished the text extraction process
 
 ## Search API
 
+`aws cloudformation package --template-file search.yml --output-template-file search-out.yml --s3-bucket obp-search-api-functions-minsem --profile {PROFILE}`
+ 
+`aws cloudformation deploy --template-file search-out.yml --stack-name obp-search-api-{ENVIRONMENT} --parameter-overrides Environment={ENVIRONMENT} ElasticSearchHost={ELASTIC_SEARCH_HOST} OntologyStoreHost={VIRTUOSO_HOST} OntologyStorePort={VIRTUOSO_PORT} --capabilities CAPABILITY_NAMED_IAM --profile {PROFILE}`
+
 ## Static Site
 
 ### Website
+
+main-site.yml can be found in **oop-web/cloudformation/**
 
 `aws cloudformation deploy --template-file main-site.yml --stack-name obp-website-{ENVIORNMENT} --parameter-overrides Environment={ENVIRONMENT} WebsiteDomain={ENVIRONMENT}.oceanbestpractices.org --profile {AWS_PROFILE}`
 

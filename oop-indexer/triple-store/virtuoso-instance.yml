@@ -56,6 +56,15 @@ Resources:
       ToPort: 22
       CidrIp: 75.148.31.81/32
 
+  VirtuosoEC2SecruityGroupSSHInbound:
+      Type: AWS::EC2::SecurityGroupIngress
+      Properties:
+          GroupId: !Ref VirtuosoEC2InstanceSecurityGroup
+          IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 193.191.134.0/24
+
   VirtuosoEC2Instance:
     Type: AWS::EC2::Instance
     Properties:
@@ -71,11 +80,11 @@ Resources:
         "Fn::Base64":
           |
               #!/bin/bash
-              yum update -y 
-              yum install -y docker
-              service docker start
-              chkconfig docker on
-              sudo docker pull openlink/virtuoso_opensource:latest
+              sudo yum update -y
+              sudo yum install -y docker
+              sudo service docker start
+              sudo chkconfig docker on
+              sudo docker pull openlink/virtuoso-opensource-7:latest
               echo ";
               ;  virtuoso.ini
               ;
@@ -340,7 +349,7 @@ Resources:
               sudo mkdir /opt/virtuoso-opensource
               sudo mkdir /opt/virtuoso-opensource/database
               sudo mv virtuoso.ini /opt/virtuoso-opensource/database/
-              sudo docker run --name vos -d -v /opt/virtuoso-opensource/database:/virtuoso-opensource/database -t -p 1111:1111 -p 8890:8890 -i openlink/virtuoso_opensource:latest
+              sudo docker run --name vos -d -v /opt/virtuoso-opensource/database:/virtuoso-opensource/database -t -p 1111:1111 -p 8890:8890 -i openlink/virtuoso-opensource-7:latest
 
 Outputs:
   VirtuosoPublicIp:

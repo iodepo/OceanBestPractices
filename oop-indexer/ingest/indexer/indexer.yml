@@ -79,7 +79,7 @@ Resources:
       FunctionName: !Sub obp-indexer-function-${Environment}
       Description: Responsible for percolating (tagging) and indexing document metadata based on a given document UID
       Handler: indexer.handler
-      Runtime: nodejs6.10
+      Runtime: nodejs12.x
       Timeout: 300
       Role: !GetAtt IndexerExecutionRole.Arn
       Environment:

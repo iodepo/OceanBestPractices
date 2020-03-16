@@ -234,7 +234,7 @@ Resources:
       Handler: metadata-downloader.handler
       FunctionName: !Sub obp-metadata-downloader-${Environment}
       Description: Downloads the metadata for a given document UID from the OBP API
-      Runtime: nodejs6.10
+      Runtime: nodejs12.x
       Timeout: 300
       Role: !GetAtt MetadataDownloaderExecutionRole.Arn
       Environment:
@@ -248,7 +248,7 @@ Resources:
       Handler: bitstreams-downloader.handler
       FunctionName: !Sub obp-bitstreams-downloader-${Environment}
       Description: Downloads the binary file for a given document UID from the OBP API
-      Runtime: nodejs6.10
+      Runtime: nodejs12.x
       Timeout: 300
       MemorySize: 1024
       Role: !GetAtt BitstreamsDownloaderExecutionRole.Arn
@@ -264,7 +264,7 @@ Resources:
       Handler: invoke-extractor.handler
       FunctionName: !Sub obp-invoke-extractor-${Environment}
       Description: Invokes the text extractor (3rd party library) functions for a given document UID
-      Runtime: nodejs6.10
+      Runtime: nodejs12.x
       Timeout: 20
       Role: !GetAtt InvokeExtractorExecutionRole.Arn
       CodeUri: .

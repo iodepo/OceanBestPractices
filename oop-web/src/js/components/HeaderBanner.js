@@ -5,7 +5,7 @@ class HeaderBanner extends Component {
     return (
       <div className='header__under-beta-container'>
         <span><i className='fa fa-exclamation-triangle'></i></span>
-        <span>Under Development</span>
+        <span>uuuuuuuuuuuuuuuuuUnder Development</span>
       </div>
     );
   }

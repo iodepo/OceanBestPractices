@@ -90,7 +90,16 @@ Resources:
             Ref: DocumentExtractedBucketName
           ELASTIC_SEARCH_HOST:
             Ref: ElasticSearchHost
-      CodeUri: s3://obp-indexer-functions-prod/db2c631b37693d866c0e52abd3c3daf2
+      FunctionName:
+        Fn::Sub: obp-indexer-function-${Environment}
+      Handler: indexer.handler
+      Role:
+        Fn::GetAtt:
+        - IndexerExecutionRole
+        - Arn
+      Runtime: nodejs12.x
+      Timeout: 300
+    Type: AWS::Serverless::Function
   InvokeIndexerFromSNSPermission:
     Type: AWS::Lambda::Permission
     Properties:
