@@ -53,6 +53,14 @@ The ingest and indexer pipeline is made up of a few different stacks, each with 
 
 The scheduler is responsible for polling the DSpace RSS feed to discover new documents that need ingesting. It creates a Lambda function and SNS Topic where new document handles are published.
 
+Since updating to Node.js 12.x dependencies must be included with the Lambda package. This function requires the `xml2js` library and must be installed prior to deploying. We use npm to manage dependencies. In order to install dependencies make sure you first have Node and npm installed. Most likely you'll need multiple versions of node on your machine so we recommend installing [nvm](https://github.com/nvm-sh/nvm). Once you have Node and npm installed navigate to the /secheduler directory and run:
+
+`npm install`
+
+This command will use the `package.json` file to install necessary dependencies into a `node_modules` directory. 
+
+Then use the `aws cloudformation` CLI to package and deploy the stack:
+
 `aws cloudformation package --template-file scheduler.yml --output-template-file scheduler-out.yml --s3-bucket obp-indexer-functions-{ENVIORNMENT} --profile {AWS_PROFILE}`
 
 `aws cloudformation deploy --template-file scheduler-out.yml --stack-name obp-scheduler-{ENVIRONMENT} --parameter-overrides Environment={ENVIORNMENT} --capabilities CAPABILITY_NAMED_IAM --profile {AWS_PROFILE}`
