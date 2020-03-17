@@ -9,3 +9,6 @@ ingest/scheduler/*.zip
 
 # Ignore private keys.
 keys/
+
+# Ignore node_modules
+node_modules
