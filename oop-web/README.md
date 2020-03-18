@@ -1,44 +1,60 @@
-# Web app for OOP
+# OceanBestPractices Web Application
 
+## Dependencies
 
-## Prereqs
+In order to work with the OceanBestPractices web app you'll first need to install Node.js and npm. Most likely you'll need multiple versions of node on your machine so we recommend installing [nvm](https://github.com/nvm-sh/nvm).
 
-Install npm (either via homebrew on OSX or https://docs.npmjs.com/getting-started/installing-node)
+## Local Development
 
-## To run the app
+Before you begin development you need to add a `.env`. Since this file should be treated as a secrets file it is not included in the repository. However, the file [dot_env_example](dot_env_example) describes the environment variables you'll need to define. Create a file named `.env` and copy the required environment variables. You should set the API endpoint to the endpoint of the API Gateway you want to use for local development.
 
-1. Clone the repo
-2. Navigate to the folder in your terminal
-3. Copy the file 'dot_env_example' to '.env' and correct it's content to meet your installation
-4. run the command `npm start`
-    - seems like `npm start` invokes `npm run watch-css` (`npm run watch-css` itself is hanging when run alone)
-    - in case of problems with packages that cannot be found (like [event-stream@3.3.6](https://stackoverflow.com/questions/53578201/npm-err-404-not-found-event-stream3-3-6))
-         - remove the lock file 
+To test locally, simply run:
+
+```
+> npm run start
+```
+
+Notes from the original author if you experience any issues:
+
+- Seems like `npm start` invokes `npm run watch-css` (`npm run watch-css` itself is hanging when run alone).
+
+- In case of problems with packages that cannot be found (like [event-stream@3.3.6](https://stackoverflow.com/questions/53578201/npm-err-404-not-found-event-stream3-3-6))
+
+- Remove the lock file.
          
-         ```rm -rf package-lock.json ```
-         - remove the node_modules dir 
-         
-         ```rm -rf node_modules/```
-         - reinstall the packages 
-         
-         ```npm install```
-         
-         - fix issues, run command and see suggestions, **can break code**
-         
-         ```npm audit```
-5. To build for production, run the command `npm run build`
+```rm -rf package-lock.json ```
+- remove the node_modules dir 
+
+```rm -rf node_modules/```
+- reinstall the packages 
+
+```npm install```
+
+- fix issues, run command and see suggestions, **can break code**
+
+```npm audit```
+
 =======
+
 2. `npm i`
 3. Navigate to the folder in your terminal
 4. `npm start`
 
-## To push to the web app (hosted in a s3 bucket)
+End notes from original author.
 
-**REMARK** there is also a CloudFormation instruction in [Deployments.md](https://github.com/iodepo/OceanBestPractices/blob/master/oop-indexer/Deployments.md#static-site)
+## AWS Deployment
 
-1. To build for production, run the command `npm build`
-2. `cd public/`
-3. `s3 sync . s3://{whatever-the-s3-bucket-is-for-the-web-app} --profile {AWS_PROFILE}`
+Before deploying the web app please make sure to following the instructions in [Deployments.md](https://github.com/iodepo/OceanBestPractices/blob/master/oop-indexer/Deployments.md#static-site) and for the CloudFront stack.
+
+Next, make sure to update your `.env` file if the API Gateway endpoint or any other environment should be different for your AWS stage.
+
+Next, run the following commands:
+
+```
+> npm run build
+> cd build
+> aws s3 sync . s3://{WEBSITE_BUCKET_NAME} --profille {AWS_PROFILE}
+```
 
 ## Changes to package.json
 
