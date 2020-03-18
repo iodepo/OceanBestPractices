@@ -64,7 +64,7 @@ class Result extends Component {
     // Find out if the tags are active by comparing the id saved on the state saved to the
     // id of the current element
     const isActiveTags = this.props.termsReducer.activeTerms && this.props.termsReducer.activeTerms.id === this.props.id;
-    const docHandle = this.props.handle ? "https://www.oceanbestpractices.net/handle/" + this.props.handle : null;
+    const docHandle = this.props.handle ? "https://repository.oceanbestpractices.org/handle/" + this.props.handle : null;
     const { showCitation, showDocument } = this.state;
 
     var toggleClassName = isActiveTags ? 'result__button result__tag-button--is-active' : 'result__button';
