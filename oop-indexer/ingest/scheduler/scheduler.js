@@ -13,7 +13,7 @@ const topicArn = process.env.DOCUMENT_TOPIC_ARN;
 const scheduleInterval = process.env.SCHEDULE_INTERVAL ? parseInt(process.env.SCHEDULE_INTERVAL) : 300;
 
 const dspace = {
-  host: 'www.oceanbestpractices.net',
+  host: 'repository.oceanbestpractices.org',
   path: '/feed/rss_2.0/site',
   accept: 'application/json',
   userAgent: "Mozill;a/5.0 (iPhone; U; CPU iPhone OS 4_3_3 like Mac OS X; en-us) AppleWebKit/533.17.9 (KHTML, like Gecko) Version/5.0.2 Mobile/8J2 Safari/6533.18.5"
