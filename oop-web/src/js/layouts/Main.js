@@ -18,7 +18,7 @@ import unesco_ioc_obp_logo from '../../images/unesco-ioc-ocb-lockup-2x.png';
 
 const navigation_links = [
   {
-    to: 'https://www.oceanbestpractices.net/page/about',
+    to: 'https://repository.oceanbestpractices.org/page/about',
     title: 'About',
   },
   {
@@ -26,11 +26,11 @@ const navigation_links = [
     title: 'Recommended Citation',
   },
   {
-    to: 'https://www.oceanbestpractices.net/page/faq',
+    to: 'https://repository.oceanbestpractices.org/page/faq',
     title: 'FAQ',
   },
   {
-    to: 'https://www.oceanbestpractices.net/feedback',
+    to: 'https://repository.oceanbestpractices.org/feedback',
     title: 'Contact Us',
   },
 ];
@@ -75,18 +75,18 @@ class Main extends Component {
                   <FullScreenModal smallModal="true" modalCTA="Get Templates" modalTitle="Best Practices Document Templates" location="home" modalClass="link-list">
                     <div className="link__list-toggle-modal">
                       <p>Select the template that best matches your document type.</p>
-                      <Superlink to="https://www.oceanbestpractices.net/handle/11329/398" event_category="header" event_action="link" event_label="Sensors template">
+                      <Superlink to="https://repository.oceanbestpractices.org/handle/11329/398" event_category="header" event_action="link" event_label="Sensors template">
                         Sensors
                       </Superlink>
-                      <Superlink to="https://www.oceanbestpractices.net/handle/11329/399" event_category="header" event_action="link" event_label="Sensors template">
+                      <Superlink to="https://repository.oceanbestpractices.org/handle/11329/399" event_category="header" event_action="link" event_label="Sensors template">
                         Ocean Applications
                       </Superlink>
-                      <Superlink to="https://www.oceanbestpractices.net/handle/11329/400" event_category="header" event_action="link" event_label="Sensors template">
+                      <Superlink to="https://repository.oceanbestpractices.org/handle/11329/400" event_category="header" event_action="link" event_label="Sensors template">
                         Data Management
                       </Superlink>
                     </div>
                   </FullScreenModal>
-                  <Superlink class_name="link-list__link" to="https://www.oceanbestpractices.net/submissions" event_category="header" event_action="link" event_label="Submit a new Best Practice">
+                  <Superlink class_name="link-list__link" to="https://repository.oceanbestpractices.org/submissions" event_category="header" event_action="link" event_label="Submit a new Best Practice">
                     Go to Submission Site
                   </Superlink>
                   <Superlink class_name="link-list__link" to="/tagger" event_category="header" event_action="link" event_label="Ocean Knowledge Tagger">

@@ -8,7 +8,7 @@ const https = require('https');
 const metadataBucket = process.env.DOCUMENT_METADATA_BUCKET || 'oop-doc-metadata';
 
 const obp = {
-  host: "www.oceanbestpractices.net",
+  host: "repository.oceanbestpractices.org",
   itemsPath: "/rest/items",
   metadataPath: "/rest/items/{uuid}/metadata",
   findPath: '/rest/items/find-by-metadata-field',

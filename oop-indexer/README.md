@@ -385,7 +385,7 @@ Searching documents with a terms filter:
 You can use the Ocean Best Practices RSS feed to fetch documents in chronological order:
 
 ```
-GET https://www.oceanbestpractices.net/feed/rss_2.0/site
+GET https://repository.oceanbestpractices.org/feed/rss_2.0/site
 ```
 
 ```
@@ -393,7 +393,7 @@ GET https://www.oceanbestpractices.net/feed/rss_2.0/site
 <rss xmlns:dc="http://purl.org/dc/elements/1.1/" version="2.0">
     <channel>
         <title>OceanBestPractices</title>
-        <link>https://www.oceanbestpractices.net:443</link>
+        <link>https://repository.oceanbestpractices.org:443</link>
         <description>The OceanBestPractices digital repository system captures, stores, indexes, preserves, and distributes digital research material.</description>
         <pubDate xmlns="http://apache.org/cocoon/i18n/2.1">Thu, 22 Feb 2018 22:47:04 GMT</pubDate>
         <dc:date>2018-02-22T22:47:04Z</dc:date>
@@ -414,7 +414,7 @@ Electronic Navigation Charts (ENC) and Electronic Chart Display and Information 
 From the returned `<item>` objects, use the `<link>` attribute to fetch document metadata:
 
 ```
-GET https://www.oceanbestpractices.net/rest/items/find-by-metadata-field -d { "key": "dc.identifier.uri", "value": "http://hdl.handle.net/11329/403" }
+GET https://repository.oceanbestpractices.org/rest/items/find-by-metadata-field -d { "key": "dc.identifier.uri", "value": "http://hdl.handle.net/11329/403" }
 ```
 
 ```
@@ -448,11 +448,11 @@ GET https://www.oceanbestpractices.net/rest/items/find-by-metadata-field -d { "k
 Using the `uuid` field in the response, we can get the document metadata and bitstream information:
 
 ```
-GET https://www.oceanbestpractices.net/rest/items/dff822cf-fb9a-4e9e-899d-f395930889ee/metadata
+GET https://repository.oceanbestpractices.org/rest/items/dff822cf-fb9a-4e9e-899d-f395930889ee/metadata
 ```
 
 ```
-GET https://www.oceanbestpractices.net/rest/items/dff822cf-fb9a-4e9e-899d-f395930889ee/bitstreams
+GET https://repository.oceanbestpractices.org/rest/items/dff822cf-fb9a-4e9e-899d-f395930889ee/bitstreams
 ```
 
 ```
@@ -488,7 +488,7 @@ GET https://www.oceanbestpractices.net/rest/items/dff822cf-fb9a-4e9e-899d-f39593
 You can then use the bitstream `retrieveLink` to fetch the binary document:
 
 ```
-GET https://www.oceanbestpractices.net/rest/bitstreams/f7c68331-5f54-45db-922b-cf2d9e1a4615/retrieve
+GET https://repository.oceanbestpractices.org/rest/bitstreams/f7c68331-5f54-45db-922b-cf2d9e1a4615/retrieve
 ```
 
 ### Text Extraction

@@ -40,7 +40,7 @@ puts options[:limit].to_i
 LIMIT = options[:limit].nil? ? 1000 : options[:limit].to_i
 OFFSET = 0
 
-DSPACE_ENDPOINT = "https://www.oceanbestpractices.net"
+DSPACE_ENDPOINT = "https://repository.oceanbestpractices.org"
 DSPACE_PATH = "/rest/items"
 
 USER_AGENT = "Mozilla/5.0 (iPhone; U; CPU iPhone OS 4_3_3 like Mac OS X; en-us) AppleWebKit/533.17.9 (KHTML, like Gecko) Version/5.0.2 Mobile/8J2 Safari/6533.18.5"

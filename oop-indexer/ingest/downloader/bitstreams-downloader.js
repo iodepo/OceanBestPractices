@@ -9,7 +9,7 @@ const binaryBucket = process.env.DOCUMENT_BINARY_BUCKET;
 const indexerFunctionName = process.env.INDEXER_FUNCTION_NAME;
 
 const obp = {
-  host: "www.oceanbestpractices.net",
+  host: "repository.oceanbestpractices.org",
   path: "/rest/items/{uuid}/bitstreams",
   accepts: 'application/json',
   userAgent: "Mozilla/5.0 (iPhone; U; CPU iPhone OS 4_3_3 like Mac OS X; en-us) AppleWebKit/533.17.9 (KHTML, like Gecko) Version/5.0.2 Mobile/8J2 Safari/6533.18.5",
