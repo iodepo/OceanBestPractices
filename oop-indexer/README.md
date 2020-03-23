@@ -563,3 +563,13 @@ The OBP infrastructure is managed by a set of CloudFormation templates. Read mor
 # OBP Ontology Triple Store (Virtuoso)
 
 Virtuoso is hosted on an AWS EC2 instance. Read more about the installation and configuration of Virtusoso [here](./Virtuoso.md).
+
+# Indexing Scripts
+
+Indexing occurs regularly via the scheduler function; however, if you want to manually index all available documents you can run the [bulk-indexer](./ingest/bulk-indexer.rb) script. This ruby script fetches documents in batches from the provided DSpace repository and posts the handles to the configured SNS topic (just like the scheduler does but in bulk). You can run the script with the following command:
+
+```
+> ./ingest/bulk-indexer.rb -p {AWS_PROFILE} -e {ENVIRONMENT} -l {DOCUMENT LIMIT}
+```
+
+The ENVIRONMENT option loads a file which should have configured environment variables. There are examples of this environment file provided in the repository such as [env.iode.json](./env.iode.json). For different environments create a similar file and provide it as the value when running the bulk indexer script.
