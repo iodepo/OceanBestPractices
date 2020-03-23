@@ -29,7 +29,7 @@ The template provides a base virtuoso.ini file and can be configured within the 
 
 The Docker image used for our instance of Virtuoso can be found here:
 
-[https://hub.docker.com/r/openlink/virtuoso-opensource-7]
+[https://hub.docker.com/r/openlink/virtuoso-opensource-7/]
 
 ## Importing OWL Ontology
 
