@@ -53,10 +53,11 @@ Loading the Bulk Loader Procedure for Virtuoso.
 
 Loading an RDF/XML SKOS vocabulary is easy once you've SSH'd into the Virtuoso instance. Secure copy the vocabulary to the Virtuoso instance:
 
+SCP the vocab.xml file to the EC2 server
 ```
 > scp -i keys/{your key} vocab.xml ec2-user@{host}:~/
 ```
-SSH to the instance and copy the vocabulary file into the docker container.
+copy the vocabulary file into the docker container.
 
 ```
 > sudo docker cp vocab.xml vos:/opt/virtuoso-opensource/database/
