@@ -1,6 +1,6 @@
 # Deploying the OBP Insfrastructure
 
-### Overview (What you'll need to deploy the App):
+### Overview:
 
 - Storage Resources (Creating S3 Buckets)
 - Text Extractor
@@ -37,13 +37,13 @@ The Elasticsearch stack deploys an instance of Elasticsearch we'll use later on.
 
 `aws cloudformation deploy --template-file elasticsearch.yml --stack-name obp-elasticsearch-{ENVIRONMENT} --parameter-overrides Environment={ENVIRONMENT} --capabilities CAPABILITY_NAMED_IAM --profile {AWS_PROFILE}`
 
-### Indices
-
-Please refer to the instructions [here](./README.md) for creating the document and terms indices.
-
 ## Virtuoso Instance
 
 Refer to the instructions in [Virtuoso.md](./Virtuoso.md)
+
+### Indexes
+
+Please refer to the instructions [here](./README.md) for creating the document and terms indices. Specifically, the *Creating and Populating the Percolator Index* and *Creating the Document Index* sections.
 
 ## Ingest and Indexer
 
