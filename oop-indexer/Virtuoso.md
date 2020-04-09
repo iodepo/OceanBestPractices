@@ -66,8 +66,6 @@ Note: In the above example `vos` is the name over the Docker container we want t
 > sudo docker ps
 ```
 
-
-
 ## Importing Ontologies and Vocabularies
 
 ### [Importing OWL Ontology](#import-owl)
@@ -80,11 +78,19 @@ SPARQL LOAD <http://purl.unep.org/sdg/sdgio.owl>;
 
 ### [Importing a Large OWL Ontology (Bulk Loading)](#import-large-owl)
 
-Example for bulk loading an RDF file. This was used to load the CHEBI ontology.
+Example for bulk loading an RDF file. This was used to load the CHEBI ontology:
 
 [http://vos.openlinksw.com/owiki/wiki/VOS/VirtBulkRDFLoaderExampleSingle]
 
-Loading the Bulk Loader Procedure for Virtuoso.
+There is a copy of the rdfloader.sql script in this repository. You can use the existing script if you want. Just upload it to your Virtuoso instance and copy it to your docker container:
+
+```
+> scp -i keys/iode-admin.pem triple-store/rdfloader.sql ec2-user@{VIRTUOSO_HOST_IP}:~/
+> ssh -i keys/iode-admin.pem ec2-user@{VIRTUOSO_HOST_IP}
+> sudo docker cp rdfloader.sql vos:/opt/virtuoso-opensource/database/
+```
+
+This script was copied from:
 
 [http://vos.openlinksw.com/owiki/wiki/VOS/VirtBulkRDFLoaderScript]
 
@@ -129,6 +135,41 @@ The application assumes that the graph names will match the the URLs for each on
 #### CHEBI
 
 Use section [Importing Large OWL Ontology](#large-owl-load) to load CHEBI. Because of the size of CHEBI it was only possible to import using the bulk loader instructions. You may want to create a snapshot of your instance prior to loading CHEBI. Please note that this import may take awhile.
+
+There is a copy of the chebi.owl file used during the development of OceanBestPractices located at in the S3 bucket `obp-chebi-copy`. The goal is to get a copy of this file onto your Virtuoso instance. You can do this manually by:
+
+
+1. Copy the file to your local machine with:
+
+```
+> aws s3 cp s3://obp-chebi-copy .
+```
+
+Then secure copy the file to your Virtuoso instance:
+
+```
+> scp -i keys/iode-admin.pem chebi.owl ec2-user@{VIRTUOSO_EC2_HOST}:~/
+```
+
+or
+
+2. Copy the file directly to the Virtuoso instance with:
+
+```
+> ssh -i keys/iode-admin.pem ec2-user@{VIRTUOSO_EC2_HOST}
+> aws s3 cp s3://obp-chebi-copy/chebi.owl .
+```
+
+If you receive the error "Unable to locate credentials" you should first run `> aws configure` to configure AWS credentials.
+
+Once the CHEBI file is loaded onto Virtuoso you should copy the file to your docker and execute docker bash in order to procede with the ingest:
+
+```
+> sudo docker cp chebi.owl vos:/opt/virtuoso-opensource/database/
+> sudo docker exec -it vos bash
+```
+
+Then follow the instructions in [Importing Large OWL Ontology](#large-owl-load).
 
 #### ENVO and SDGIO
 
