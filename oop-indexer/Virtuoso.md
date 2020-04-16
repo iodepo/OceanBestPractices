@@ -147,8 +147,8 @@ Each vocabulary can be ingested by following the instructions in [Importing SKOS
 For example, if I wanted to load the L05 vocabulary I would run the following commands:
 
 ```
-> scp -i keys/iode-admin.pem L05.xml ec2-user@{VIRTUOSO_EC2_HOST}:~/
 > ssh -i keys/iode-admin.pem ec2-user@{VIRTUOSO_EC2_HOST}
+> wget http://vocab.nerc.ac.uk/collection/L05/current/ -O L05.xml
 > sudo docker cp L05.xml vos:/opt/virtuoso-opensource/database/
 > sudo docker exec -it vos bash
 > /opt/virtuoso-opensource/bin/isql 1111
@@ -157,3 +157,5 @@ SQL> quit;
 > exit
 > logout
 ```
+
+**WARNING** Don't forget to run the percolator/create-tag-index.rb script, see README.md file!!!
