@@ -157,7 +157,7 @@ or
 
 ```
 > ssh -i keys/iode-admin.pem ec2-user@{VIRTUOSO_EC2_HOST}
-> aws s3 cp s3://obp-chebi-copy/chebi.owl .
+> aws s3 cp --recursive s3://obp-chebi-copy/chebi.owl .
 ```
 
 If you receive the error "Unable to locate credentials" you should first run `> aws configure` to configure AWS credentials.
