@@ -142,7 +142,7 @@ There is a copy of the chebi.owl file used during the development of OceanBestPr
 1. Copy the file to your local machine with:
 
 ```
-> aws s3 cp s3://obp-chebi-copy .
+> aws s3 cp --recursive s3://obp-chebi-copy .
 ```
 
 Then secure copy the file to your Virtuoso instance:
