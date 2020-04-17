@@ -349,7 +349,7 @@ Resources:
               sudo mkdir /opt/virtuoso-opensource
               sudo mkdir /opt/virtuoso-opensource/database
               sudo mv virtuoso.ini /opt/virtuoso-opensource/database/
-              sudo docker run --name vos -d -v /opt/virtuoso-opensource/database:/virtuoso-opensource/database -t -p 1111:1111 -p 8890:8890 -i openlink/virtuoso-opensource-7:latest
+              sudo docker run --name vos --restart=on-failure:10 -d -v /opt/virtuoso-opensource/database:/virtuoso-opensource/database -t -p 1111:1111 -p 8890:8890 -i openlink/virtuoso-opensource-7:latest
 
 Outputs:
   VirtuosoPublicIp:
