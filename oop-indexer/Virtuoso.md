@@ -16,10 +16,13 @@ The Virtuoso Triple Store instance is running on an EC2 instance and can be laun
 You can launch new instances of Virtuoso for recovery or testing purposes by launching a new cloudformation stack:
 
 ```
-aws cloudformation deploy --template-file virtuoso-instance.yml --stack-name {NAME} --parameter-overrides VpcId={VPCID} Environment={ENVIRONMENT} KeyPairName={KEY_PAIR} --profile {AWS_PROFILE}
+aws cloudformation deploy --template-file virtuoso-instance.yml --stack-name {NAME} --parameter-overrides VpcId={VPCID} Environment={ENVIRONMENT} KeyPairName={KEY_PAIR} InstanceType={EC2_INSTANCE_TYPE} --profile {AWS_PROFILE}
 ```
 
-There are other parameters you can provide. Please refer to the CloudFormation template for details.
+The InstanceType parameter will default to a t2.small (you can view this in the CloudFormation template). Please note that t2.small is pretty small and you will most
+likely want to bump that up. For cost reasons the template defaults to this size. The virtuoso.ini settings in the CloudFormation template allocates buffers per the recommended values
+based on ~2GB of free memory (the available memory for a t2.small). If you launch with a smaller instance size you should adjust those numbers. You can adjust those values larger
+if you want more memory and use a larger instance.
 
 This stack creates an EC2 instance and spins up an instance of Virtuoso within a Docker Container. It also creates a Security Group which will allow HTTP access to port 8890 (Virtuoso default) and SSH access.
 

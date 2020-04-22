@@ -171,7 +171,6 @@ WHERE {
     WHERE { 
        ?s a owl:Class . 
        ?s rdfs:label ?label . 
-       FILTER regex(str(?s), "SeaData devices_") 
     } 
   } 
   UNION 
