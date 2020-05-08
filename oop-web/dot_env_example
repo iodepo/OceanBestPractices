@@ -5,6 +5,7 @@
 REACT_APP_API_ENDPOINT=http://localhost/
 
 //to run on AWS
+//you can find the url via https://console.aws.amazon.com/apigateway/home and select the correct stage to deploy
 //REACT_APP_API_ENDPOINT=https://13zqmuuwz6.execute-api.us-east-1.amazonaws.com/iode
 
 
