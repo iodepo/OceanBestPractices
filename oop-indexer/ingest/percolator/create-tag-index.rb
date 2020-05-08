@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 
 require 'net/http'
+require 'resolv-replace'
 
 require 'json'
 require 'optparse'
