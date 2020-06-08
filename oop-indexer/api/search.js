@@ -1,7 +1,9 @@
 'use strict';
 
 const AWS = require('aws-sdk');
+const creds = new AWS.EnvironmentCredentials('AWS');
 const region = process.env.REGION || 'us-east-1';
+
 const http = require('http');
 
 const esOpts = {
@@ -10,7 +12,6 @@ const esOpts = {
 };
 
 const esEndpoint = new AWS.Endpoint(esOpts.host);
-const creds = new AWS.EnvironmentCredentials('AWS');
 
 const ontOpts = {
   host: process.env.ONTOLOGY_STORE_HOST,
@@ -20,6 +21,9 @@ const ontOpts = {
 
 const DEFAULT_FROM = 0, DEFAULT_SIZE = 20;
 
+/**
+ * This function is responsible for handling a keyword search and returning matching documents.
+ */
 exports.handler = (event, context, callback) => {
   const params = event.queryStringParameters;
   
@@ -29,7 +33,6 @@ exports.handler = (event, context, callback) => {
     callback(null, { statusCode: 200, body: JSON.stringify({}), headers: responseHeaders() });
   } else {
     var opts = parseParams(params);
-
     if (opts.synonyms) {
       getSynonyms(opts.keywords, callback)
         .then(function(results) {
@@ -47,6 +50,14 @@ exports.handler = (event, context, callback) => {
   }
 };
 
+/**
+ * Executes an Elasticsearch query with the given search options and notifies the callback function when
+ * it completes. The callback function should be the function that ends this Lambda function, so most likely
+ * passed directly from the handler.
+ * 
+ * @param {object} options An object defining the search options to use when building the search query.
+ * @param {function} callback The function to use as a callback when this asynchronous function finishes.
+ */
 function executeSearch(options, callback) {
   const searchBody = JSON.stringify(getSearchDocument(options));
   
@@ -74,6 +85,13 @@ function executeSearch(options, callback) {
   });
 }
 
+/**
+ * Parses the event parameters to define search related parameters and default values. 
+ * 
+ * @param {object} params The parameters provided when invoking the search function.
+ *
+ * @returns {object} An object containing the parsed parameters.
+ */
 function parseParams(params) {
   return {
     keywords: params.keywords !== undefined && params.keywords.length > 0 ? params.keywords.split(',') : [],
@@ -88,6 +106,10 @@ function parseParams(params) {
   }
 }
 
+/**
+ * Builds an HTTP request taht can be used in an Elasticsearch query.
+ * @param {object} body The body of the HTTP request. Ideally this contains the Elasticsearch search document.
+ */
 function getRequest(body) {
   const req = new AWS.HttpRequest(esEndpoint);
   req.method = 'POST';
@@ -101,6 +123,17 @@ function getRequest(body) {
   return req;
 }
 
+/**
+ * Builds an Elasticsearch search document object that can be used in an Elasctsearch search request. Specifically,
+ * this function sets the fields to include, options like from and size, and which fields should provide the highlight
+ * information. It also builds the query string value based on keywords provided in the `opts` argument.
+ *
+ * @param {object} opts Search options to include in the search document. At a minimum this object should contain a
+ *                      from, size, keywords, terms | termsURI, fields, and whether or not `refereed` should be 
+ *                      checked.
+ * 
+ * @returns {object} A search document object that can be used directly by an Elasticsearch search request.
+ */
 function getSearchDocument(opts) {
   const searchDoc = {
       "_source": {
@@ -129,7 +162,7 @@ function getSearchDocument(opts) {
  * 
  * e.g. "+ocean current" becomes "AND \"ocean current\""
  **/
-function formatKeyword(k, i) {
+function formatKeyword(k) {
   // Map the UI operators to ES operators.
   const opTransforms = { "+": "AND", "-": "NOT" };
   
@@ -144,9 +177,38 @@ function formatKeyword(k, i) {
   // performing a quoted query in ES.
   fk = fk.replace(/["]/g, "");
   
-  return i > 0 ? op + " \"" + fk + "\"" : "\"" + fk + "\"";
+  // Optional: try splitting the search term on a space. If it's a multi-
+  // word search term we'll append each term as OR'd AND searches.
+  const fk_comps = fk.split(' ');
+  const opt_t = fk_comps.map(t => {
+    return `\"${t}\"`;
+  });
+  
+  console.log(`opt_t:\n${JSON.stringify(opt_t)}`);
+  
+  // Construct the query for the primary keyword.
+  fk = op + " \"" + fk + "\"";  
+
+  // It's a multi-word keyword. Append a grouped AND for each word in the term
+  // and boost the original keyword.
+  if (opt_t.length > 1) {
+    fk = `${fk}^2 OR ( ${opt_t.join(' AND ')} )`;
+  }
+  
+  return fk;
 }
 
+/**
+ * Helper function that builds the `query` field of the Elasticsearch search document.
+ *
+ * @param {array} keywords An array of search keywords.
+ * @param {array} terms An array of terms that will be used as filters in the query.
+ * @param {array} termURIs A list of term URIs (ontology URIs) that can be used as filters in the query.
+ * @param {array} fields An array of field names to be searched against by the query.
+ * @param {boolean} refereed Whether or not `refereed` should be used as a filter.
+ * 
+ * @returns {object} The query object that can be used in an Elasticsearch search document `query` field.
+ */
 function buildElasticsearchQuery(keywords, terms, termURIs, fields, refereed) {
   var boolQuery = {
     "must": {
