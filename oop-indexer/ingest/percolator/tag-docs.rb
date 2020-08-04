@@ -30,7 +30,7 @@ TAG_SIZE = 500
 
 # Fetch all document IDs
 def query_for_doc_ids
-  { query: { match_all: {} }, stored_fields: [], size: 500 }
+  { query: { match_all: {} }, stored_fields: [], size: 1500 }
 end
 
 def fetch_doc_ids

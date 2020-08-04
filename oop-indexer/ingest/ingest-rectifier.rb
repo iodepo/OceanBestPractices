@@ -36,13 +36,15 @@ ELASTIC_SEARCH_PATH = "/documents/doc"
 AWS_PROFILE = options[:profile]
 TOPIC_ARN = options[:env]["AVAILABLE_TOPIC_ARN"]
 
-limit = options[:limit] || 350
+LIMIT = options[:limit].nil? ? 1000 : options[:limit].to_i
+OFFSET = 0
+
 DSPACE_HOST = "https://repository.oceanbestpractices.org"
-DSPACE_PATH = "/rest/items?limit=#{limit}"
+DSPACE_PATH = "/rest/items"
 DSPACE_USER_AGENT = "Mozilla/5.0 (iPhone; U; CPU iPhone OS 4_3_3 like Mac OS X; en-us) AppleWebKit/533.17.9 (KHTML, like Gecko) Version/5.0.2 Mobile/8J2 Safari/6533.18.5"
 
-def fetch_source_docs() 
-  res = open(DSPACE_HOST + DSPACE_PATH).read
+def fetch_source_docs(limit, offset) 
+  res = open(DSPACE_HOST + DSPACE_PATH + "?limit=#{limit}&offset=#{offset}").read
   JSON.parse(res)
 end
 
@@ -57,26 +59,40 @@ def indexed?(key)
 end
 
 def publish_handle(handle)
-  puts "Posting handle #{handle}..."
   `aws sns publish --profile #{AWS_PROFILE} --topic-arn #{TOPIC_ARN} --message "http://hdl.handle.net/#{handle}"`
 end
-
-
-source_docs = fetch_source_docs()
 
 indexed_count = 0
 indexed_uuids = []
 
-source_docs.each do |doc| 
-  if !indexed?(doc['uuid']) 
-    publish_handle(doc['handle'])
-    indexed_count += 1
-    indexed_uuids << doc['uuid']
-  end 
+req_limit = [50, LIMIT].min
+req_offset = OFFSET
+
+loop do 
+  puts "Fetching #{req_limit} documents with offset #{req_offset} from DSpace..."
+  source_docs = fetch_source_docs(req_limit, req_offset)
+
+  source_docs.each do |doc| 
+    source_doc_uuid = doc['uuid']
+    puts "Checking if document UUID #{source_doc_uuid} exists in our index..."
+    
+    if !indexed?(doc['uuid']) 
+      puts "Could not find document UUID #{source_doc_uuid} in our index - publishing now..."
+    
+      publish_handle(doc['handle'])
+      indexed_count += 1
+      indexed_uuids << source_doc_uuid
+
+    end 
+  end
+
+  req_offset += source_docs.size
+
+  # The DSpace API doesn't guarantee the results will match
+  # the requested limit due to their internal pagination. So we
+  # just have to check and see if we've reached the end of our results.
+  break if source_docs.size <= 0 || req_offset >= LIMIT
 end
 
-puts "Indexed #{indexed_count} missing documents." 
-puts "Indexed UUIDs:\n#{indexed_uuids.join("\n")}"
-
-
-
+puts "Indexed #{indexed_count} missing documents!" 
+puts "Indexed UUIDs:\n#{indexed_uuids.join("\n")}" if indexed_uuids.size > 0
