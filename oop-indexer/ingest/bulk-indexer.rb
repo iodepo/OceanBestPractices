@@ -27,7 +27,7 @@ OptionParser.new do |opts|
     options[:env] = JSON.parse(File.read(e))
   end
 
-  opts.on("-l LIMIT", "--limit=LIMIT", "Limit the number of documents indexed. Defaults to 1000.") do |l|
+  opts.on("-l LIMIT", "--limit=LIMIT", "Limit the number of documents indexed. Defaults to 2000.") do |l|
     options[:limit] = l
   end
 
@@ -37,7 +37,7 @@ AWS_PROFILE = options[:profile]
 TOPIC_ARN = options[:env]["AVAILABLE_TOPIC_ARN"]
 
 puts options[:limit].to_i
-LIMIT = options[:limit].nil? ? 1000 : options[:limit].to_i
+LIMIT = options[:limit].nil? ? 2000 : options[:limit].to_i
 OFFSET = 0
 
 DSPACE_ENDPOINT = "https://repository.oceanbestpractices.org"
