@@ -53,7 +53,7 @@ Next, run the following commands:
 ```
 > npm run build
 > cd build
-> aws s3 sync . s3://{WEBSITE_BUCKET_NAME} --profille {AWS_PROFILE}
+> aws s3 sync . s3://{WEBSITE_BUCKET_NAME} --profile {AWS_PROFILE}
 ```
 
 ## Changes to package.json
