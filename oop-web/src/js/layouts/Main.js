@@ -75,13 +75,13 @@ class Main extends Component {
                   <FullScreenModal smallModal="true" modalCTA="Get Templates" modalTitle="Best Practices Document Templates" location="home" modalClass="link-list">
                     <div className="link__list-toggle-modal">
                       <p>Select the template that best matches your document type.</p>
-                      <Superlink to="https://repository.oceanbestpractices.org/handle/11329/398" event_category="header" event_action="link" event_label="Sensors template">
+                      <Superlink to="https://repository.oceanbestpractices.org/handle/11329/1243" event_category="header" event_action="link" event_label="Sensors template">
                         Sensors
                       </Superlink>
-                      <Superlink to="https://repository.oceanbestpractices.org/handle/11329/399" event_category="header" event_action="link" event_label="Sensors template">
+                      <Superlink to="https://repository.oceanbestpractices.org/handle/11329/1246" event_category="header" event_action="link" event_label="Sensors template">
                         Ocean Applications
                       </Superlink>
-                      <Superlink to="https://repository.oceanbestpractices.org/handle/11329/400" event_category="header" event_action="link" event_label="Sensors template">
+                      <Superlink to="https://repository.oceanbestpractices.org/handle/11329/1245" event_category="header" event_action="link" event_label="Sensors template">
                         Data Management
                       </Superlink>
                     </div>
