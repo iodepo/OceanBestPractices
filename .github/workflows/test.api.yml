@@ -1,7 +1,7 @@
 name: test-api
 on: [push]
 jobs:
-  lint:
+  test:
     runs-on: ubuntu-latest
     defaults:
       run:
