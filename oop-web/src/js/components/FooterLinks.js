@@ -22,6 +22,11 @@ const footer_links = [
     class: '',
   },
   {
+    to: 'https://repository.oceanbestpractices.org/page/policy',
+    title: 'Privacy Policy',
+    class: '',
+  },
+  {
     to: '/tagger',
     title: 'OceanKnowledge Tagger',
     class: 'tagger__footer-link',
