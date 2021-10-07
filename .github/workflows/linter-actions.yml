@@ -9,4 +9,4 @@ jobs:
         with:
           node-version: '12'
       - run: npm install
-      - run: npm run lint
+      - run: cd api && npm run lint
