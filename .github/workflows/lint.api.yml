@@ -3,11 +3,12 @@ on: [push]
 jobs:
   lint:
     runs-on: ubuntu-latest
+    defaults:
+      working-directory: ./api
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
         with:
           node-version: '12'
-      - run: cd api
       - run: npm install
       - run: npm run lint
