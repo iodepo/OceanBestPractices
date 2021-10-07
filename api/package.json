@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "jest",
+    "test:watch": "jest --watchAll",
     "lint": "eslint src/**"
   },
   "repository": {
@@ -21,6 +22,7 @@
     "aws-sdk": "^2.1002.0",
     "eslint": "^7.32.0",
     "eslint-config-airbnb-base": "^14.2.1",
-    "eslint-plugin-import": "^2.24.2"
+    "eslint-plugin-import": "^2.24.2",
+    "jest": "^27.2.4"
   }
 }
