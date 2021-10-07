@@ -1,0 +1,26 @@
+{
+  "name": "obp-api",
+  "version": "1.0.0",
+  "description": "This project includes all APIs, functions, queries, mappings, and resources necessary to deploy or query the OBP indexer and API infrastructure. The OBP indexer is a system which fetches existing documents from the Ocean Best Practices API; extracts text if necessary; and indexes the document metadata into an existing Elasticsearch cluster. The OBP API provides endpoints for clients to search and discover indexed documents.",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "lint": "eslint src/**"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/iodepo/OceanBestPractices.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/iodepo/OceanBestPractices/issues"
+  },
+  "homepage": "https://github.com/iodepo/OceanBestPractices#readme",
+  "devDependencies": {
+    "aws-sdk": "^2.1002.0",
+    "eslint": "^7.32.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-plugin-import": "^2.24.2"
+  }
+}

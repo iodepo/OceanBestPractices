@@ -10,5 +10,8 @@ ingest/scheduler/*.zip
 # Ignore private keys.
 keys/
 
-# Ignore node_modules
+# Package directories
 node_modules
+
+# Serverless directories
+.serverless
