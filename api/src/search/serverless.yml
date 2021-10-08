@@ -1,0 +1,80 @@
+service: obp-api-search
+
+frameworkVersion: '2'
+
+# Enables variable references including `ssm`.
+variablesResolutionMode: 20210326
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  stage: dev
+  region: us-east-1
+  timeout: 300
+  # iam: # TODO
+  environment:
+    ELASTIC_SEARCH_HOST: ${env:ELASTIC_SEARCH_HOST, ''}
+    ONTOLOGY_STORE_HOST: ${env:ONTOLOGY_STORE_HOST, ''}
+    ONTOLOGY_STORE_PORT: ${env:ONTOLOGY_STORE_PORT, 8890}
+    REGION: ${self:provider.region}
+    STAGE: ${opt:stage, 'dev'}
+
+custom:
+  documentation:
+    api:
+      info:
+        title: "OceanBestPractices Search API"
+        description: >
+          Provides an API for searching the OceanBestPractices document repository.
+
+functions:
+  documentPreview:
+    handler: preview.handler
+    events:
+      - http:
+         method: get
+         path: documents/preview
+         cors: true
+         documentation:
+          summary: Preview document tagging results.
+          description: >
+            Returns the results of our ontology term tagging
+            routine against the provided document body and title.
+          requestBody:
+            description: >
+              The document body and title used in our tagging routine.
+          requestModels:
+            "application/json": "DocumentPreviewRequest"
+          methodResponses:
+
+  searchAutocomplete:
+    handler: autocomplete.handler
+    events:
+      - http:
+          method: get
+          path: documents/autocomplete
+          cors: true
+  searchByKeywords:
+    handler: search.handler
+    events:
+      - http:
+          method: get
+          path: documents
+          cors: true
+  statistics:
+    handler: statistics.handler
+    events:
+      - http:
+          method: get
+          path: statistics
+          cors: true
+  termsGraph:
+    handler: terms-graph.handler
+    events:
+      - http:
+          method: get
+          path: terms/graph
+          cors: true
+
+plugins:
+  - serverless-aws-documentation
