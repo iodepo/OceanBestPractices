@@ -258,7 +258,7 @@ class PanelRelationships extends Component {
     } else if (this.props.relationshipsReducer.isLoading) {
       relationshipsList = <div>
         <header className="search-sidebar__header">
-          <span className="search-sidebar__memo"><i class="fa fa-spinner loading-spinner"></i></span>
+          <span className="search-sidebar__memo"><i className="fa fa-spinner loading-spinner"></i></span>
           <Superlink event_category="results" event_action="link | tags" event_label="Return to Tags">
             <button className="search-sidebar__back-button" onClick={() => this.onBackClick()}>
               <i className="fa fa-chevron-left" aria-hidden="true" /> Return to Tags
