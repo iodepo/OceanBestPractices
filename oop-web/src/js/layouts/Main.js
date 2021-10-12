@@ -2,7 +2,6 @@ import React, { Component } from "react";
 import { connect } from 'react-redux';
 
 import Wrapper from './Wrapper';
-import HeaderBanner from '../components/HeaderBanner';
 import SearchBar from '../components/SearchBar';
 import SearchTipsModal from '../components/SearchTipsModal';
 import FullScreenModal from '../components/FullScreenModal';
@@ -60,8 +59,6 @@ class Main extends Component {
         <Wrapper header={false} page="landing" childrenContainerClass="landing">
           <section className='landing__header'>
 
-            <HeaderBanner />
-
             <div className='link-list--landing'>
 
               <ul className="link-list link-list--horizontal">
@@ -90,7 +87,7 @@ class Main extends Component {
                     Go to Submission Site
                   </Superlink>
                   <Superlink class_name="link-list__link" to="/tagger" event_category="header" event_action="link" event_label="Ocean Knowledge Tagger">
-                    OceanKnowledge Tagger (Beta)
+                    OceanKnowledge Tagger
                   </Superlink>
                 </LinkListItemToggle>
               </span>
