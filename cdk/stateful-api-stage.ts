@@ -11,6 +11,9 @@ export default class StatefulApiStage extends Stage {
 
     super(scope, id, superProps);
 
-    new StatefulApiStack(this, 'StatefulApiStack', { stage });
+    new StatefulApiStack(this, 'StatefulApiStack', {
+      stage,
+      description: `Stateful API stack for the "${stage}" stage`
+    });
   }
 }
