@@ -1,4 +1,4 @@
-import { constructQuery } from '../helpers/query';
+import { constructQuery } from './query';
 
 export const baseAPIURL = process.env.REACT_APP_API_ENDPOINT;
 export const defaultQuerySize = 50;

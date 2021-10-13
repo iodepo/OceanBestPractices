@@ -10,8 +10,8 @@ import {
   SEARCH_CLEAR_FILTERS,
 } from '../types/search';
 
-import { resetTerms } from '../actions/terms';
-import { resetRelationships } from '../actions/relationships'
+import { resetTerms } from './terms';
+import { resetRelationships } from './relationships'
 
 import delayPromise from '../helpers/delayPromise';
 import convertFiltersToString from '../helpers/convertFiltersToString';

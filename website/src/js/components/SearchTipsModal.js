@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import YouTube from 'react-youtube';
-import FullScreenModal from '../components/FullScreenModal';
-import SearchTipsModalItem from '../components/SearchTipsModalItem';
+import FullScreenModal from './FullScreenModal';
+import SearchTipsModalItem from './SearchTipsModalItem';
 
 import MetadataFilters from '../../images/SearchTips/MetadataFilter.png';
 import AdvancedSearch from '../../images/SearchTips/AdvancedFilter.png';

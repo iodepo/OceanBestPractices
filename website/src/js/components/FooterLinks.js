@@ -1,9 +1,9 @@
 import React, { Component } from "react";
 
 import LinkListItem from './LinkListItem';
-import LinkListItemToggle from '../components/LinkListItemToggle';
-import FullScreenModal from '../components/FullScreenModal';
-import Superlink from '../components/Superlink';
+import LinkListItemToggle from './LinkListItemToggle';
+import FullScreenModal from './FullScreenModal';
+import Superlink from './Superlink';
 
 const footer_links = [
   {

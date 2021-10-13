@@ -2,8 +2,8 @@ import React, { Component } from "react";
 import logo from '../../images/iode-logo-footer.png';
 import FullScreenModal from './FullScreenModal';
 import PoweredByE84 from '../../images/PoweredByE84.svg';
-import FooterLinks from '../components/FooterLinks';
-import Superlink from '../components/Superlink';
+import FooterLinks from './FooterLinks';
+import Superlink from './Superlink';
 
 class Footer extends Component {
 

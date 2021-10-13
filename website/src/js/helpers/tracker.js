@@ -1,7 +1,7 @@
-import { activeQueryOperatorsString } from '../helpers/query';
-import { activeFieldsString } from '../helpers/fields';
-import { activeTagsString } from '../helpers/tags';
-import { optionIsActiveById } from '../helpers/options';
+import { activeQueryOperatorsString } from './query';
+import { activeFieldsString } from './fields';
+import { activeTagsString } from './tags';
+import { optionIsActiveById } from './options';
 
 /**
  * customDimensionsFromState
