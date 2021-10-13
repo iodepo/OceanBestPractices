@@ -21,7 +21,6 @@
     "@aws-cdk/aws-elasticsearch": "^1.127.0",
     "@aws-cdk/aws-events-targets": "^1.127.0",
     "@aws-cdk/aws-lambda": "^1.127.0",
-    "@aws-cdk/aws-opensearchservice": "^1.127.0",
     "@aws-cdk/aws-s3": "^1.127.0",
     "@aws-cdk/aws-s3-deployment": "^1.127.0",
     "@aws-cdk/aws-s3-notifications": "^1.127.0",
