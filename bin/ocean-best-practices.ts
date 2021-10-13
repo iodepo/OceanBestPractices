@@ -7,7 +7,8 @@ import StatefulApiPipelineStack from '../cdk/stateful-api-pipeline-stack';
 const app = new cdk.App();
 
 new StatefulApiPipelineStack(app, 'StatefulApiPipelineStack', {
-  env: { region: 'us-east-2' }
+  env: { region: 'us-east-1' },
+  description: 'Pipeline for managing deployments of the stateful api stack'
 });
 
 app.synth();
