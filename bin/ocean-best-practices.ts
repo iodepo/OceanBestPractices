@@ -14,7 +14,8 @@ new StatefulApiPipelineStack(app, 'StatefulApiPipelineStack', {
 
 new StatefulApiStage(app, 'MarcStatefulApiStage', {
   env: { region: 'us-east-1' },
-  stage: 'marc'
+  stage: 'marc',
+  terminationProtection: false
 });
 
 app.synth();

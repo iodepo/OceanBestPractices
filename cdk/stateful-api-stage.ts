@@ -3,15 +3,21 @@ import StatefulApiStack from "./stateful-api-stack";
 
 interface StatefulApiStageProps extends StageProps {
   stage: string
+  terminationProtection?: boolean
 }
 
 export default class StatefulApiStage extends Stage {
   constructor(scope: Construct, id: string, props: StatefulApiStageProps) {
-    const { stage, ...superProps } = props;
+    const {
+      stage,
+      terminationProtection = true,
+      ...superProps
+    } = props;
 
     super(scope, id, superProps);
 
     new StatefulApiStack(this, 'StatefulApiStack', {
+      terminationProtection,
       stage,
       description: `Stateful API stack for the "${stage}" stage`
     });

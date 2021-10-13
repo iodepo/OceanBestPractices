@@ -19,7 +19,8 @@ export default class StatefulApiPipelineStack extends Stack {
 
     pipeline.addStage(new StatefulApiStage(this, 'Development', {
       env: { region: 'us-east-1' },
-      stage: 'development'
+      stage: 'development',
+      terminationProtection: false
     }));
 
     pipeline.addStage(
