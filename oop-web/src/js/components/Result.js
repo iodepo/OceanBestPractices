@@ -76,7 +76,7 @@ class Result extends Component {
 
     var authorList = null;
     if (this.props.author) {
-      authorList = Array.isArray(this.props.author) ? this.props.author.join(", ") : [this.props.author].join(", ")
+      authorList = Array.isArray(this.props.author) ? this.props.author.join("; ") : [this.props.author].join(", ")
     }
 
     let result_title;
