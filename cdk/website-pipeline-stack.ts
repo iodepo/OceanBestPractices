@@ -6,7 +6,10 @@ import WebsiteStage from "./website-stage";
 
 export default class WebsitePipelineStack extends Stack {
   constructor(scope: Construct, id: string, props: StackProps = {}) {
-    super(scope, id, props);
+    super(scope, id, {
+      description: 'Pipeline for managing deployments of the website stack',
+      ...props
+    });
 
     const pipeline = new CodePipeline(this, 'Pipeline', {
       synth: new ShellStep('Synth', {

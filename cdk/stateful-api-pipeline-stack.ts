@@ -3,10 +3,17 @@ import { Construct } from "constructs";
 import { CodePipeline, CodePipelineSource, ManualApprovalStep, ShellStep } from '@aws-cdk/pipelines';
 import { GitHubTrigger } from "@aws-cdk/aws-codepipeline-actions";
 import StatefulApiStage from "./stateful-api-stage";
+import { IDomain } from "@aws-cdk/aws-elasticsearch";
 
 export default class StatefulApiPipelineStack extends Stack {
+  public readonly developmentElasticsearchDomain: IDomain;
+  public readonly stagingElasticsearchDomain: IDomain;
+
   constructor(scope: Construct, id: string, props: StackProps = {}) {
-    super(scope, id, props);
+    super(scope, id, {
+      description: 'Pipeline for managing deployments of the stateful api stack',
+      ...props
+    });
 
     const pipeline = new CodePipeline(this, 'Pipeline', {
       synth: new ShellStep('Synth', {
@@ -17,22 +24,27 @@ export default class StatefulApiPipelineStack extends Stack {
       })
     });
 
-    pipeline.addStage(new StatefulApiStage(this, 'Development', {
+    const developmentStage = new StatefulApiStage(this, 'Development', {
       env: { region: 'us-east-1' },
       stage: 'development',
       terminationProtection: false
-    }));
+    });
 
-    pipeline.addStage(
-      new StatefulApiStage(this, 'Staging', {
-        env: { region: 'us-east-1' },
-        stage: 'staging'
-      }),
-      {
-        pre: [
-          new ManualApprovalStep('PromoteToStaging', { comment: 'Promote to staging' }),
-        ]
-      }
-    );
+    this.developmentElasticsearchDomain = developmentStage.elasticsearchDomain;
+
+    pipeline.addStage(developmentStage);
+
+    const stagingStage = new StatefulApiStage(this, 'Staging', {
+      env: { region: 'us-east-1' },
+      stage: 'staging'
+    });
+
+    this.stagingElasticsearchDomain = stagingStage.elasticsearchDomain;
+
+    pipeline.addStage(stagingStage, {
+      pre: [
+        new ManualApprovalStep('PromoteToStaging', { comment: 'Promote to staging' }),
+      ]
+    });
   }
 }

@@ -1,3 +1,4 @@
+import { IDomain } from "@aws-cdk/aws-elasticsearch";
 import { Construct, Stage, StageProps } from "@aws-cdk/core";
 import StatefulApiStack from "./stateful-api-stack";
 
@@ -7,6 +8,8 @@ interface StatefulApiStageProps extends StageProps {
 }
 
 export default class StatefulApiStage extends Stage {
+  public readonly elasticsearchDomain: IDomain;
+
   constructor(scope: Construct, id: string, props: StatefulApiStageProps) {
     const {
       stage,
@@ -16,10 +19,11 @@ export default class StatefulApiStage extends Stage {
 
     super(scope, id, superProps);
 
-    new StatefulApiStack(this, 'StatefulApiStack', {
+    const statefulApiStack = new StatefulApiStack(this, 'StatefulApiStack', {
       terminationProtection,
-      stage,
-      description: `Stateful API stack for the "${stage}" stage`
+      stage
     });
+
+    this.elasticsearchDomain = statefulApiStack.elasticsearchDomain;
   }
 }
