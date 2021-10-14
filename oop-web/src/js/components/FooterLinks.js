@@ -40,7 +40,7 @@ class FooterLinks extends Component {
         <ul className="link-list link-list--horizontal">
           { footer_links.map((link, index) => <LinkListItem className={`${link.class}`} key={`footer-link-${index}-${link.title}`} location="footer" {...link} />) }
           <LinkListItemToggle flipArrow="true" toggleButtonClass="link-list__item" toggleModalClass="link__list-toggle up" label="Submit Best Practice">
-            <li>Submit a new best practice</li>
+            <div>Submit a new best practice</div>
             <FullScreenModal smallModal="true" modalCTA="Get Templates" modalTitle="Best Practices Document Templates" location="home" modalClass="link-list">
               <div className="link__list-toggle-modal">
                 <p>Select the template that best matches your document type.</p>

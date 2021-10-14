@@ -15,7 +15,7 @@ import Superlink from './Superlink';
 
 class SearchResults extends Component {
 
-  componentWillMount() {
+  componentDidMount() {
 
     // This will catch the case in which we have arrived on this page without using the search input on /search.
     // This only happens when the user is moving over from the landing page
