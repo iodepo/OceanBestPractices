@@ -1,5 +1,5 @@
 {
-  "app": "npx ts-node --prefer-ts-exts bin/ocean-best-practices.ts",
+  "app": "npx ts-node --prefer-ts-exts bin/deploy.ts",
   "requireApproval": "never",
   "context": {
     "@aws-cdk/aws-apigateway:usagePlanKeyOrderInsensitiveId": true,

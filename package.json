@@ -7,9 +7,7 @@
     "ocean-best-practices": "bin/ocean-best-practices.js"
   },
   "scripts": {
-    "build": "tsc",
-    "watch": "tsc -w",
-    "test": "jest",
+    "build": "true",
     "cdk": "cdk"
   },
   "devDependencies": {
@@ -27,13 +25,10 @@
     "@aws-cdk/aws-sns-subscriptions": "^1.127.0",
     "@aws-cdk/core": "1.127.0",
     "@aws-cdk/pipelines": "^1.127.0",
-    "@types/jest": "^26.0.10",
     "@types/node": "^12.0.0",
     "aws-cdk": "1.127.0",
     "bufferutil": "^4.0.1",
-    "jest": "^27.2.5",
     "source-map-support": "^0.5.16",
-    "ts-jest": "^27.0.5",
     "ts-node": "^9.0.0",
     "typescript": "^4.4.3",
     "utf-8-validate": "^5.0.2"
