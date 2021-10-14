@@ -16,7 +16,7 @@ class SearchSidebar extends Component {
   }
 
   static getDerivedStateFromProps(props, prevState) {
-    if (props.termsReducer.activeTerms.title !== prevState.termsReducer?.activeTerms.title) {
+    if (prevState.termsReducer && props.termsReducer.activeTerms.title !== prevState.termsReducer.activeTerms.title) {
       return ({ activeTags: props.termsReducer.activeTerms.title })
     }
     return null
