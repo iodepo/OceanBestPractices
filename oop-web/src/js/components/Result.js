@@ -44,8 +44,8 @@ class Result extends Component {
   componentListFromStrings(string_list) {
     if ( !Array.isArray(string_list) ) return [];
 
-    return string_list.map(string => {
-      return <span dangerouslySetInnerHTML={{__html: string}} />
+    return string_list.map((string, i) => {
+      return <span dangerouslySetInnerHTML={{__html: string}} key={string + i}/>
     });
   }
 
@@ -137,9 +137,9 @@ class Result extends Component {
                 : null
               }
               {
-                 authorList
-                 ? <span className="result__author">{ this.props.journal_title ? ", " + authorList : authorList }</span>
-                 : null
+                authorList
+                ? <span className="result__author">{ this.props.journal_title ? ", " + authorList : authorList }</span>
+                : null
               }
             </div>
             <div className="result__highlight"> { this.componentListFromStrings(this.props.highlight) } </div>
