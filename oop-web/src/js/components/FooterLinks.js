@@ -59,7 +59,7 @@ class FooterLinks extends Component {
               Go to Submission Site
             </Superlink>
             <Superlink class_name="link-list__link" to="/tagger" event_category="footer" event_action="link" event_label="Ocean Knowledge Tagger">
-              OceanKnowledge Tagger (Beta)
+              OceanKnowledge Tagger
             </Superlink>
           </LinkListItemToggle>
         </ul>
