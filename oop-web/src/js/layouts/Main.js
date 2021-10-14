@@ -36,7 +36,7 @@ const navigation_links = [
 
 class Main extends Component {
 
-  componentWillMount() {
+  componentDidMount() {
 
     this.props.dispatch(getStats());
 
