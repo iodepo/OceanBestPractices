@@ -12,6 +12,7 @@ export default class PipelineStack extends Stack {
     });
 
     const pipeline = new CodePipeline(this, 'Pipeline', {
+      pipelineName: 'OBP-Deployments',
       synth: new ShellStep('Synth', {
         input: CodePipelineSource.gitHub('iodepo/OceanBestPractices', 'cdk-pipeline-deployments', {
           trigger: GitHubTrigger.POLL
