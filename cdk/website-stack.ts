@@ -11,8 +11,7 @@ interface WebsiteStackProps extends StackProps {
   sslConfig?: {
     certificate: Certificate
     domainNames: [string, ...string[]]
-  },
-  websiteIndexDocument?: string
+  }
 }
 
 export default class WebsiteStack extends Stack {
@@ -20,15 +19,19 @@ export default class WebsiteStack extends Stack {
     const {
       sslConfig,
       stage,
-      websiteIndexDocument = 'index.html',
       ...superProps
     } = props;
 
-    super(scope, id, superProps);
+    const indexDocument = 'index.html';
+
+    super(scope, id, {
+      description: `Website stack for the "${stage}" stage`,
+      ...superProps
+    });
 
     const websiteBucket = new Bucket(this, 'WebsiteBucket', {
       bucketName: `obp-cdk-website-${stage}`,
-      websiteIndexDocument
+      websiteIndexDocument: indexDocument
     });
 
     new BucketDeployment(this, 'WebsiteContent', {
@@ -48,7 +51,7 @@ export default class WebsiteStack extends Stack {
     new cloudfront.Distribution(this, 'Distribution', {
       ...sslOptions,
       comment: `Ocean Best Practices website - ${stage}`,
-      defaultRootObject: websiteIndexDocument,
+      defaultRootObject: indexDocument,
       httpVersion: cloudfront.HttpVersion.HTTP2,
       errorResponses: [
         {

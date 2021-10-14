@@ -6,7 +6,6 @@ import { Function } from "@aws-cdk/aws-lambda";
 interface StatelessApiStackProps extends StackProps {
   elasticsearchDomain: IDomain
   stage: string
-  textExtractorFunctionName: string
 }
 
 export default class StatelessApiStack extends Stack {
@@ -14,7 +13,6 @@ export default class StatelessApiStack extends Stack {
     const {
       elasticsearchDomain,
       stage,
-      textExtractorFunctionName,
       ...superProps
     } = props;
 
@@ -26,7 +24,7 @@ export default class StatelessApiStack extends Stack {
     const textExtractorFunction = Function.fromFunctionArn(
       this,
       'TextExtractor',
-      `arn:aws:lambda:${this.region}:${this.account}:function:${textExtractorFunctionName}`
+      `arn:aws:lambda:${this.region}:${this.account}:function:'textractor_simple'`
     );
 
     new Ingest(this, 'Ingest', {

@@ -13,6 +13,7 @@ export default class StatefulApiStack extends Stack {
 
     super(scope, id, {
       description: `Stateful API stack for the "${stage}" stage`,
+      terminationProtection: true,
       ...superProps
     });
 
