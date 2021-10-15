@@ -2,16 +2,17 @@ import { Construct, Stack, StackProps } from "@aws-cdk/core";
 import { IDomain } from '@aws-cdk/aws-elasticsearch';
 import Ingest from "./ingest";
 import { Function } from "@aws-cdk/aws-lambda";
+import Api from "./api";
 
 interface StatelessApiStackProps extends StackProps {
-  elasticsearchDomain: IDomain
+  elasticsearch: IDomain
   stage: string
 }
 
 export default class StatelessApiStack extends Stack {
   constructor(scope: Construct, id: string, props: StatelessApiStackProps) {
     const {
-      elasticsearchDomain,
+      elasticsearch,
       stage,
       ...superProps
     } = props;
@@ -28,9 +29,19 @@ export default class StatelessApiStack extends Stack {
     );
 
     new Ingest(this, 'Ingest', {
-      elasticsearchDomain,
+      elasticsearchDomain: elasticsearch,
       stage,
       textExtractorFunction
+    });
+
+    if (this.region === undefined) {
+      throw new Error('Expected a region to be set');
+    }
+
+    new Api(this, 'Api', {
+      stage,
+      region: this.region,
+      elasticsearch
     });
   }
 }

@@ -26,11 +26,6 @@ export default class PipelineStack extends Stack {
       })
     });
 
-    pipeline.addStage(new ObpStage(this, 'Development', {
-      env: { region: 'us-east-1' },
-      stage: 'development'
-    }));
-
     pipeline.addStage(
       new ObpStage(this, 'Staging', {
         env: { region: 'us-east-1' },
@@ -41,6 +36,21 @@ export default class PipelineStack extends Stack {
           new ManualApprovalStep(
             'PromoteToStaging',
             { comment: 'Promote to staging' }
+          ),
+        ]
+      }
+    );
+
+    pipeline.addStage(
+      new ObpStage(this, 'Production', {
+        env: { region: 'us-east-1' },
+        stage: 'prod'
+      }),
+      {
+        pre: [
+          new ManualApprovalStep(
+            'PromoteToProduction',
+            { comment: 'Promote to production' }
           ),
         ]
       }

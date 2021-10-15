@@ -22,7 +22,7 @@ export default class Ingest extends Construct {
     super(scope, id);
 
     const {
-      elasticsearchDomain: opensearchDomain,
+      elasticsearchDomain,
       scheduleInterval = 300,
       stage,
       textExtractorFunction
@@ -32,39 +32,39 @@ export default class Ingest extends Construct {
 
     const snsTopics = new IngestSnsTopics(this, 'SnsTopics', { stage });
 
-    // const lambdas = new IngestLambdas(this, 'Lambdas', {
-    //   buckets,
-    //   opensearchDomain,
-    //   scheduleInterval,
-    //   snsTopics,
-    //   stage,
-    //   textExtractorFunction
-    // });
+    const lambdas = new IngestLambdas(this, 'Lambdas', {
+      buckets,
+      elasticsearchDomain,
+      scheduleInterval,
+      snsTopics,
+      stage,
+      textExtractorFunction
+    });
 
-    // // Invoke the scheduler function every 5 minutes
-    // new events.Rule(this, 'SchedulerEventRule', {
-    //   schedule: events.Schedule.rate(Duration.minutes(5)),
-    //   targets: [new eventTargets.LambdaFunction(lambdas.scheduler)]
-    // })
-    // // Writes events to the "available document" topic
+    // Invoke the scheduler function every 5 minutes
+    new events.Rule(this, 'SchedulerEventRule', {
+      schedule: events.Schedule.rate(Duration.minutes(5)),
+      targets: [new eventTargets.LambdaFunction(lambdas.scheduler)]
+    })
+    // Writes events to the "available document" topic
 
-    // // "metadata downloader" lambda is triggered by the "available document" topic
-    // snsTopics.availableDocument.addSubscription(new LambdaSubscription(lambdas.metadataDownloader));
-    // // "metadata downloader" lambda writes to the "document metadata" bucket
+    // "metadata downloader" lambda is triggered by the "available document" topic
+    snsTopics.availableDocument.addSubscription(new LambdaSubscription(lambdas.metadataDownloader));
+    // "metadata downloader" lambda writes to the "document metadata" bucket
 
-    // // The "bitstreams downloader" lambda is triggered when an object is created in the "document metadata" bucket
-    // buckets.documentMetadata.addObjectCreatedNotification(new LambdaDestination(lambdas.bitstreamsDownloader));
-    // // The "bitstreams downloader" lambda writes an object to the "document source" bucket
+    // The "bitstreams downloader" lambda is triggered when an object is created in the "document metadata" bucket
+    buckets.documentMetadata.addObjectCreatedNotification(new LambdaDestination(lambdas.bitstreamsDownloader));
+    // The "bitstreams downloader" lambda writes an object to the "document source" bucket
 
-    // // The "invoke extractor" lambda is triggered when an object is created in the "document source" bucket
-    // buckets.documentSource.addObjectCreatedNotification(new LambdaDestination(lambdas.invokeExtractor));
+    // The "invoke extractor" lambda is triggered when an object is created in the "document source" bucket
+    buckets.documentSource.addObjectCreatedNotification(new LambdaDestination(lambdas.invokeExtractor));
 
-    // // TODO Extractor
+    // TODO Extractor
 
-    // buckets.textExtractorDestination.addObjectCreatedNotification(new SnsDestination(snsTopics.textExtractor));
-    // // An event is published to the "text extractor" topic when an object is created in the "text extractor destination" bucket
+    buckets.textExtractorDestination.addObjectCreatedNotification(new SnsDestination(snsTopics.textExtractor));
+    // An event is published to the "text extractor" topic when an object is created in the "text extractor destination" bucket
 
-    // // The "indexer" lambda is triggered by the "text extractor" topic
-    // snsTopics.textExtractor.addSubscription(new LambdaSubscription(lambdas.indexer));
+    // The "indexer" lambda is triggered by the "text extractor" topic
+    snsTopics.textExtractor.addSubscription(new LambdaSubscription(lambdas.indexer));
   }
 }

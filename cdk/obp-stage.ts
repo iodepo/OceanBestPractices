@@ -21,7 +21,7 @@ export default class ObpStage extends Stage {
     });
 
     new StatelessApiStack(this, 'StatelessApiStack', {
-      elasticsearchDomain: statefulApiStack.elasticsearchDomain,
+      elasticsearch: statefulApiStack.elasticsearchDomain,
       stage
     });
 
