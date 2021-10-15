@@ -15,10 +15,11 @@ class SearchSidebar extends Component {
     }
   }
 
-  componentWillReceiveProps(props) {
-    this.setState({
-      activeTags: props.termsReducer.activeTerms.title
-    });
+  static getDerivedStateFromProps(props, prevState) {
+    if (prevState.termsReducer && props.termsReducer.activeTerms.title !== prevState.termsReducer.activeTerms.title) {
+      return ({ activeTags: props.termsReducer.activeTerms.title })
+    }
+    return null
   }
 
   closeSidebar() {

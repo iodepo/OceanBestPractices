@@ -11,13 +11,14 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 3rem 1rem;
+  padding: 4.5rem 1rem;
   width: 100%;
   background: rgba(243, 243, 243, .7);
   border-radius: 1rem;
   
   @media #{$screen-s} {
     width: 80%;
+    padding: 3rem 1rem;
   }
 }
 
@@ -27,10 +28,6 @@
   margin-bottom: 3rem;
   max-width: 575px;
   height: auto;
-
-  @media #{$screen-xs} {
-    margin-left: -5%;
-  }
 
   @media #{$screen-m} {
     width: 556px;

@@ -73,7 +73,7 @@ class Stats extends Component {
     );
     const termDescriptions = (
       terminology_descriptions.map((description, index) =>
-      <div className='terminology-descriptions'>
+      <div className='terminology-descriptions' key={index}>
         <p className='terminology-descriptions__terms'>{description.term}</p>
         <p>{description.description}</p>
       </div>
