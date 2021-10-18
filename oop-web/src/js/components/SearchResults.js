@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import { connect } from 'react-redux';
+import { getLangNameFromCode } from 'language-name-map';
 
 import { getSearch } from '../actions/search';
 import { setOption } from '../actions/options';
@@ -122,7 +123,7 @@ class SearchResults extends Component {
           date={date}
           highlight={highlight}
           id={id}
-          language={language}
+          language={getLangNameFromCode(language).name || language}
           publisher={publisher}
           author={author}
           title={title}
