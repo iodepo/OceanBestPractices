@@ -781,10 +781,16 @@ html {
     text-decoration: none; }
 
 .footer__iode-logo {
-  margin: 0.5rem 0.8rem 0 0; }
+  margin: 1rem 0.8rem 0 0; }
+  @media (min-width: 641px) {
+    .footer__iode-logo {
+      margin-top: 0; } }
 
 .footer__goos-logo {
-  margin: 0.5rem 0 0 0.8rem; }
+  margin: 1rem 0 0 0.8rem; }
+  @media (min-width: 641px) {
+    .footer__goos-logo {
+      margin-top: 0; } }
 
 .footer__link {
   color: #718092;

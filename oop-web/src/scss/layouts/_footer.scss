@@ -162,11 +162,19 @@
 }
 
 .footer__iode-logo {
-  margin: 0.5rem 0.8rem 0 0;
+  margin: 1rem 0.8rem 0 0;
+
+  @media #{$screen-s} {
+    margin-top: 0;
+  }
 }
 
 .footer__goos-logo {
-  margin: 0.5rem 0 0 0.8rem;
+  margin: 1rem 0 0 0.8rem;
+
+  @media #{$screen-s} {
+    margin-top: 0;
+  }
 }
 
 .footer__link {
