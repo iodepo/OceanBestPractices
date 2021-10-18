@@ -780,12 +780,11 @@ html {
     color: #3D4352;
     text-decoration: none; }
 
-.footer__logo {
-  display: block;
-  margin: 0.5rem auto 0; }
-  @media (min-width: 641px) {
-    .footer__logo {
-      margin: 0; } }
+.footer__iode-logo {
+  margin: 0.5rem 0.8rem 0 0; }
+
+.footer__goos-logo {
+  margin: 0.5rem 0 0 0.8rem; }
 
 .footer__link {
   color: #718092;

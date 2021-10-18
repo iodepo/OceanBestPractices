@@ -161,14 +161,12 @@
   
 }
 
-.footer__logo {
+.footer__iode-logo {
+  margin: 0.5rem 0.8rem 0 0;
+}
 
-  display: block;
-  margin: 0.5rem auto 0;
-
-  @media #{$screen-s} {
-    margin: 0;
-  }
+.footer__goos-logo {
+  margin: 0.5rem 0 0 0.8rem;
 }
 
 .footer__link {
