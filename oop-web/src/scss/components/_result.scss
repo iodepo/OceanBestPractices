@@ -1,6 +1,6 @@
 .result {
   padding: 0.825rem 1rem;
-  color: #718092;
+  color: $dark-gray;
   border-bottom: 1px solid #D8D8D8;
   display: flex;
   align-items: center;
@@ -32,14 +32,14 @@
 }
 
 .result__journal-title {
-  color: #7f8b9c;
+  color: $dark-med-gray;
   font-weight: normal;
   font-style: italic;
   font-size: 18px;
 }
 
 .result__author {
-  color: #7f8b9c;
+  color: $dark-med-gray;
   font-weight: bold;
   font-size: 18px;
 }

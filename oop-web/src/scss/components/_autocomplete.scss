@@ -11,12 +11,12 @@
   z-index: -1;
   max-height: 20rem;
   overflow-y: scroll;
-  border: 1px solid #F4F5FA;
+  border: 1px solid $light-gray;
   box-shadow: 0px 2px 2px 0px rgba(0,0,0,0.1);
 }
 
 .autocomplete__item {
-  border-top: 1px solid #F4F5FA;
+  border-top: 1px solid $light-gray;
 }
 
 .autocomplete__item:first-child .autocomplete__button {
@@ -39,5 +39,5 @@
 }
 
 .autocomplete__button:hover {
-  background: #F4F5FA;
+  background: $light-gray;
 }
