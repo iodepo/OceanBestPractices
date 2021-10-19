@@ -118,6 +118,11 @@ class SearchBarTags extends Component {
       <ul className='searchbar__tag-wrapper'>
         { this.createSplitSearchTags(this.props.active_search) }
         { this.createSplitSearchTags(this.filtersToTags(this.props.active_filters)) }
+        {
+          this.props.active_search.length > 0
+          ? <span className='searchbar__tag-message'>All terms listed affect current search. Clear them to start a new search.</span>
+          : null
+        }
       </ul>
     );
   }
