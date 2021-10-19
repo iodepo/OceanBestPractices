@@ -4,18 +4,15 @@
   border-bottom: 1px solid #D8D8D8;
   display: flex;
   align-items: center;
-
 }
 
 .result__info {
-
   word-break: break-word;
   text-align: left;
 
   @media #{$screen-m} {
     width: 100%;
   }
-
 }
 
 .result__title {
@@ -26,7 +23,7 @@
 }
 
 .result__link {
-  color: #2d73b6;;
+  color: #2d73b6;
   text-decoration: none;
   cursor: pointer;
 }
@@ -61,7 +58,7 @@
   }
 
   span:after { 
-    content: '... '
+    content: '... ';
   }
 }
 
@@ -72,7 +69,7 @@
 
 .result__publisher-data {
   font-size: 10px;
-  margin-left:1rem;
+  margin-left: 1rem;
 }
 
 .result__tags {
@@ -103,34 +100,48 @@
   padding: .25rem .5rem;
   background-color: $primary-blue;
   border: none;
-  text-decoration:none;
-  font-size:0.8rem;
+  text-decoration: none;
+  font-size: 0.8rem;
+
   @media #{$screen-s} {
-    padding:.25rem 1rem;
+    padding: .25rem 1rem;
   }
+
   span {
     color: #FFFFFF;
     font-weight: bold;
     padding: 0 3px;
   }
-  &:hover, &:focus{background-color:$primary-blue-dark;color:#fff !important;}
 
-  &.result__button-secondary{
-    background-color:$light-gray;
-    color:$dark-gray;
-    span{color:$dark-gray;}
-    &:hover{background:$light-med-gray;}
-    &.is-active{
-      background:$light-med-gray;
+  &:hover, &:focus {
+    background-color: $primary-blue-dark;
+    color: #fff !important;
+  }
+
+  &.result__button-secondary {
+    background-color: $light-gray;
+    color: $dark-gray;
+
+    span {
+      color: $dark-gray;
+    }
+
+    &:hover {
+      background: $light-med-gray;
+    }
+
+    &.is-active {
+      background: $light-med-gray;
     }
   }
 
-  .result__button-icon i{
-    font-size:0.7rem;
+  .result__button-icon i {
+    font-size: 0.7rem;
+
     @media #{$screen-s} {
-      font-size:0.85rem;
-      margin-left:-5px;
-      margin-right:5px;
+      font-size: 0.85rem;
+      margin-left: -5px;
+      margin-right: 5px;
     }
   }
 }
@@ -145,13 +156,13 @@
     color: #007ABB;
   }
 
-  &:hover, &:focus{
-    background-color:white;
+  &:hover, &:focus {
+    background-color: white;
+
     span {
       color: #007ABB;
     }
   }
-
 }
 
 .tag-button-arrow {
