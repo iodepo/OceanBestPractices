@@ -130,16 +130,14 @@ class Result extends Component {
               }
             </div>
             { result_title }
-            <div className="result__journal_author">
+            <div className="result__author">
               {
-                this.props.journal_title
-                ? <span className="result__journal-title">{this.props.journal_title}</span>
-                : null
+                authorList || null
               }
+            </div>
+            <div className="result__journal-title">
               {
-                authorList
-                ? <span className="result__author">{ this.props.journal_title ? ", " + authorList : authorList }</span>
-                : null
+                this.props.journal_title || null
               }
             </div>
             <div className="result__highlight"> { this.componentListFromStrings(this.props.highlight) } </div>
