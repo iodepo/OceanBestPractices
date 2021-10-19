@@ -1281,7 +1281,8 @@ html {
   color: #7f8b9c;
   font-weight: normal;
   font-style: italic;
-  font-size: 18px; }
+  font-size: 18px;
+  margin-top: 10px; }
 
 .result__author {
   color: #7f8b9c;
@@ -1313,14 +1314,18 @@ html {
 .result__tags {
   margin-top: 15px;
   margin-bottom: 15px;
-  font-size: 14px;
-  font-weight: bold; }
+  font-size: 14px; }
 
 .result__tag {
+  font-weight: bold;
   border-radius: 4px;
   margin-right: 0.5rem;
   padding: 0.4375rem 0.5625rem;
   background-color: #F6F5F5; }
+
+.result__methodology {
+  padding-left: 1rem;
+  font-size: 0.825rem; }
 
 .result__button {
   display: inline;

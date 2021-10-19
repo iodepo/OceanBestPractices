@@ -128,6 +128,11 @@ class Result extends Component {
                 ? <span className="result__tag">{this.props.language}</span>
                 : null
               }
+              {
+                this.props.methodology
+                ? <span className="result__methodology">Methodology: {this.props.methodology}</span>
+                : null
+              }
             </div>
             { result_title }
             <div className="result__author">
