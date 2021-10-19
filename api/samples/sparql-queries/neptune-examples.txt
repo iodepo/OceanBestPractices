@@ -1,0 +1,32 @@
+curl -X POST  -H 'Content-Type: application/json' https://obp-proto-db-1-instance-1.cq9czvpqljls.us-east-1.neptune.amazonaws.com:8182/loader -d '
+{
+"source" : "s3://obp-proto-neptune/L05.rdf",
+"format" : "rdfxml",
+"iamRoleArn" : "arn:aws:iam::063582114381:role/NeptuneLoadFromS3",
+"region": "us-east-1",
+"failOnError" : "FALSE",
+"parallelism" : "MEDIUM",
+"updateSingleCardinalityProperties" : "FALSE",
+"queueRequest" : "TRUE",
+"parserConfiguration" : {
+    "namedGraphUri" : "http://vocab.nerc.ac.uk/collection/L05/current/"
+  }
+}'
+
+curl -G 'https://obp-proto-db-1-instance-1.cq9czvpqljls.us-east-1.neptune.amazonaws.com:8182/loader/569eaa62-e4ef-4d2d-812d-51e24f62d497'
+
+curl -X POST --data-binary 'query=select ?s ?p ?o where {?s ?p ?o} limit 10' https://obp-proto-db-1-instance-1.cq9czvpqljls.us-east-1.neptune.amazonaws.com:8182/sparql
+
+curl -X POST --data-binary 'query=prefix skos: <http://www.w3.org/2004/02/skos/core#> select ?s ?o from <http://vocab.nerc.ac.uk/collection/L05/current/> where { ?s skos:prefLabel ?o} limit 10' https://obp-proto-db-1-instance-1.cq9czvpqljls.us-east-1.neptune.amazonaws.com:8182/sparql
+
+curl -X POST --data-binary 'query=SELECT  DISTINCT ?g WHERE  { GRAPH ?g {?s ?p ?o} } ORDER BY  ?g' https://obp-proto-db-1-instance-1.cq9czvpqljls.us-east-1.neptune.amazonaws.com:8182/sparql
+
+curl -X POST https://obp-proto-db-1-instance-1.cq9czvpqljls.us-east-1.neptune.amazonaws.com:8182/sparql --data-binary "query=prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> prefix owl: <http://www.w3.org/2002/07/owl#> SELECT DISTINCT ?xs WHERE { ?xs rdfs:label ?xl . FILTER (?xl = 'water'^^xsd:string) }"
+
+curl -X POST https://obp-proto-db-1-instance-1.cq9czvpqljls.us-east-1.neptune.amazonaws.com:8182/sparql --data-binary "query=PREFIX dc: <http://purl.org/dc/elements/1.1/> PREFIX skos: <http://www.w3.org/2004/02/skos/core#> PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> SELECT * WHERE { ?s rdf:type skos:Concept . ?s skos:prefLabel ?o . }"
+
+
+
+curl -X POST https://obp-proto-db-1-instance-1.cq9czvpqljls.us-east-1.neptune.amazonaws.com:8182/sparql --data-binary "query=PREFIX dc: <http://purl.org/dc/elements/1.1/> PREFIX skos: <http://www.w3.org/2004/02/skos/core#> PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> SELECT ?narrower ?narrowerLabel ?broader ?broaderLabel ?related ?relatedLabel WHERE { OPTIONAL { <http://vocab.nerc.ac.uk/collection/L05/current/124/> skos:broader ?broader . ?broader skos:prefLabel ?broaderLabel . } OPTIONAL { <http://vocab.nerc.ac.uk/collection/L05/current/124/> skos:narrower ?narrower . ?narrower skos:prefLabel ?narrowerLabel . } OPTIONAL { <http://vocab.nerc.ac.uk/collection/L05/current/124/> skos:related ?related .  ?related skos:prefLabel ?relatedLabel . } }"
+
+WHERE { ?s rdf:type skos:Concept . ?s skos:prefLabel ?label . }

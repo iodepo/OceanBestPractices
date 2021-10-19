@@ -11,5 +11,8 @@ cdk.out
 
 keys/*
 
+# Testing directory.
+/coverage
+
 tmp/
 deployment-config.json

@@ -8,7 +8,7 @@ ingest/indexer/*.zip
 ingest/scheduler/*.zip
 
 # Ignore private keys.
-keys/
+/keys
 
-# Ignore node_modules
+# Package directories.
 node_modules
