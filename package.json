@@ -11,7 +11,7 @@
     "cdk": "cdk",
     "test": "jest",
     "test:watch": "jest --watchAll",
-    "lint": "eslint api/lambdas/** cdk/** ingest/lambdas/**"
+    "lint": "eslint api/lambdas/** ingest/lambdas/**"
   },
   "devDependencies": {
     "@aws-cdk/aws-apigateway": "^1.128.0",
