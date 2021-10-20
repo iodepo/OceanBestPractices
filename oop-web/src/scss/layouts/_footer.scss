@@ -1,9 +1,9 @@
 .footer {
   padding: 0.5rem 1rem;
   text-align: left;
-  background-color: #dcdde1;
+  background-color: $light-med-gray;
   font-weight: bold;
-  color: #718092;
+  color: $dark-gray;
   font-size: 0.7rem;
   align-items:center;
   @media #{$screen-s} {
@@ -175,7 +175,7 @@
 }
 
 .footer__link {
-  color: #718092;
+  color: $dark-gray;
   text-decoration: none;
 
   &:hover {

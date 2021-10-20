@@ -3,8 +3,9 @@ import iodeLogo from '../../images/iode-logo-footer.png';
 import goosLogo from '../../images/goos-logo-footer.png';
 import FullScreenModal from './FullScreenModal';
 import PoweredByE84 from '../../images/PoweredByE84.svg';
-import FooterLinks from '../components/FooterLinks';
-import Superlink from '../components/Superlink';
+import FooterLinks from './FooterLinks';
+import Superlink from './Superlink';
+import Disclaimer from './Disclaimer';
 
 class Footer extends Component {
 
@@ -38,10 +39,7 @@ class Footer extends Component {
         <div className='footer-links'>
             <span>
               <FullScreenModal modalCTA='Disclaimer' modalTitle='Disclaimer' modalClass='footer-modal' location="footer">
-                <div className='disclaimer'>
-                  <strong>Disclaimer:</strong> IODE/IOC does not warrant that the information, documents and materials contained in the OceanBestPractices repository website is complete and correct and shall not be liable whatsoever for any damages incurred as a result of its use.
-                  <br /><br /> <em>Mention of a commercial company or product within this repository content does not constitute an endorsement by IODE/IOC. Use of information from this repository for publicity or advertising purposes concerning proprietary products or the tests of such products is not authorized.</em>
-                </div>
+                <Disclaimer />
               </FullScreenModal>
             </span>
           </div>

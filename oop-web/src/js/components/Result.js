@@ -128,18 +128,21 @@ class Result extends Component {
                 ? <span className="result__tag">{this.props.language}</span>
                 : null
               }
-            </div>
-            { result_title }
-            <div className="result__journal_author">
               {
-                this.props.journal_title
-                ? <span className="result__journal-title">{this.props.journal_title}</span>
+                this.props.methodology
+                ? <span className="result__methodology">Methodology: {this.props.methodology}</span>
                 : null
               }
+            </div>
+            { result_title }
+            <div className="result__author">
               {
-                authorList
-                ? <span className="result__author">{ this.props.journal_title ? ", " + authorList : authorList }</span>
-                : null
+                authorList || null
+              }
+            </div>
+            <div className="result__journal-title">
+              {
+                this.props.journal_title || null
               }
             </div>
             <div className="result__highlight"> { this.componentListFromStrings(this.props.highlight) } </div>
