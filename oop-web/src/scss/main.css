@@ -780,12 +780,17 @@ html {
     color: #3D4352;
     text-decoration: none; }
 
-.footer__logo {
-  display: block;
-  margin: 0.5rem auto 0; }
+.footer__iode-logo {
+  margin: 1rem 0.8rem 0 0; }
   @media (min-width: 641px) {
-    .footer__logo {
-      margin: 0; } }
+    .footer__iode-logo {
+      margin-top: 0; } }
+
+.footer__goos-logo {
+  margin: 1rem 0 0 0.8rem; }
+  @media (min-width: 641px) {
+    .footer__goos-logo {
+      margin-top: 0; } }
 
 .footer__link {
   color: #718092;
