@@ -127,7 +127,7 @@ class SearchResults extends Component {
           date={date}
           highlight={highlight}
           id={id}
-          language={getLangNameFromCode(language).name || language}
+          language={language ? getLangNameFromCode(language).name : null}
           publisher={publisher}
           author={author}
           title={title}
