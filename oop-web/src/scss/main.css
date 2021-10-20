@@ -1281,7 +1281,8 @@ html {
   color: #7f8b9c;
   font-weight: normal;
   font-style: italic;
-  font-size: 18px; }
+  font-size: 18px;
+  margin-top: 10px; }
 
 .result__author {
   color: #7f8b9c;
