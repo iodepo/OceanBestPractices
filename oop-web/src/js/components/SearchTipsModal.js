@@ -32,7 +32,7 @@ class SearchTipsModal extends Component {
             number='8'
             header='Video Tutorial'
           />
-             <YouTube
+            <YouTube
               videoID={youtubeVideoID}
               opts={opts}
             />
@@ -120,7 +120,7 @@ mention the term “ocean” from your results.</p>
                 <img src={LogicalOperators} alt='Logical Operators Screenshot' />
               </div>
           </div>
-         
+
           <div className="row" id="AdvancedSearch">
             <div className="col-8">
               <SearchTipsModalItem
@@ -128,8 +128,8 @@ mention the term “ocean” from your results.</p>
                 header='Advanced search options &amp; filters'
                 content='The “Advanced” dropdown menu on the right of the search bar allows you access additional functions to enhance your search.'
               />
-               <h4>Synonyms</h4>
-               <p>Enabling this feature by toggling the OFF/ON button will allow the system to check if a) your search
+              <h4>Synonyms</h4>
+              <p>Enabling this feature by toggling the OFF/ON button will allow the system to check if a) your search
 term is present in any of the ontologies, thesauri, or vocabularies used to index documents in the
 archive and b) if those ontologies, thesauri, or vocabularies list any exact synonyms for that term. If
 they do, those synonyms will be added to the query to broaden your search.
@@ -139,8 +139,8 @@ mount”. Allowing the system to search for these variants increases the likelih
 relevant results.
 </p>
                 
-               <h4>Refereed</h4>
-               <p>If you would like your search to only return results that have been refereed, you can toggle this option on by clicking the OFF switch to
+              <h4>Refereed</h4>
+              <p>If you would like your search to only return results that have been refereed, you can toggle this option on by clicking the OFF switch to
 ON inside the Advanced dropdown.</p>
             </div>
             <div className="col-4 tip__modal-item-screenshot">
@@ -155,8 +155,8 @@ ON inside the Advanced dropdown.</p>
                 header='Interacting with your search results'
                 content=''
               />
-               <h4>Sorting</h4>
-               <p>The “Sort By” dropdown menu on the right of the results page allows you to select in what order your results will be displayed. By default,
+              <h4>Sorting</h4>
+              <p>The “Sort By” dropdown menu on the right of the results page allows you to select in what order your results will be displayed. By default,
                 results are sorted by relevance, determined by standard metrics based on the number of times your search term or phrase occurs in a
                 target document. Selecting any other sorting rule from the dropdown will resort your results.</p>
                 <h4>Saved Search</h4>
@@ -203,7 +203,7 @@ XML.</p>
                 header='Using tags'
                 content='Based on their textual content, each document in the ocean best practices repository has been "tagged" with terms from controlled vocabularies and/or ontologies. You can see which tags are associated with each document by clicking on "View Tags" in any search result.'
               />
-               <p>The terms or phrases you queried for will be
+              <p>The terms or phrases you queried for will be
                 highlighted across the document and are viewable
                 individually (by using the dropdown menu which lists
                 them) or all together by clicking on “Highlight All
