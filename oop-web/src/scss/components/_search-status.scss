@@ -11,14 +11,15 @@
 }
 
 .search-status__info {
-  max-width: 20em;
+  max-width: 16em;
+  font-size: 1rem;
   text-align: center;
 }
 
 .search-status__icon {
   margin-bottom: 1rem;
   display: block;
-  color: #bbb;
+  color: $med-gray;
   font-size: 2em;
   &.fa-spinner{
     animation: spin infinite 2s linear;
@@ -27,5 +28,5 @@
 
 .search-status__text {
   font-size: 0.825em;
-  color: #bbb;
+  color: $med-gray;
 }
