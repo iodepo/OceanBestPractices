@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import { connect } from 'react-redux';
+import { getLangNameFromCode } from 'language-name-map';
 
 import { getSearch } from '../actions/search';
 import { setOption } from '../actions/options';
@@ -57,6 +58,9 @@ class SearchResults extends Component {
         refereed: result._source.refereed,
         journal_title: result._source.journal_title,
         citation: result._source.citation,
+        methodology: Array.isArray(result._source.bptype)
+          ? result._source.bptype.join(', ')
+          : result._source.bptype,
         uuid: result._source.uuid,
         sourceKey: result._source.sourceKey
       }
@@ -113,6 +117,7 @@ class SearchResults extends Component {
           refereed,
           journal_title,
           citation,
+          methodology,
           uuid,
           sourceKey
         } = result;
@@ -122,7 +127,7 @@ class SearchResults extends Component {
           date={date}
           highlight={highlight}
           id={id}
-          language={language}
+          language={getLangNameFromCode(language).name || language}
           publisher={publisher}
           author={author}
           title={title}
@@ -134,6 +139,7 @@ class SearchResults extends Component {
           refereed={refereed}
           journal_title={journal_title}
           citation={citation}
+          methodology={methodology}
           uuid={uuid}
           sourceKey={sourceKey}
         />

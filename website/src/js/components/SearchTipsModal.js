@@ -79,7 +79,7 @@ bar to refine your search. You can change how new terms or phrases relate to you
               <SearchTipsModalItem
                 number='2'
                 header='Searching by metadata field'
-                content='You can restrict your search to a single metadata field – such as the Title, Author, or Publisher of a document - by using the dropdown
+                content='You can restrict your search to a single metadata field – such as the Title, Author, or Issuing Agency of a document - by using the dropdown
                 menu to the left of the search bar.'
               />
                 <p>You can also restrict your search to the body of documents in the archive, ignoring the content

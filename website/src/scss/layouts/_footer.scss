@@ -1,9 +1,9 @@
 .footer {
   padding: 0.5rem 1rem;
   text-align: left;
-  background-color: #dcdde1;
+  background-color: $light-med-gray;
   font-weight: bold;
-  color: #718092;
+  color: $dark-gray;
   font-size: 0.7rem;
   align-items:center;
   @media #{$screen-s} {
@@ -12,7 +12,6 @@
 }
 
 .footer__info {
-
   text-align: center;
   margin-bottom:1rem;
   @media #{$screen-s} {
@@ -135,7 +134,6 @@
 .footer__legal {
   text-align: center;
   display: block;
-
   
   @media #{$screen-s} {
     line-height: 1.5rem;
@@ -145,7 +143,6 @@
 }
 
 .footer-modal__label {
-  
   padding: 0 .5rem;
   color: #292929;
   font-size: .9rem;
@@ -161,19 +158,24 @@
   
 }
 
-.footer__logo {
-
-  display: block;
-  margin: 0.5rem auto 0;
+.footer__iode-logo {
+  margin: 1rem 0.8rem 0 0;
 
   @media #{$screen-s} {
-    margin: 0;
+    margin-top: 0;
+  }
+}
+
+.footer__goos-logo {
+  margin: 1rem 0 0 0.8rem;
+
+  @media #{$screen-s} {
+    margin-top: 0;
   }
 }
 
 .footer__link {
-
-  color: #718092;
+  color: $dark-gray;
   text-decoration: none;
 
   &:hover {

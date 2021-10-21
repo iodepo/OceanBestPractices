@@ -64,7 +64,7 @@ const initialState = [
     active_search: false,
   },
   {
-    title: 'Publisher',
+    title: 'Issuing Agency',
     id: 'publisher',
     value: [
       'publisher',

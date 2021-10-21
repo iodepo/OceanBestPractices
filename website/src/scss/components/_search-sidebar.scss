@@ -2,8 +2,8 @@
   bottom:0;
   left:0;
   width: 100%;
-  background: #F4F5FA;
-  color: #6D7B90;
+  background: $light-gray;
+  color: $dark-med-gray;
   transition:all 0.3s;
   height:0;
   &.active{
@@ -106,7 +106,7 @@
 }
 
 .search-sidebar__tab--active {
-  background: #F4F5FA;
+  background: $light-gray;
   color: #7A8AA3;
 }
 
@@ -155,7 +155,7 @@
 
 .search-sidebar__message {
   font-size: 0.825rem;
-  opacity: .7;
+  opacity: .9;
 }
 
 .search-sidebar__term-list {
