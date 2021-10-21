@@ -20,6 +20,7 @@ import { Distribution } from '@aws-cdk/aws-cloudfront';
 interface WebsiteStackProps extends StackProps {
   stage: string
   domainNames?: [string, ...string[]]
+  disableWebsiteCache?: boolean
 }
 
 export default class WebsiteStack extends Stack {
@@ -29,6 +30,7 @@ export default class WebsiteStack extends Stack {
     const {
       domainNames,
       stage,
+      disableWebsiteCache,
       ...superProps
     } = props;
 
@@ -57,6 +59,14 @@ export default class WebsiteStack extends Stack {
       };
     }
 
+    const cachePolicy = disableWebsiteCache
+      ? CachePolicy.CACHING_DISABLED
+      : new CachePolicy(this, 'DefaultCachePolicy', {
+          cookieBehavior: CacheCookieBehavior.all(),
+          queryStringBehavior: CacheQueryStringBehavior.all()
+        });
+
+
     this.cloudfrontDistribution = new Distribution(this, 'Distribution', {
       ...sslOptions,
       comment: `Ocean Best Practices website - ${stage}`,
@@ -74,17 +84,14 @@ export default class WebsiteStack extends Stack {
         origin: new S3Origin(websiteBucket),
         viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
         allowedMethods: AllowedMethods.ALLOW_GET_HEAD,
-        cachePolicy: new CachePolicy(this, 'DefaultCachePolicy', {
-          cookieBehavior: CacheCookieBehavior.all(),
-          queryStringBehavior: CacheQueryStringBehavior.all()
-        })
+        cachePolicy
       },
     });
 
     new BucketDeployment(this, 'WebsiteContent', {
       destinationBucket: websiteBucket,
       sources: [Source.asset(path.join(__dirname, '..', 'website', 'build'))],
-      distribution: this.cloudfrontDistribution
+      distribution: disableWebsiteCache ? undefined : this.cloudfrontDistribution
     });
   }
 }

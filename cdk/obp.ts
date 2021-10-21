@@ -8,6 +8,7 @@ interface ObpProps {
   stage: string
   esNodeType?: string
   terminationProtection?: boolean
+  disableWebsiteCache?: boolean
 }
 
 export default class Obp extends Construct {
@@ -17,22 +18,24 @@ export default class Obp extends Construct {
     const {
       env,
       stage,
-      esNodeType = 't2.small.elasticsearch',
-      terminationProtection = true
+      disableWebsiteCache,
+      esNodeType,
+      terminationProtection = true,
     } = props;
 
     const statefulApiStack = new StatefulApiStack(this, 'StatefulApiStack', {
       env,
       stage,
       esNodeType,
-      terminationProtection: terminationProtection
+      terminationProtection
     });
     Tags.of(statefulApiStack).add('obp-stage', stage);
 
     const websiteStack = new WebsiteStack(this, `WebsiteStack`, {
       env,
       stage,
-      terminationProtection: terminationProtection
+      disableWebsiteCache,
+      terminationProtection
     });
     Tags.of(websiteStack).add('obp-stage', stage);
 

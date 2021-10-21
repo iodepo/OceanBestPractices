@@ -15,7 +15,8 @@ new Obp(app, 'Dev', {
   env,
   stage: 'dev',
   esNodeType: 't3.small.elasticsearch',
-  terminationProtection: false
+  terminationProtection: false,
+  disableWebsiteCache: true
 });
 
 new Obp(app, 'Staging', { env, stage: 'staging' });
