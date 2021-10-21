@@ -26,7 +26,7 @@ export default class Api extends Construct {
     const documentPreview = new Function(this, 'DocumentPreview', {
       functionName: `${stage}-obp-cdk-api-document-preview`,
       handler: 'document-preview.handler',
-      runtime: Runtime.NODEJS_12_X,
+      runtime: Runtime.NODEJS_14_X,
       code: Code.fromAsset(path.join(lambdasPath, 'document-preview')),
       description: 'Returns the result of running our Ontology term tagging routine against the given document body and title.',
       timeout: Duration.seconds(100),
@@ -39,7 +39,7 @@ export default class Api extends Construct {
     const getStatistics = new Function(this, 'GetStatistics', {
       functionName: `${stage}-obp-cdk-api-get-statistics`,
       handler: 'get-statistics.handler',
-      runtime: Runtime.NODEJS_12_X,
+      runtime: Runtime.NODEJS_14_X,
       code: Code.fromAsset(path.join(lambdasPath, 'get-statistics')),
       description: 'Returns general statistics about the OBP index size and ontology count.',
       environment: {
@@ -53,7 +53,7 @@ export default class Api extends Construct {
     const getTermsGraph = new Function(this, 'GetTermsGraph', {
       functionName: `${stage}-obp-cdk-api-get-terms-graph`,
       handler: 'get-terms-graph.handler',
-      runtime: Runtime.NODEJS_12_X,
+      runtime: Runtime.NODEJS_14_X,
       code: Code.fromAsset(path.join(lambdasPath, 'get-terms-graph')),
       description: 'Queries ontologies for terms related to the given term.',
       timeout: Duration.seconds(100),
@@ -66,7 +66,7 @@ export default class Api extends Construct {
     const searchAutocomplete = new Function(this, 'SearchAutocomplete', {
       functionName: `${stage}-obp-cdk-api-search-autocomplete`,
       handler: 'search-autocomplete.handler',
-      runtime: Runtime.NODEJS_12_X,
+      runtime: Runtime.NODEJS_14_X,
       code: Code.fromAsset(path.join(lambdasPath, 'search-autocomplete')),
       description: 'Returns a subset of ontology terms that complete the given keyword.',
       timeout: Duration.seconds(100),
@@ -79,7 +79,7 @@ export default class Api extends Construct {
     const searchByKeywords = new Function(this, 'SearchByKeywords', {
       functionName: `${stage}-obp-cdk-api-search-by-keywords`,
       handler: 'search-by-keywords.handler',
-      runtime: Runtime.NODEJS_12_X,
+      runtime: Runtime.NODEJS_14_X,
       code: Code.fromAsset(path.join(lambdasPath, 'search-by-keywords')),
       description: 'Searches the OBP index for documents matching the given keywords.',
       timeout: Duration.minutes(5),

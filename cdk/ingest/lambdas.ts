@@ -38,7 +38,7 @@ export default class IngestLambdas extends Construct {
     this.indexer = new Function(this, 'Indexer', {
       functionName: `${stage}-obp-cdk-ingest-indexer`,
       handler: 'indexer.handler',
-      runtime: Runtime.NODEJS_12_X,
+      runtime: Runtime.NODEJS_14_X,
       code: Code.fromAsset(path.join(lambdasPath, 'indexer')),
       description: 'Responsible for percolating (tagging) and indexing document metadata based on a given document UID',
       timeout: Duration.minutes(5),
@@ -55,7 +55,7 @@ export default class IngestLambdas extends Construct {
     this.bitstreamsDownloader = new Function(this, 'BitstreamsDownloader', {
       functionName: `${stage}-obp-cdk-ingest-bitstreams-downloader`,
       handler: 'bitstreams-downloader.handler',
-      runtime: Runtime.NODEJS_12_X,
+      runtime: Runtime.NODEJS_14_X,
       code: Code.fromAsset(path.join(lambdasPath, 'bitstreams-downloader')),
       description: 'Downloads the binary file for a given document UID from the OBP API',
       timeout: Duration.minutes(5),
@@ -71,7 +71,7 @@ export default class IngestLambdas extends Construct {
     this.invokeExtractor = new Function(this, 'InvokeExtractor', {
       functionName: `${stage}-obp-cdk-ingest-invoke-extractor`,
       handler: 'invoke-extractor.handler',
-      runtime: Runtime.NODEJS_12_X,
+      runtime: Runtime.NODEJS_14_X,
       code: Code.fromAsset(path.join(lambdasPath, 'invoke-extractor')),
       description: 'Invokes the text extractor (3rd party library) functions for a given document UID',
       timeout: Duration.seconds(20),
@@ -86,7 +86,7 @@ export default class IngestLambdas extends Construct {
     this.metadataDownloader = new Function(this, 'MetadataDownloader', {
       functionName: `${stage}-obp-cdk-ingest-metadata-downloader`,
       handler: 'metadata-downloader.handler',
-      runtime: Runtime.NODEJS_12_X,
+      runtime: Runtime.NODEJS_14_X,
       code: Code.fromAsset(path.join(lambdasPath, 'metadata-downloader')),
       description: 'Downloads the metadata for a given document UID from the OBP API',
       timeout: Duration.minutes(5),
@@ -99,7 +99,7 @@ export default class IngestLambdas extends Construct {
     this.scheduler = new Function(this, 'Scheduler', {
       functionName: `${stage}-obp-cdk-ingest-scheduler`,
       handler: 'scheduler.handler',
-      runtime: Runtime.NODEJS_12_X,
+      runtime: Runtime.NODEJS_14_X,
       code: Code.fromAsset(path.join(lambdasPath, 'scheduler')),
       description: 'Periodically checks the OBP RSS feed for documents that need indexing.',
       timeout: Duration.minutes(1),
