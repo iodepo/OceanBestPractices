@@ -12,16 +12,12 @@ export default class IngestSnsTopics extends Construct {
   constructor(scope: Construct, id: string, props: SnsTopicsProps) {
     super(scope, id);
 
-    const {
-      stage
-    } = props;
-
     this.availableDocument = new Topic(this, 'AvailableDocument', {
-      displayName: `${stage} Available Documents Topic`
+      displayName: `${props.stage} Available Documents Topic`
     });
 
     this.textExtractor = new Topic(this, 'TextExtractor', {
-      displayName: `${stage}-Text Extractor Completed Topic`
+      displayName: `${props.stage}-Text Extractor Completed Topic`
     });
   }
 }
