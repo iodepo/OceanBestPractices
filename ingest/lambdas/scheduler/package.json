@@ -10,5 +10,8 @@
   "license": "ISC",
   "dependencies": {
     "xml2js": "^0.4.23"
+  },
+  "peerDependencies": {
+    "aws-sdk": "^2.1011.0"
   }
 }

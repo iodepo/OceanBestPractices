@@ -63,10 +63,8 @@ def index_tag(tag)
   es_doc = query_for(tag)
 
   uri = URI(ELASTIC_SEARCH_HOST + ELASTIC_SEARCH_PATH + "/" + URI(tag[:uri]).path.split('/').last)
-  req = Net::HTTP::Put.new(uri, 'Content-Type' => 'application/json')
-  req.body = es_doc.to_json
 
-  res = Net::HTTP.start(uri.hostname) { |http| http.request(req) }
+  res = Net::HTTP.put(uri, es_doc.to_json, 'Content-Type' => 'application/json')
 
   if res.code != "201"
     puts "Error:\n#{res.code}\n#{res.body}"
@@ -76,7 +74,6 @@ end
 def bulk_index_tags(tags)
   
   uri = URI(ELASTIC_SEARCH_HOST + ELASTIC_SEARCH_PATH + "/_bulk")
-  req = Net::HTTP::Post.new(uri, 'Content-Type' => 'application/x-ndjson')
   
   es_doc = tags.map do |tag|
     [
@@ -87,11 +84,7 @@ def bulk_index_tags(tags)
 
   es_doc = es_doc.flatten.map(&:to_json).join("\n") << "\n"
 
-  #puts es_doc
-  
-  req.body = es_doc 
-
-  res = Net::HTTP.start(uri.hostname) { |http| http.request(req) }
+  res = Net::HTTP.post(uri, es_doc, 'Content-Type' => 'application/json')
 
   if (res.code != "201" && res.code != "200")
     puts "Error:\n#{res.code}\n#{res.body}"

@@ -1,9 +1,11 @@
+import { IDistribution } from "@aws-cdk/aws-cloudfront";
 import { AnyPrincipal, PolicyStatement } from "@aws-cdk/aws-iam";
 import { Bucket, BucketAccessControl, HttpMethods } from "@aws-cdk/aws-s3";
-import { Construct, Duration } from "@aws-cdk/core";
+import { Construct, Duration, RemovalPolicy } from "@aws-cdk/core";
 
 interface BucketsProps {
   stage: string
+  websiteDistribution: IDistribution
 }
 
 export default class IngestBuckets extends Construct {
@@ -15,24 +17,28 @@ export default class IngestBuckets extends Construct {
   constructor(scope: Construct, id: string, props: BucketsProps) {
     super(scope, id);
 
-    const { stage } = props;
+    const { stage, websiteDistribution } = props;
 
     this.documentMetadata = new Bucket(this, 'DocumentMetadata', {
-      bucketName: `obp-cdk-document-metadata-${stage}`,
-      lifecycleRules: [{ expiration: Duration.days(15) }]
+      bucketName: `${stage}-obp-cdk-document-metadata`,
+      lifecycleRules: [{ expiration: Duration.days(15) }],
+      removalPolicy: RemovalPolicy.DESTROY,
+      autoDeleteObjects: true
     });
 
     this.documentSource = new Bucket(this, 'DocumentSource', {
-      bucketName: `obp-cdk-document-source-${stage}`,
+      bucketName: `${stage}-obp-cdk-document-source`,
       accessControl: BucketAccessControl.PUBLIC_READ,
       cors: [
         {
           allowedHeaders: ['Authorization'],
           allowedMethods: [HttpMethods.GET, HttpMethods.HEAD],
-          allowedOrigins: ['*'],
+          allowedOrigins: [`https://${websiteDistribution.distributionDomainName}`],
           maxAge: 3000
         }
-      ]
+      ],
+      removalPolicy: RemovalPolicy.DESTROY,
+      autoDeleteObjects: true
     });
 
     this.documentSource.addToResourcePolicy(new PolicyStatement({
@@ -42,13 +48,17 @@ export default class IngestBuckets extends Construct {
     }));
 
     this.textExtractorTemp = new Bucket(this, 'TextExtractorTemp', {
-      bucketName: `obp-cdk-doc-extracted-temp-${stage}`,
-      lifecycleRules: [{ expiration: Duration.days(5) }]
+      bucketName: `${stage}-obp-cdk-doc-extracted-temp`,
+      lifecycleRules: [{ expiration: Duration.days(5) }],
+      removalPolicy: RemovalPolicy.DESTROY,
+      autoDeleteObjects: true
     });
 
     this.textExtractorDestination = new Bucket(this, 'TextExtractorDestination', {
-      bucketName: `obp-cdk-doc-extracted-${stage}`,
-      lifecycleRules: [{ expiration: Duration.days(15) }]
+      bucketName: `${stage}-obp-cdk-doc-extracted`,
+      lifecycleRules: [{ expiration: Duration.days(15) }],
+      removalPolicy: RemovalPolicy.DESTROY,
+      autoDeleteObjects: true
     });
   }
 }

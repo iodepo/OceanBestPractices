@@ -17,11 +17,11 @@ export default class IngestSnsTopics extends Construct {
     } = props;
 
     this.availableDocument = new Topic(this, 'AvailableDocument', {
-      displayName: `Available Documents Topic - ${stage}`
+      displayName: `${stage} Available Documents Topic`
     });
 
     this.textExtractor = new Topic(this, 'TextExtractor', {
-      displayName: `Text Extractor Completed Topic - ${stage}`
+      displayName: `${stage}-Text Extractor Completed Topic`
     });
   }
 }

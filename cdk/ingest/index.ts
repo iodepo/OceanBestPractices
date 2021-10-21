@@ -8,13 +8,14 @@ import { LambdaSubscription } from '@aws-cdk/aws-sns-subscriptions';
 import { LambdaDestination, SnsDestination } from '@aws-cdk/aws-s3-notifications';
 import { IFunction } from '@aws-cdk/aws-lambda';
 import { IDomain } from '@aws-cdk/aws-elasticsearch';
-
+import { IDistribution } from '@aws-cdk/aws-cloudfront';
 
 interface IngestProps {
   elasticsearchDomain: IDomain
   stage: string
   scheduleInterval?: number
   textExtractorFunction: IFunction
+  websiteDistribution: IDistribution
 }
 
 export default class Ingest extends Construct {
@@ -25,10 +26,14 @@ export default class Ingest extends Construct {
       elasticsearchDomain,
       scheduleInterval = 300,
       stage,
-      textExtractorFunction
+      textExtractorFunction,
+      websiteDistribution
     } = props;
 
-    const buckets = new IngestBuckets(this, 'Buckets', { stage });
+    const buckets = new IngestBuckets(this, 'Buckets', {
+      stage,
+      websiteDistribution
+    });
 
     const snsTopics = new IngestSnsTopics(this, 'SnsTopics', { stage });
 
@@ -43,7 +48,7 @@ export default class Ingest extends Construct {
 
     // Invoke the scheduler function every 5 minutes
     new events.Rule(this, 'SchedulerEventRule', {
-      schedule: events.Schedule.rate(Duration.minutes(5)),
+      schedule: events.Schedule.rate(Duration.seconds(scheduleInterval)),
       targets: [new eventTargets.LambdaFunction(lambdas.scheduler)]
     })
     // Writes events to the "available document" topic
@@ -58,8 +63,6 @@ export default class Ingest extends Construct {
 
     // The "invoke extractor" lambda is triggered when an object is created in the "document source" bucket
     buckets.documentSource.addObjectCreatedNotification(new LambdaDestination(lambdas.invokeExtractor));
-
-    // TODO Extractor
 
     buckets.textExtractorDestination.addObjectCreatedNotification(new SnsDestination(snsTopics.textExtractor));
     // An event is published to the "text extractor" topic when an object is created in the "text extractor destination" bucket

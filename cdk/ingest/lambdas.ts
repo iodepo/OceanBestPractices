@@ -36,7 +36,7 @@ export default class IngestLambdas extends Construct {
     } = props;
 
     this.indexer = new Function(this, 'Indexer', {
-      functionName: `obp-cdk-ingest-indexer-${stage}`,
+      functionName: `${stage}-obp-cdk-ingest-indexer`,
       handler: 'indexer.handler',
       runtime: Runtime.NODEJS_12_X,
       code: Code.fromAsset(path.join(lambdasPath, 'indexer')),
@@ -50,9 +50,10 @@ export default class IngestLambdas extends Construct {
     });
     buckets.documentMetadata.grantRead(this.indexer);
     buckets.textExtractorDestination.grantRead(this.indexer);
+    elasticsearchDomain.grantWrite(this.indexer);
 
     this.bitstreamsDownloader = new Function(this, 'BitstreamsDownloader', {
-      functionName: `obp-cdk-ingest-bitstreams-downloader-${stage}`,
+      functionName: `${stage}-obp-cdk-ingest-bitstreams-downloader`,
       handler: 'bitstreams-downloader.handler',
       runtime: Runtime.NODEJS_12_X,
       code: Code.fromAsset(path.join(lambdasPath, 'bitstreams-downloader')),
@@ -68,7 +69,7 @@ export default class IngestLambdas extends Construct {
     this.indexer.grantInvoke(this.bitstreamsDownloader);
 
     this.invokeExtractor = new Function(this, 'InvokeExtractor', {
-      functionName: `obp-cdk-ingest-invoke-extractor-${stage}`,
+      functionName: `${stage}-obp-cdk-ingest-invoke-extractor`,
       handler: 'invoke-extractor.handler',
       runtime: Runtime.NODEJS_12_X,
       code: Code.fromAsset(path.join(lambdasPath, 'invoke-extractor')),
@@ -83,7 +84,7 @@ export default class IngestLambdas extends Construct {
     textExtractorFunction.grantInvoke(this.invokeExtractor);
 
     this.metadataDownloader = new Function(this, 'MetadataDownloader', {
-      functionName: `obp-cdk-ingest-metadata-downloader-${stage}`,
+      functionName: `${stage}-obp-cdk-ingest-metadata-downloader`,
       handler: 'metadata-downloader.handler',
       runtime: Runtime.NODEJS_12_X,
       code: Code.fromAsset(path.join(lambdasPath, 'metadata-downloader')),
@@ -96,13 +97,10 @@ export default class IngestLambdas extends Construct {
     buckets.documentMetadata.grantWrite(this.metadataDownloader);
 
     this.scheduler = new Function(this, 'Scheduler', {
-      functionName: `obp-cdk-ingest-scheduler-${stage}`,
+      functionName: `${stage}-obp-cdk-ingest-scheduler`,
       handler: 'scheduler.handler',
       runtime: Runtime.NODEJS_12_X,
-      code: Code.fromAsset(
-        path.join(lambdasPath, 'scheduler'),
-        { exclude: ['package.json', 'package-lock.json'] }
-      ),
+      code: Code.fromAsset(path.join(lambdasPath, 'scheduler')),
       description: 'Periodically checks the OBP RSS feed for documents that need indexing.',
       timeout: Duration.minutes(1),
       environment: {
