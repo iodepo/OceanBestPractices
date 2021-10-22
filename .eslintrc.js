@@ -91,6 +91,16 @@ module.exports = {
           'error',
           { types: { Function: false } },
         ],
+        'unicorn/import-style': [
+          'error',
+          {
+            styles: {
+              path: {
+                namespace: true,
+              },
+            },
+          },
+        ],
       },
     },
     {
