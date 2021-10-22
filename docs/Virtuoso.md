@@ -2,13 +2,12 @@
 
 The Virtuoso Triple Store instance is running on an EC2 instance and can be launched by a Cloud Formation template.
 
-
 ### Overview
 
 - Creating a Virtuoso Stack
-    - Docker Image
+  - Docker Image
 - Importing OWL Ontology
-    - Importing a Large OWL Ontology (Bulk Loading)
+  - Importing a Large OWL Ontology (Bulk Loading)
 - Importing SKOS Vocabulary
 
 ## Creating a Virtuoso Stack
@@ -44,29 +43,30 @@ The next section describes how to access the docker filesystem so that you can a
 
 You can SSH to the Virtuoso instance using the key pair that was set during the Virtuoso Cloudformation Stack creation. For example:
 
+```sh
+ssh -i iode-admin.pem ec2-user@{VIRTUOSO_EC2_INSTANCE_PUBLIC_IP}
 ```
-> ssh -i iode-admin.pem ec2-user@{VIRTUOSO_EC2_INSTANCE_PUBLIC_IP}
-```
+
 Making sure to replace the EC2 IP address with that of your Virtuoso instance. You can find the public IP address of your Virtuoso instance in the EC2 Console or by viewing the Outputs of the Virtuoso Cloudformation stack you created in a previous step.
 
 Once you have access to the Virtuoso instance, you can run the docker console by running the following command (this command assumes default values for names and ports was used):
 
-```
-> sudo docker exec -it vos /bin/bash
+```sh
+sudo docker exec -it vos /bin/bash
 ```
 
 You can now view the generated `dba` password by running:
 
-```
-> less ../settings/dba_password
+```sh
+less ../settings/dba_password
 ```
 
 You can use the username `dba` and this password to login to the Virtuoso Conductor web page at `https://{VIRTUOSO_EC2_INSTANCE_PUBLIC_IP}:8890`
 
 Note: In the above example `vos` is the name over the Docker container we want to connect. If you didn't use the default values you can get a list of running containers by executing:
 
-```
-> sudo docker ps
+```sh
+sudo docker ps
 ```
 
 ## Importing Ontologies and Vocabularies
@@ -75,8 +75,8 @@ Note: In the above example `vos` is the name over the Docker container we want t
 
 Loading a small ontology is easy if a `.owl` file is available. Navigate to the Virtuoso Conductor and choose _Database -> Interactive SQL_. In the SQL console, you can load a `.owl` file by executing a command similar to:
 
-```
-SPARQL LOAD <http://purl.unep.org/sdg/sdgio.owl>;
+```sql
+LOAD <http://purl.unep.org/sdg/sdgio.owl>;
 ```
 
 ### [Importing a Large OWL Ontology (Bulk Loading)](#import-large-owl)
@@ -87,10 +87,10 @@ Example for bulk loading an RDF file. This was used to load the CHEBI ontology:
 
 There is a copy of the rdfloader.sql script in this repository. You can use the existing script if you want. Just upload it to your Virtuoso instance and copy it to your docker container:
 
-```
-> scp -i keys/iode-admin.pem triple-store/rdfloader.sql ec2-user@{VIRTUOSO_HOST_IP}:~/
-> ssh -i keys/iode-admin.pem ec2-user@{VIRTUOSO_HOST_IP}
-> sudo docker cp rdfloader.sql vos:/opt/virtuoso-opensource/database/
+```sh
+scp -i keys/iode-admin.pem triple-store/rdfloader.sql ec2-user@{VIRTUOSO_HOST_IP}:~/
+ssh -i keys/iode-admin.pem ec2-user@{VIRTUOSO_HOST_IP}
+sudo docker cp rdfloader.sql vos:/opt/virtuoso-opensource/database/
 ```
 
 This script was copied from:
@@ -102,20 +102,22 @@ This script was copied from:
 Loading an RDF/XML SKOS vocabulary is easy once you've SSH'd into the Virtuoso instance. Secure copy the vocabulary to the Virtuoso instance:
 
 SCP the vocab.xml file to the EC2 server
+
+```sh
+scp -i keys/{your key} vocab.xml ec2-user@{host}:~/
 ```
-> scp -i keys/{your key} vocab.xml ec2-user@{host}:~/
-```
+
 copy the vocabulary file into the docker container.
 
-```
-> sudo docker cp vocab.xml vos:/opt/virtuoso-opensource/database/
+```sh
+sudo docker cp vocab.xml vos:/opt/virtuoso-opensource/database/
 ```
 
 Start a bash session in the Virtuoso docker container and start isql:
 
-```
-> sudo docker exec -it vos bash
-> /opt/virtuoso-opensource/bin/isql 1111
+```sh
+sudo docker exec -it vos bash
+/opt/virtuoso-opensource/bin/isql 1111
 ```
 
 You'll be prompted to enter the `dba` user password. Follow the instructions here for loading the vocabulary:
@@ -126,12 +128,12 @@ You'll be prompted to enter the `dba` user password. Follow the instructions her
 
 There were 6 ontologies and vocabularies used during the development of this application:
 
-  1. CHEBI (http://purl.obolibrary.org/obo/chebi.owl)
-  2. ENVO (http://purl.obolibrary.org/obo/envo.owl)
-  3. SDGIO (http://purl.unep.org/sdg/sdgio.owl)
-  4. L05 (http://vocab.nerc.ac.uk/collection/L05/current/)
-  5. L06 (http://vocab.nerc.ac.uk/collection/L06/current/)
-  6. L22 (http://vocab.nerc.ac.uk/collection/L22/current/)
+  1. CHEBI (<http://purl.obolibrary.org/obo/chebi.owl>)
+  2. ENVO (<http://purl.obolibrary.org/obo/envo.owl>)
+  3. SDGIO (<http://purl.unep.org/sdg/sdgio.owl>)
+  4. L05 (<http://vocab.nerc.ac.uk/collection/L05/current/>)
+  5. L06 (<http://vocab.nerc.ac.uk/collection/L06/current/>)
+  6. L22 (<http://vocab.nerc.ac.uk/collection/L22/current/>)
 
 The application assumes that the graph names will match the the URLs for each ontology or vocabulary. For example, by default the application assumes that the ENVO ontology will imported as the graph name `http://purl.obolibrary.org/obo/envo.owl`.
 
@@ -141,35 +143,34 @@ Use section [Importing Large OWL Ontology](#large-owl-load) to load CHEBI. Becau
 
 There is a copy of the chebi.owl file used during the development of OceanBestPractices located at in the S3 bucket `obp-chebi-copy`. The goal is to get a copy of this file onto your Virtuoso instance. You can do this manually by:
 
-
 1. Copy the file to your local machine with:
 
-```
-> aws s3 cp --recursive s3://obp-chebi-copy .
+```sh
+aws s3 cp --recursive s3://obp-chebi-copy .
 ```
 
 Then secure copy the file to your Virtuoso instance:
 
-```
-> scp -i keys/iode-admin.pem chebi.owl ec2-user@{VIRTUOSO_EC2_HOST}:~/
+```sh
+scp -i keys/iode-admin.pem chebi.owl ec2-user@{VIRTUOSO_EC2_HOST}:~/
 ```
 
 or
 
 2. Copy the file directly to the Virtuoso instance with:
 
-```
-> ssh -i keys/iode-admin.pem ec2-user@{VIRTUOSO_EC2_HOST}
-> aws s3 cp --recursive s3://obp-chebi-copy/chebi.owl .
+```sh
+ssh -i keys/iode-admin.pem ec2-user@{VIRTUOSO_EC2_HOST}
+aws s3 cp --recursive s3://obp-chebi-copy/chebi.owl .
 ```
 
 If you receive the error "Unable to locate credentials" you should first run `> aws configure` to configure AWS credentials.
 
 Once the CHEBI file is loaded onto Virtuoso you should copy the file to your docker and execute docker bash in order to procede with the ingest:
 
-```
-> sudo docker cp chebi.owl vos:/opt/virtuoso-opensource/database/
-> sudo docker exec -it vos bash
+```sh
+sudo docker cp chebi.owl vos:/opt/virtuoso-opensource/database/
+sudo docker exec -it vos bash
 ```
 
 Then follow the instructions in [Importing Large OWL Ontology](#large-owl-load).
@@ -180,8 +181,8 @@ ENVO and SDGIO were reasonably sized Ontologies. You can use the instructions fo
 
 For example: after connecting to the Interactive SQL shell in the Virtuoso Conductor you can import ENVO by running the following SPARQL command:
 
-```
-SPARQL LOAD <http://purl.obolibrary.org/obo/envo.owl>;
+```sql
+LOAD <http://purl.obolibrary.org/obo/envo.owl>;
 ```
 
 #### SKOS Vocabularies
@@ -190,7 +191,7 @@ Each vocabulary can be ingested by following the instructions in [Importing SKOS
 
 For example, if I wanted to load the L05 vocabulary I would run the following commands:
 
-```
+```sh
 > ssh -i keys/iode-admin.pem ec2-user@{VIRTUOSO_EC2_HOST}
 > wget http://vocab.nerc.ac.uk/collection/L05/current/ -O L05.xml
 > sudo docker cp L05.xml vos:/opt/virtuoso-opensource/database/
@@ -202,4 +203,6 @@ SQL> quit;
 > logout
 ```
 
-**WARNING** Don't forget to run the percolator/create-tag-index.rb script, see README.md file!!!
+⚠️ **WARNING** ⚠️
+
+Don't forget to run the percolator/create-tag-index.rb script, see [ingest/README.md](../ingest/README.md) file!

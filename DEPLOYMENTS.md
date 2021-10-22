@@ -6,7 +6,7 @@
 
 `aws cloudformation deploy --template-file text-extractor-permissions.yml --stack-name obp-text-extractor-permissions-{ENVIRONMENT} --parameter-overrides Environment={ENVIRONMENT}  --capabilities CAPABILITY_NAMED_IAM --profile {AWS_PROFILE}`
 
-Please refer to the [oop-indexer README](./oop-indexer-README.md), [TextExtractor repo](https://github.com/Element84/lambda-text-extractor) and [apex](https://apex.run/) for installation of textextractor.
+Please refer to the [oop-indexer README](./ingest/README.md), [TextExtractor repo](https://github.com/Element84/lambda-text-extractor) and [apex](https://apex.run/) for installation of textextractor.
 
 ### Virtuoso Instance
 
