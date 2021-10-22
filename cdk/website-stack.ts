@@ -1,58 +1,78 @@
 import * as path from'path';
-import { Construct, Stack, StackProps } from "@aws-cdk/core";
+import { Construct, RemovalPolicy, Stack, StackProps } from "@aws-cdk/core";
 import { Bucket } from '@aws-cdk/aws-s3';
-import * as cloudfront from '@aws-cdk/aws-cloudfront';
+import {
+  AllowedMethods,
+  CacheCookieBehavior,
+  CachePolicy,
+  CacheQueryStringBehavior,
+  DistributionProps,
+  HttpVersion,
+  SecurityPolicyProtocol,
+  ViewerProtocolPolicy
+} from '@aws-cdk/aws-cloudfront';
 import { S3Origin } from '@aws-cdk/aws-cloudfront-origins';
 import { Certificate } from "@aws-cdk/aws-certificatemanager";
 import { BucketDeployment, Source } from '@aws-cdk/aws-s3-deployment';
+import { StringParameter } from '@aws-cdk/aws-ssm';
+import { Distribution } from '@aws-cdk/aws-cloudfront';
 
 interface WebsiteStackProps extends StackProps {
   stage: string
-  sslConfig?: {
-    certificate: Certificate
-    domainNames: [string, ...string[]]
-  }
+  domainNames?: [string, ...string[]]
+  disableWebsiteCache?: boolean
 }
 
 export default class WebsiteStack extends Stack {
+  public readonly cloudfrontDistribution: Distribution;
+
   constructor(scope: Construct, id: string, props: WebsiteStackProps) {
     const {
-      sslConfig,
+      domainNames,
       stage,
+      disableWebsiteCache,
       ...superProps
     } = props;
 
-    const indexDocument = 'index.html';
-
     super(scope, id, {
+      stackName: `${stage}-obp-cdk-website`,
       description: `Website stack for the "${stage}" stage`,
+      terminationProtection: true,
       ...superProps
     });
 
     const websiteBucket = new Bucket(this, 'WebsiteBucket', {
-      bucketName: `obp-cdk-website-${stage}`,
-      websiteIndexDocument: indexDocument
+      bucketName: `${stage}-obp-cdk-website`,
+      removalPolicy: RemovalPolicy.DESTROY,
+      autoDeleteObjects: true,
     });
 
-    new BucketDeployment(this, 'WebsiteContent', {
-      destinationBucket: websiteBucket,
-      sources: [Source.asset(path.join(__dirname, '..', 'website', 'build'))]
-    });
+    let sslOptions: Partial<DistributionProps> = {};
+    if (domainNames !== undefined) {
+      const certificateArn = StringParameter.valueForStringParameter(this, `/OBP/${stage}/certificate-arn`);
 
-    let sslOptions: Partial<cloudfront.DistributionProps> = {};
-    if (sslConfig !== undefined) {
+      const certificate = Certificate.fromCertificateArn(this, 'Certificate', certificateArn);
+
       sslOptions = {
-        certificate: sslConfig.certificate,
-        domainNames: sslConfig.domainNames,
-        minimumProtocolVersion: cloudfront.SecurityPolicyProtocol.TLS_V1_1_2016
+        certificate,
+        domainNames
       };
     }
 
-    new cloudfront.Distribution(this, 'Distribution', {
+    const cachePolicy = disableWebsiteCache
+      ? CachePolicy.CACHING_DISABLED
+      : new CachePolicy(this, 'DefaultCachePolicy', {
+          cookieBehavior: CacheCookieBehavior.all(),
+          queryStringBehavior: CacheQueryStringBehavior.all()
+        });
+
+
+    this.cloudfrontDistribution = new Distribution(this, 'Distribution', {
       ...sslOptions,
       comment: `Ocean Best Practices website - ${stage}`,
-      defaultRootObject: indexDocument,
-      httpVersion: cloudfront.HttpVersion.HTTP2,
+      minimumProtocolVersion: SecurityPolicyProtocol.TLS_V1_1_2016,
+      defaultRootObject: 'index.html',
+      httpVersion: HttpVersion.HTTP2,
       errorResponses: [
         {
           httpStatus: 404,
@@ -62,13 +82,16 @@ export default class WebsiteStack extends Stack {
       ],
       defaultBehavior: {
         origin: new S3Origin(websiteBucket),
-        viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-        allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD,
-        cachePolicy: new cloudfront.CachePolicy(this, 'DefaultCachePolicy', {
-          cookieBehavior: cloudfront.CacheCookieBehavior.all(),
-          queryStringBehavior: cloudfront.CacheQueryStringBehavior.all()
-        })
+        viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+        allowedMethods: AllowedMethods.ALLOW_GET_HEAD,
+        cachePolicy
       },
+    });
+
+    new BucketDeployment(this, 'WebsiteContent', {
+      destinationBucket: websiteBucket,
+      sources: [Source.asset(path.join(__dirname, '..', 'website', 'build'))],
+      distribution: disableWebsiteCache ? undefined : this.cloudfrontDistribution
     });
   }
 }

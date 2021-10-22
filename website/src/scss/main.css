@@ -780,12 +780,17 @@ html {
     color: #3D4352;
     text-decoration: none; }
 
-.footer__logo {
-  display: block;
-  margin: 0.5rem auto 0; }
+.footer__iode-logo {
+  margin: 1rem 0.8rem 0 0; }
   @media (min-width: 641px) {
-    .footer__logo {
-      margin: 0; } }
+    .footer__iode-logo {
+      margin-top: 0; } }
+
+.footer__goos-logo {
+  margin: 1rem 0 0 0.8rem; }
+  @media (min-width: 641px) {
+    .footer__goos-logo {
+      margin-top: 0; } }
 
 .footer__link {
   color: #718092;
@@ -1281,7 +1286,8 @@ html {
   color: #7f8b9c;
   font-weight: normal;
   font-style: italic;
-  font-size: 18px; }
+  font-size: 18px;
+  margin-top: 10px; }
 
 .result__author {
   color: #7f8b9c;
@@ -1313,14 +1319,18 @@ html {
 .result__tags {
   margin-top: 15px;
   margin-bottom: 15px;
-  font-size: 14px;
-  font-weight: bold; }
+  font-size: 14px; }
 
 .result__tag {
+  font-weight: bold;
   border-radius: 4px;
   margin-right: 0.5rem;
   padding: 0.4375rem 0.5625rem;
   background-color: #F6F5F5; }
+
+.result__methodology {
+  padding-left: 1rem;
+  font-size: 0.825rem; }
 
 .result__button {
   display: inline;
@@ -1551,7 +1561,9 @@ html {
   width: 100%;
   margin: 1rem auto 0;
   display: flex;
-  flex-wrap: wrap; }
+  flex-wrap: wrap;
+  align-items: center;
+  color: #718092; }
 
 .searchbar__tag {
   margin: .2rem .7rem .2rem 0;
@@ -1584,6 +1596,10 @@ html {
   background-color: #0068B3; }
   .searchbar__tag-node:hover i {
     color: white; }
+
+.searchbar__tag-message {
+  font-size: 0.825rem;
+  padding: .2rem; }
 
 .searchbar__log-wrapper {
   position: relative;
