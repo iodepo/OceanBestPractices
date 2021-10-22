@@ -23,7 +23,7 @@ class SearchStatus extends Component {
         break;
       case 'has_not_searched':
         icon = 'search';
-        statusText = `Type a term in the above to start your search.`;
+        statusText = `Type a term in the search bar above to start your search.`;
         break;
       default:
         return false;
