@@ -4,8 +4,6 @@ const AWS = require('aws-sdk');
 
 const s3 = new AWS.S3();
 
-const region = process.env.REGION || 'us-east-1';
-
 const metadataBucketName = process.env.DOCUMENT_METADATA_BUCKET;
 
 const esHost = process.env.ELASTIC_SEARCH_HOST;
@@ -57,6 +55,8 @@ const mapping = {
 };
 
 exports.handler = (event, context, callback) => {
+  const region = context.invokedFunctionArn.split(':')[3];
+
   var uuid, contentBucketName, contentKey, sourceKey, metadataKey = undefined;
   
   if (event.Records !== undefined && event.Records.length > 0) {
@@ -87,11 +87,11 @@ exports.handler = (event, context, callback) => {
           const titleObject = metadata.find(function(m) { return m.key === "dc.title"});
           const title = titleObject !== undefined ? titleObject.value : '';
           
-          percolateTerms(title, content, function(err, terms) {
+          percolateTerms(title, content, region, function(err, terms) {
             if (err === null) {
               metadata.push({ key: "terms", value: terms });
               
-              indexDocument(mapMetadata(metadata), function(err, resp) {
+              indexDocument(mapMetadata(metadata), region, function(err, resp) {
                 if (err) {
                   callback(err, null);
                 } else {
@@ -194,10 +194,10 @@ function mapMetadata(metadata) {
   return indexDoc;
 }
 
-function indexDocument(doc, callback) {
+function indexDocument(doc, region, callback) {
   var indexBody = JSON.stringify(doc);
 
-  const req = getIndexRequest(doc.uuid, indexBody);
+  const req = getIndexRequest(doc.uuid, indexBody, region);
 
   const signer = new AWS.Signers.V4(req, 'es');
   signer.addAuthorization(creds, new Date());
@@ -223,7 +223,7 @@ function indexDocument(doc, callback) {
   });
 }
 
-function getIndexRequest(id, body) {
+function getIndexRequest(id, body, region) {
   const req = new AWS.HttpRequest(esEndpoint);
   req.method = 'POST';
   req.path = '/documents/doc/' + id;
@@ -236,7 +236,7 @@ function getIndexRequest(id, body) {
   return req;
 }
 
-function buildPercolatorRequest(body) {
+function buildPercolatorRequest(body, region) {
   const req = new AWS.HttpRequest(esEndpoint);
   req.method = 'POST';
   req.path = '/terms/_search';
@@ -249,11 +249,11 @@ function buildPercolatorRequest(body) {
   return req;
 }
 
-function percolateTerms(title, contents, callback) {
+function percolateTerms(title, contents, region, callback) {
   var from = 0, size = 300;
   var percolatorQuery = { query: { percolate: { field: "query", document: { contents: contents, title: title } } }, size: size, from: from };
 
-  const req = buildPercolatorRequest(JSON.stringify(percolatorQuery));
+  const req = buildPercolatorRequest(JSON.stringify(percolatorQuery), region);
   makePercolatorRequest(req, function(err, hits) {
     if (err === null) {
       var hitsData = hits.hits;
