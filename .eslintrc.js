@@ -81,7 +81,10 @@ module.exports = {
       },
     },
     {
-      files: ['cdk/**/*.ts'],
+      files: [
+        'bin/*.ts',
+        'cdk/**/*.ts',
+      ],
       rules: {
         'no-new': 'off',
         '@typescript-eslint/ban-types': [
