@@ -1,5 +1,6 @@
 import * as path from 'path';
 import {
+  CfnOutput,
   Construct,
   Duration,
 } from '@aws-cdk/core';
@@ -107,6 +108,11 @@ export default class Api extends Construct {
       defaultCorsPreflightOptions: {
         allowOrigins: [`https://${websiteDistribution.distributionDomainName}`],
       },
+    });
+
+    new CfnOutput(this, 'ApiUrlOutput', {
+      value: api.url,
+      exportName: 'api-url',
     });
 
     const documents = api.root.addResource('documents');

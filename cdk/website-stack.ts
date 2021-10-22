@@ -1,5 +1,6 @@
 import * as path from 'path';
 import {
+  CfnOutput,
   Construct,
   RemovalPolicy,
   Stack,
@@ -57,6 +58,17 @@ export default class WebsiteStack extends Stack {
       autoDeleteObjects: true,
     });
 
+    const configBucket = new Bucket(this, 'ConfigBucket', {
+      bucketName: `${stage}-obp-cdk-website-config`,
+      removalPolicy: RemovalPolicy.DESTROY,
+      autoDeleteObjects: true,
+    });
+
+    new CfnOutput(this, 'ConfigBucketOutput', {
+      value: configBucket.bucketName,
+      exportName: 'config-bucket-name',
+    });
+
     let sslOptions: Partial<DistributionProps> = {};
     if (domainNames !== undefined) {
       const certificateArn = StringParameter.valueForStringParameter(
@@ -105,6 +117,14 @@ export default class WebsiteStack extends Stack {
         viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
         allowedMethods: AllowedMethods.ALLOW_GET_HEAD,
         cachePolicy,
+      },
+      additionalBehaviors: {
+        '/config.json': {
+          origin: new S3Origin(configBucket),
+          viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+          allowedMethods: AllowedMethods.ALLOW_GET_HEAD,
+          cachePolicy: CachePolicy.CACHING_DISABLED,
+        },
       },
     });
 
