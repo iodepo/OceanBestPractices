@@ -57,6 +57,7 @@ class SearchResults extends Component {
         thumbnail: result._source.thumbnail,
         refereed: result._source.refereed,
         journal_title: result._source.journal_title,
+        coverageSpatial: result._source.coverage_spatial,
         citation: result._source.citation,
         methodology: Array.isArray(result._source.bptype)
           ? result._source.bptype.join(', ')
@@ -116,6 +117,7 @@ class SearchResults extends Component {
           thumbnail,
           refereed,
           journal_title,
+          coverageSpatial,
           citation,
           methodology,
           uuid,
@@ -138,6 +140,7 @@ class SearchResults extends Component {
           thumbnail={thumbnail}
           refereed={refereed}
           journal_title={journal_title}
+          coverageSpatial={coverageSpatial}
           citation={citation}
           methodology={methodology}
           uuid={uuid}

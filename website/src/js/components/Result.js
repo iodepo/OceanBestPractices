@@ -118,53 +118,54 @@ class Result extends Component {
       )
     }
     return (
-
-        <article className="result">
-          <section className="result__info">
-            <div className="result__tags">
-              <span className="result__tag">{this.props.date}</span>
-              {
-                this.props.language
-                ? <span className="result__tag">{this.props.language}</span>
-                : null
-              }
-              {
-                this.props.methodology
-                ? <span className="result__methodology">Methodology: {this.props.methodology}</span>
-                : null
-              }
-            </div>
-            { result_title }
-            <div className="result__author">
-              {
-                authorList || null
-              }
-            </div>
-            <div className="result__journal-title">
-              {
-                this.props.journal_title || null
-              }
-            </div>
-            <div className="result__highlight"> { this.componentListFromStrings(this.props.highlight) } </div>
-            <div className="result__publisher">
-
-              <Superlink event_category="results" event_action={`link | ${isActiveTags ? 'clear' : 'view'}`} event_label={isActiveTags ? 'Viewing Tags' : 'View Tags'}>
-                <a className={toggleClassName} onClick={isActiveTags ? this.onReset.bind(this) : this.handleTagToggle.bind(this)} href="#tagSection">
-                  <span className="result__button-icon"><i className={toggleTagsIcon} aria-hidden="true"></i></span>
-                  <span className={toggleLabelClassName}></span>
-                </a>
-              </Superlink>
-              {document_button}
-              {citation_button}
-              <span className="result__publisher-data">{this.props.publisher}</span>
-            </div>
-            { showCitation
-                ? <Citation citation={this.props.citation}/>
-                : null
+      // TODO: implement this.props.coverageSpatial as a "region bubble" in the search result
+      // refer to https://element84.atlassian.net/browse/OBP-278
+      <article className="result">
+        <section className="result__info">
+          <div className="result__tags">
+            <span className="result__tag">{this.props.date}</span>
+            {
+              this.props.language
+              ? <span className="result__tag">{this.props.language}</span>
+              : null
             }
-          </section>
-        </article>
+            {
+              this.props.methodology
+              ? <span className="result__methodology">Methodology: {this.props.methodology}</span>
+              : null
+            }
+          </div>
+          { result_title }
+          <div className="result__author">
+            {
+              authorList || null
+            }
+          </div>
+          <div className="result__journal-title">
+            {
+              this.props.journal_title || null
+            }
+          </div>
+          <div className="result__highlight"> { this.componentListFromStrings(this.props.highlight) } </div>
+          <div className="result__publisher">
 
+            <Superlink event_category="results" event_action={`link | ${isActiveTags ? 'clear' : 'view'}`} event_label={isActiveTags ? 'Viewing Tags' : 'View Tags'}>
+              <a className={toggleClassName} onClick={isActiveTags ? this.onReset.bind(this) : this.handleTagToggle.bind(this)} href="#tagSection">
+                <span className="result__button-icon"><i className={toggleTagsIcon} aria-hidden="true"></i></span>
+                <span className={toggleLabelClassName}></span>
+              </a>
+            </Superlink>
+            {document_button}
+            {citation_button}
+            <span className="result__publisher-data">{this.props.publisher}</span>
+          </div>
+          {
+            showCitation
+            ? <Citation citation={this.props.citation}/>
+            : null
+          }
+        </section>
+      </article>
     );
   }
 }
