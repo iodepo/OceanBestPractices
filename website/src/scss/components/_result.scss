@@ -1,0 +1,178 @@
+.result {
+  padding: 0.825rem 1rem;
+  color: $dark-gray;
+  border-bottom: 1px solid #D8D8D8;
+  display: flex;
+  align-items: center;
+}
+
+.result__info {
+  word-break: break-word;
+  text-align: left;
+
+  @media #{$screen-m} {
+    width: 100%;
+  }
+}
+
+.result__title {
+  margin-bottom: 10px;
+  margin-top: 10px;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.result__link {
+  color: #2d73b6;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.result__journal-title {
+  color: $dark-med-gray;
+  font-weight: normal;
+  font-style: italic;
+  font-size: 18px;
+  margin-top: 10px;
+}
+
+.result__author {
+  color: $dark-med-gray;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.result__link:hover {
+  color: #007ABB;
+  text-decoration: underline;
+}
+
+.result__highlight {
+  font-size: 1rem;
+  line-height: 1.25rem;
+  margin-bottom: 20px;
+  margin-top: 10px;
+  
+  em {
+    font-weight: bold;
+  }
+
+  span:after { 
+    content: '... ';
+  }
+}
+
+.result__publisher {
+  margin-top: 10px;
+  font-size: 12px;
+}
+
+.result__publisher-data {
+  font-size: 10px;
+  margin-left: 1rem;
+}
+
+.result__tags {
+  margin-top: 15px;
+  margin-bottom: 15px;
+  font-size: 14px;
+}
+
+.result__tag {
+  font-weight: bold;
+  border-radius: 4px;
+  margin-right: 0.5rem;
+  padding: 0.4375rem 0.5625rem;
+  background-color: #F6F5F5;
+}
+
+.result__methodology {
+  padding-left: 1rem;
+  font-size: 0.825rem;
+}
+
+.result__button {
+  display: inline;
+  height: 1.5rem;
+  margin-right: .5em;
+  border-radius: 4px;
+  cursor: pointer;
+  padding: .25rem .5rem;
+  background-color: $primary-blue;
+  border: none;
+  text-decoration: none;
+  font-size: 0.8rem;
+
+  @media #{$screen-s} {
+    padding: .25rem 1rem;
+  }
+
+  span {
+    color: #FFFFFF;
+    font-weight: bold;
+    padding: 0 3px;
+  }
+
+  &:hover, &:focus {
+    background-color: $primary-blue-dark;
+    color: #fff !important;
+  }
+
+  &.result__button-secondary {
+    background-color: $light-gray;
+    color: $dark-gray;
+
+    span {
+      color: $dark-gray;
+    }
+
+    &:hover {
+      background: $light-med-gray;
+    }
+
+    &.is-active {
+      background: $light-med-gray;
+    }
+  }
+
+  .result__button-icon i {
+    font-size: 0.7rem;
+
+    @media #{$screen-s} {
+      font-size: 0.85rem;
+      margin-left: -5px;
+      margin-right: 5px;
+    }
+  }
+}
+
+.result__tag-button--is-active {
+  background-color: white;
+  border-style: dotted;
+  border-width: .13rem;
+  border-color: #007ABB;
+
+  span {
+    color: #007ABB;
+  }
+
+  &:hover, &:focus {
+    background-color: white;
+
+    span {
+      color: #007ABB;
+    }
+  }
+}
+
+.tag-button-arrow {
+  padding-right: 5px;
+}
+
+.result__tag-label:after {
+  content: "View Tags";
+}
+
+.result__tag-label--is-active:after {
+  content: "Viewing Tags";
+}

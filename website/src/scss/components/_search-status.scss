@@ -1,0 +1,32 @@
+.search-status {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(255,255,255,0.4);
+}
+
+.search-status__info {
+  max-width: 16em;
+  font-size: 1rem;
+  text-align: center;
+}
+
+.search-status__icon {
+  margin-bottom: 1rem;
+  display: block;
+  color: $med-gray;
+  font-size: 2em;
+  &.fa-spinner{
+    animation: spin infinite 2s linear;
+  }
+}
+
+.search-status__text {
+  font-size: 0.825em;
+  color: $med-gray;
+}
