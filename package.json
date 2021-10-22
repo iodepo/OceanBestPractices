@@ -8,7 +8,6 @@
   },
   "scripts": {
     "build": "./bin/build.sh",
-    "cdk": "cdk",
     "cdk:list": "cdk list",
     "cdk:dev:deploy": "cdk deploy Dev/*",
     "cdk:dev:destroy": "cdk destroy Dev/*",
