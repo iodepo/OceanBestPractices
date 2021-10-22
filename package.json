@@ -19,7 +19,7 @@
     "cdk:staging:diff": "cdk diff Staging/*",
     "test": "jest",
     "test:watch": "jest --watchAll",
-    "lint": "eslint api/lambdas/** ingest/lambdas/**"
+    "lint": "eslint api/lambdas/** cdk/** ingest/lambdas/**"
   },
   "devDependencies": {
     "@aws-cdk/aws-apigateway": "^1.128.0",
@@ -42,6 +42,8 @@
     "@aws-cdk/pipelines": "^1.128.0",
     "@types/lodash": "^4.14.175",
     "@types/node": "^12.0.0",
+    "@typescript-eslint/eslint-plugin": "^5.1.0",
+    "@typescript-eslint/parser": "^5.1.0",
     "aws-cdk": "^1.128.0",
     "bufferutil": "^4.0.1",
     "eslint": "^7.32.0",
