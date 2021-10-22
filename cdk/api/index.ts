@@ -21,7 +21,7 @@ export default class Api extends Construct {
 
     const { elasticsearch, region, stage, websiteDistribution } = props;
 
-    const virtuosoHostname = StringParameter.valueForStringParameter(this, `/OBP/marc-dev/virtuoso-hostname`);
+    const virtuosoHostname = StringParameter.valueForStringParameter(this, `/OBP/${stage}/virtuoso-hostname`);
 
     const documentPreview = new Function(this, 'DocumentPreview', {
       functionName: `${stage}-obp-cdk-api-document-preview`,
