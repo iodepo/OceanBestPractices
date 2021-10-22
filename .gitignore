@@ -9,7 +9,8 @@ cdk.out
 .idea/*
 .env
 
-keys/*
+# Ignore private keys.
+keys/
 
 # Testing directory.
 /coverage
