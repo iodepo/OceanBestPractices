@@ -1,7 +1,11 @@
-import { Construct, Environment, Tags } from "@aws-cdk/core";
-import StatefulApiStack from "./stateful-api-stack";
-import StatelessApiStack from "./stateless-api-stack";
-import WebsiteStack from "./website-stack";
+import {
+  Construct,
+  Environment,
+  Tags,
+} from '@aws-cdk/core';
+import StatefulApiStack from './stateful-api-stack';
+import StatelessApiStack from './stateless-api-stack';
+import WebsiteStack from './website-stack';
 
 interface ObpProps {
   env: Environment
@@ -27,15 +31,15 @@ export default class Obp extends Construct {
       env,
       stage,
       esNodeType,
-      terminationProtection
+      terminationProtection,
     });
     Tags.of(statefulApiStack).add('obp-stage', stage);
 
-    const websiteStack = new WebsiteStack(this, `WebsiteStack`, {
+    const websiteStack = new WebsiteStack(this, 'WebsiteStack', {
       env,
       stage,
       disableWebsiteCache,
-      terminationProtection
+      terminationProtection,
     });
     Tags.of(websiteStack).add('obp-stage', stage);
 
@@ -43,7 +47,7 @@ export default class Obp extends Construct {
       env,
       stage,
       elasticsearch: statefulApiStack.elasticsearchDomain,
-      websiteDistribution: websiteStack.cloudfrontDistribution
+      websiteDistribution: websiteStack.cloudfrontDistribution,
     });
     Tags.of(statelessApiStack).add('obp-stage', stage);
   }

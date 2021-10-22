@@ -1,8 +1,16 @@
-import * as path from 'path';
-import { IDomain } from "@aws-cdk/aws-elasticsearch";
-import { Code, Function, IFunction, Runtime } from "@aws-cdk/aws-lambda";
-import { Construct, Duration } from "@aws-cdk/core";
-import IngestBuckets from "./buckets";
+import path from 'path';
+import { IDomain } from '@aws-cdk/aws-elasticsearch';
+import {
+  Code,
+  Function,
+  IFunction,
+  Runtime,
+} from '@aws-cdk/aws-lambda';
+import {
+  Construct,
+  Duration,
+} from '@aws-cdk/core';
+import IngestBuckets from './buckets';
 import IngestSnsTopics from './sns-topics';
 
 const lambdasPath = path.join(__dirname, '..', '..', 'ingest', 'lambdas');
@@ -18,9 +26,13 @@ interface LambdasProps {
 
 export default class IngestLambdas extends Construct {
   public readonly bitstreamsDownloader: Function;
+
   public readonly indexer: Function;
+
   public readonly invokeExtractor: Function;
+
   public readonly metadataDownloader: Function;
+
   public readonly scheduler: Function;
 
   constructor(scope: Construct, id: string, props: LambdasProps) {
@@ -32,7 +44,7 @@ export default class IngestLambdas extends Construct {
       scheduleInterval = 300,
       snsTopics,
       stage,
-      textExtractorFunction
+      textExtractorFunction,
     } = props;
 
     this.indexer = new Function(this, 'Indexer', {
@@ -45,8 +57,8 @@ export default class IngestLambdas extends Construct {
       environment: {
         DOCUMENT_METADATA_BUCKET: buckets.documentMetadata.bucketName,
         DOCUMENT_CONTENT_BUCKET: buckets.textExtractorDestination.bucketName,
-        ELASTIC_SEARCH_HOST: elasticsearchDomain.domainEndpoint
-      }
+        ELASTIC_SEARCH_HOST: elasticsearchDomain.domainEndpoint,
+      },
     });
     buckets.documentMetadata.grantRead(this.indexer);
     buckets.textExtractorDestination.grantRead(this.indexer);
@@ -62,8 +74,8 @@ export default class IngestLambdas extends Construct {
       memorySize: 1024,
       environment: {
         DOCUMENT_BINARY_BUCKET: buckets.documentSource.bucketName,
-        INDEXER_FUNCTION_NAME: this.indexer.functionName
-      }
+        INDEXER_FUNCTION_NAME: this.indexer.functionName,
+      },
     });
     buckets.documentSource.grantWrite(this.bitstreamsDownloader);
     this.indexer.grantInvoke(this.bitstreamsDownloader);
@@ -78,8 +90,8 @@ export default class IngestLambdas extends Construct {
       environment: {
         TEXT_EXTRACTOR_FUNCTION_NAME: textExtractorFunction.functionName,
         TEXT_EXTRACTOR_TEMP_BUCKET: buckets.textExtractorTemp.bucketName,
-        TEXT_EXTRACTOR_BUCKET: buckets.textExtractorDestination.bucketName
-      }
+        TEXT_EXTRACTOR_BUCKET: buckets.textExtractorDestination.bucketName,
+      },
     });
     textExtractorFunction.grantInvoke(this.invokeExtractor);
 
@@ -91,8 +103,8 @@ export default class IngestLambdas extends Construct {
       description: 'Downloads the metadata for a given document UID from the OBP API',
       timeout: Duration.minutes(5),
       environment: {
-        DOCUMENT_METADATA_BUCKET: buckets.documentMetadata.bucketName
-      }
+        DOCUMENT_METADATA_BUCKET: buckets.documentMetadata.bucketName,
+      },
     });
     buckets.documentMetadata.grantWrite(this.metadataDownloader);
 
@@ -105,8 +117,8 @@ export default class IngestLambdas extends Construct {
       timeout: Duration.minutes(1),
       environment: {
         DOCUMENT_TOPIC_ARN: snsTopics.availableDocument.topicArn,
-        SCHEDULE_INTERVAL: scheduleInterval.toString()
-      }
+        SCHEDULE_INTERVAL: scheduleInterval.toString(),
+      },
     });
     snsTopics.availableDocument.grantPublish(this.scheduler);
   }

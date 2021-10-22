@@ -1,5 +1,7 @@
 {
   "recommendations": [
-    "davidanson.vscode-markdownlint"
+    "davidanson.vscode-markdownlint",
+    "dbaeumer.vscode-eslint",
+    "timonwong.shellcheck"
   ]
 }

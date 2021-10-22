@@ -1,7 +1,17 @@
-import * as path from 'path';
-import { Construct, Duration } from "@aws-cdk/core";
-import { LambdaIntegration, RestApi } from '@aws-cdk/aws-apigateway';
-import { Code, Function, Runtime } from "@aws-cdk/aws-lambda";
+import path from 'path';
+import {
+  Construct,
+  Duration,
+} from '@aws-cdk/core';
+import {
+  LambdaIntegration,
+  RestApi,
+} from '@aws-cdk/aws-apigateway';
+import {
+  Code,
+  Function,
+  Runtime,
+} from '@aws-cdk/aws-lambda';
 import { StringParameter } from '@aws-cdk/aws-ssm';
 import { IDistribution } from '@aws-cdk/aws-cloudfront';
 import { IDomain } from '@aws-cdk/aws-elasticsearch';
@@ -19,7 +29,9 @@ export default class Api extends Construct {
   constructor(scope: Construct, id: string, props: ApiProps) {
     super(scope, id);
 
-    const { elasticsearch, region, stage, websiteDistribution } = props;
+    const {
+      elasticsearch, region, stage, websiteDistribution,
+    } = props;
 
     const virtuosoHostname = StringParameter.valueForStringParameter(this, `/OBP/${stage}/virtuoso-hostname`);
 
@@ -30,9 +42,7 @@ export default class Api extends Construct {
       code: Code.fromAsset(path.join(lambdasPath, 'document-preview')),
       description: 'Returns the result of running our Ontology term tagging routine against the given document body and title.',
       timeout: Duration.seconds(100),
-      environment: {
-        ELASTIC_SEARCH_HOST: elasticsearch.domainEndpoint
-      }
+      environment: { ELASTIC_SEARCH_HOST: elasticsearch.domainEndpoint },
     });
     elasticsearch.grantRead(documentPreview);
 
@@ -45,8 +55,8 @@ export default class Api extends Construct {
       environment: {
         ELASTIC_SEARCH_HOST: elasticsearch.domainEndpoint,
         ONTOLOGY_STORE_HOST: virtuosoHostname,
-        ONTOLOGY_STORE_PORT: '8890'
-      }
+        ONTOLOGY_STORE_PORT: '8890',
+      },
     });
     elasticsearch.grantRead(getStatistics);
 
@@ -59,8 +69,8 @@ export default class Api extends Construct {
       timeout: Duration.seconds(100),
       environment: {
         ONTOLOGY_STORE_HOST: virtuosoHostname,
-        ONTOLOGY_STORE_PORT: '8890'
-      }
+        ONTOLOGY_STORE_PORT: '8890',
+      },
     });
 
     const searchAutocomplete = new Function(this, 'SearchAutocomplete', {
@@ -72,8 +82,8 @@ export default class Api extends Construct {
       timeout: Duration.seconds(100),
       environment: {
         ONTOLOGY_STORE_HOST: virtuosoHostname,
-        ONTOLOGY_STORE_PORT: '8890'
-      }
+        ONTOLOGY_STORE_PORT: '8890',
+      },
     });
 
     const searchByKeywords = new Function(this, 'SearchByKeywords', {
@@ -87,16 +97,16 @@ export default class Api extends Construct {
         ELASTIC_SEARCH_HOST: elasticsearch.domainEndpoint,
         REGION: region,
         ONTOLOGY_STORE_HOST: virtuosoHostname,
-        ONTOLOGY_STORE_PORT: '8890'
-      }
+        ONTOLOGY_STORE_PORT: '8890',
+      },
     });
     elasticsearch.grantReadWrite(searchByKeywords);
 
     const api = new RestApi(this, 'Api', {
       restApiName: `${stage}-obp-cdk-api-api`,
       defaultCorsPreflightOptions: {
-        allowOrigins: [`https://${websiteDistribution.distributionDomainName}`]
-      }
+        allowOrigins: [`https://${websiteDistribution.distributionDomainName}`],
+      },
     });
 
     const documents = api.root.addResource('documents');
