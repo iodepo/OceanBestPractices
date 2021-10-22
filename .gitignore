@@ -1,5 +1,24 @@
+*.d.ts
+node_modules/
+
+# CDK asset staging directory
+.cdk.staging
+cdk.out
+
 .idea
 .idea/*
 .env
 
-keys/*
+# Ignore private keys.
+keys/
+
+# Testing directory.
+/coverage
+
+tmp/
+deployment-config.json
+
+# The docs say that this should be committed but, given that this is a public
+# repo, that seems like a bad idea.
+# https://docs.aws.amazon.com/cdk/latest/guide/best-practices.html#best-practices-apps
+cdk.context.json
