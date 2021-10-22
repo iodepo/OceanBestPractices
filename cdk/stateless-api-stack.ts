@@ -1,9 +1,13 @@
-import { Construct, Stack, StackProps } from "@aws-cdk/core";
+import {
+  Construct,
+  Stack,
+  StackProps,
+} from '@aws-cdk/core';
 import { IDomain } from '@aws-cdk/aws-elasticsearch';
-import Ingest from "./ingest";
-import { Function } from "@aws-cdk/aws-lambda";
-import Api from "./api";
-import { IDistribution } from "@aws-cdk/aws-cloudfront";
+import { Function } from '@aws-cdk/aws-lambda';
+import { IDistribution } from '@aws-cdk/aws-cloudfront';
+import Ingest from './ingest';
+import Api from './api';
 
 interface StatelessApiStackProps extends StackProps {
   elasticsearch: IDomain
@@ -24,7 +28,7 @@ export default class StatelessApiStack extends Stack {
       stackName: `${stage}-obp-cdk-stateless-api`,
       description: `Stateless API stack for the "${stage}" stage`,
       terminationProtection: true,
-      ...superProps
+      ...superProps,
     });
 
     const textExtractorFunction = Function.fromFunctionArn(
@@ -37,14 +41,14 @@ export default class StatelessApiStack extends Stack {
       elasticsearchDomain: elasticsearch,
       stage,
       textExtractorFunction,
-      websiteDistribution
+      websiteDistribution,
     });
 
     new Api(this, 'Api', {
       stage,
       region: this.region,
       elasticsearch,
-      websiteDistribution
+      websiteDistribution,
     });
   }
 }

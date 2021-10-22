@@ -1,5 +1,10 @@
-import * as path from'path';
-import { Construct, RemovalPolicy, Stack, StackProps } from "@aws-cdk/core";
+import path from 'path';
+import {
+  Construct,
+  RemovalPolicy,
+  Stack,
+  StackProps,
+} from '@aws-cdk/core';
 import { Bucket } from '@aws-cdk/aws-s3';
 import {
   AllowedMethods,
@@ -9,13 +14,18 @@ import {
   DistributionProps,
   HttpVersion,
   SecurityPolicyProtocol,
-  ViewerProtocolPolicy
+  ViewerProtocolPolicy,
+  Distribution,
 } from '@aws-cdk/aws-cloudfront';
 import { S3Origin } from '@aws-cdk/aws-cloudfront-origins';
-import { Certificate } from "@aws-cdk/aws-certificatemanager";
-import { BucketDeployment, Source } from '@aws-cdk/aws-s3-deployment';
+import { Certificate } from '@aws-cdk/aws-certificatemanager';
+import {
+  BucketDeployment,
+  BucketDeploymentProps,
+  Source,
+} from '@aws-cdk/aws-s3-deployment';
 import { StringParameter } from '@aws-cdk/aws-ssm';
-import { Distribution } from '@aws-cdk/aws-cloudfront';
+import { Mutable } from 'type-fest';
 
 interface WebsiteStackProps extends StackProps {
   stage: string
@@ -30,7 +40,7 @@ export default class WebsiteStack extends Stack {
     const {
       domainNames,
       stage,
-      disableWebsiteCache,
+      disableWebsiteCache = false,
       ...superProps
     } = props;
 
@@ -38,7 +48,7 @@ export default class WebsiteStack extends Stack {
       stackName: `${stage}-obp-cdk-website`,
       description: `Website stack for the "${stage}" stage`,
       terminationProtection: true,
-      ...superProps
+      ...superProps,
     });
 
     const websiteBucket = new Bucket(this, 'WebsiteBucket', {
@@ -49,23 +59,33 @@ export default class WebsiteStack extends Stack {
 
     let sslOptions: Partial<DistributionProps> = {};
     if (domainNames !== undefined) {
-      const certificateArn = StringParameter.valueForStringParameter(this, `/OBP/${stage}/certificate-arn`);
+      const certificateArn = StringParameter.valueForStringParameter(
+        this,
+        `/OBP/${stage}/certificate-arn`
+      );
 
-      const certificate = Certificate.fromCertificateArn(this, 'Certificate', certificateArn);
+      const certificate = Certificate.fromCertificateArn(
+        this,
+        'Certificate',
+        certificateArn
+      );
 
       sslOptions = {
         certificate,
-        domainNames
+        domainNames,
       };
     }
 
     const cachePolicy = disableWebsiteCache
       ? CachePolicy.CACHING_DISABLED
-      : new CachePolicy(this, 'DefaultCachePolicy', {
+      : new CachePolicy(
+        this,
+        'DefaultCachePolicy',
+        {
           cookieBehavior: CacheCookieBehavior.all(),
-          queryStringBehavior: CacheQueryStringBehavior.all()
-        });
-
+          queryStringBehavior: CacheQueryStringBehavior.all(),
+        }
+      );
 
     this.cloudfrontDistribution = new Distribution(this, 'Distribution', {
       ...sslOptions,
@@ -77,21 +97,26 @@ export default class WebsiteStack extends Stack {
         {
           httpStatus: 404,
           responseHttpStatus: 200,
-          responsePagePath: '/index.html'
-        }
+          responsePagePath: '/index.html',
+        },
       ],
       defaultBehavior: {
         origin: new S3Origin(websiteBucket),
         viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
         allowedMethods: AllowedMethods.ALLOW_GET_HEAD,
-        cachePolicy
+        cachePolicy,
       },
     });
 
-    new BucketDeployment(this, 'WebsiteContent', {
+    const websiteContentProps: Mutable<BucketDeploymentProps> = {
       destinationBucket: websiteBucket,
       sources: [Source.asset(path.join(__dirname, '..', 'website', 'build'))],
-      distribution: disableWebsiteCache ? undefined : this.cloudfrontDistribution
-    });
+    };
+
+    if (disableWebsiteCache === false) {
+      websiteContentProps.distribution = this.cloudfrontDistribution;
+    }
+
+    new BucketDeployment(this, 'WebsiteContent', websiteContentProps);
   }
 }

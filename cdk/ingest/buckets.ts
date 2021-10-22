@@ -1,7 +1,18 @@
-import { IDistribution } from "@aws-cdk/aws-cloudfront";
-import { AnyPrincipal, PolicyStatement } from "@aws-cdk/aws-iam";
-import { Bucket, BucketAccessControl, HttpMethods } from "@aws-cdk/aws-s3";
-import { Construct, Duration, RemovalPolicy } from "@aws-cdk/core";
+import { IDistribution } from '@aws-cdk/aws-cloudfront';
+import {
+  AnyPrincipal,
+  PolicyStatement,
+} from '@aws-cdk/aws-iam';
+import {
+  Bucket,
+  BucketAccessControl,
+  HttpMethods,
+} from '@aws-cdk/aws-s3';
+import {
+  Construct,
+  Duration,
+  RemovalPolicy,
+} from '@aws-cdk/core';
 
 interface BucketsProps {
   stage: string
@@ -10,20 +21,26 @@ interface BucketsProps {
 
 export default class IngestBuckets extends Construct {
   public readonly documentMetadata: Bucket;
+
   public readonly documentSource: Bucket;
+
   public readonly textExtractorDestination: Bucket;
+
   public readonly textExtractorTemp: Bucket;
 
   constructor(scope: Construct, id: string, props: BucketsProps) {
     super(scope, id);
 
-    const { stage, websiteDistribution } = props;
+    const {
+      stage,
+      websiteDistribution,
+    } = props;
 
     this.documentMetadata = new Bucket(this, 'DocumentMetadata', {
       bucketName: `${stage}-obp-cdk-document-metadata`,
       lifecycleRules: [{ expiration: Duration.days(15) }],
       removalPolicy: RemovalPolicy.DESTROY,
-      autoDeleteObjects: true
+      autoDeleteObjects: true,
     });
 
     this.documentSource = new Bucket(this, 'DocumentSource', {
@@ -34,11 +51,11 @@ export default class IngestBuckets extends Construct {
           allowedHeaders: ['Authorization'],
           allowedMethods: [HttpMethods.GET, HttpMethods.HEAD],
           allowedOrigins: [`https://${websiteDistribution.distributionDomainName}`],
-          maxAge: 3000
-        }
+          maxAge: 3000,
+        },
       ],
       removalPolicy: RemovalPolicy.DESTROY,
-      autoDeleteObjects: true
+      autoDeleteObjects: true,
     });
 
     this.documentSource.addToResourcePolicy(new PolicyStatement({
@@ -51,14 +68,14 @@ export default class IngestBuckets extends Construct {
       bucketName: `${stage}-obp-cdk-doc-extracted-temp`,
       lifecycleRules: [{ expiration: Duration.days(5) }],
       removalPolicy: RemovalPolicy.DESTROY,
-      autoDeleteObjects: true
+      autoDeleteObjects: true,
     });
 
     this.textExtractorDestination = new Bucket(this, 'TextExtractorDestination', {
       bucketName: `${stage}-obp-cdk-doc-extracted`,
       lifecycleRules: [{ expiration: Duration.days(15) }],
       removalPolicy: RemovalPolicy.DESTROY,
-      autoDeleteObjects: true
+      autoDeleteObjects: true,
     });
   }
 }

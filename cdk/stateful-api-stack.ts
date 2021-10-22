@@ -1,7 +1,21 @@
-import { Construct, Stack, StackProps } from "@aws-cdk/core";
-import { Domain, ElasticsearchVersion } from '@aws-cdk/aws-elasticsearch';
-import { AnyPrincipal, Effect, PolicyStatement } from "@aws-cdk/aws-iam";
-import { BastionHostLinux, Vpc } from '@aws-cdk/aws-ec2';
+import {
+  Construct,
+  Stack,
+  StackProps,
+} from '@aws-cdk/core';
+import {
+  Domain,
+  ElasticsearchVersion,
+} from '@aws-cdk/aws-elasticsearch';
+import {
+  AnyPrincipal,
+  Effect,
+  PolicyStatement,
+} from '@aws-cdk/aws-iam';
+import {
+  BastionHostLinux,
+  Vpc,
+} from '@aws-cdk/aws-ec2';
 
 interface StatefulApiStackProps extends StackProps {
   stage: string
@@ -22,7 +36,7 @@ export default class StatefulApiStack extends Stack {
       stackName: `${stage}-obp-cdk-stateful-api`,
       description: `Stateful API stack for the "${stage}" stage`,
       terminationProtection: true,
-      ...superProps
+      ...superProps,
     });
 
     const vpc = Vpc.fromLookup(this, 'Vpc', { isDefault: true });
@@ -33,11 +47,9 @@ export default class StatefulApiStack extends Stack {
       version: ElasticsearchVersion.V6_8,
       capacity: {
         dataNodeInstanceType: esNodeType,
-        dataNodes: 1
+        dataNodes: 1,
       },
-      advancedOptions: {
-        'rest.action.multi.allow_explicit_index': 'true'
-      },
+      advancedOptions: { 'rest.action.multi.allow_explicit_index': 'true' },
       accessPolicies: [
         new PolicyStatement({
           effect: Effect.ALLOW,
@@ -47,12 +59,12 @@ export default class StatefulApiStack extends Stack {
             IpAddress: {
               'aws:SourceIp': [
                 esProxy.instancePrivateIp,
-                esProxy.instancePublicIp
-              ]
-            }
-          }
-        })
-      ]
+                esProxy.instancePublicIp,
+              ],
+            },
+          },
+        }),
+      ],
     });
   }
 }
