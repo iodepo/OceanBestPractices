@@ -8,7 +8,7 @@ require 'json'
 require 'uri'
 require 'optparse'
 
-require 'open-uri' 
+require 'open-uri'
 
 options = {}
 OptionParser.new do |opts|
@@ -52,10 +52,10 @@ def handles(limit = LIMIT, offset = OFFSET)
 
   # puts "#{req['User-Agent']}"
   # res = Net::HTTP.start(uri.hostname) { |http| http.request(req) }
-  
+
   res = open(DSPACE_ENDPOINT + DSPACE_PATH + "?limit=#{limit}&offset=#{offset}").read
   results = JSON.parse(res)
-  results.map() { |r| r["handle"] }
+  results.map() { |r| r["uuid"] }
   # else
   #   puts "Error:\n#{res.code}\n#{res.body}}"
   #   []
@@ -63,16 +63,16 @@ def handles(limit = LIMIT, offset = OFFSET)
 
 end
 
-def publish_handle(handle) 
+def publish_handle(handle)
   puts "Posting handle #{handle}..."
-  `aws sns publish --profile #{AWS_PROFILE} --topic-arn #{TOPIC_ARN} --message "http://hdl.handle.net/#{handle}"`
+  `aws sns publish --profile #{AWS_PROFILE} --topic-arn #{TOPIC_ARN} --message "#{handle}"`
 end
 
 req_limit = [10, LIMIT].min
 req_offset = OFFSET
 
-loop do 
-  
+loop do
+
   handles = handles(req_limit, req_offset)
   handles.each { |h| publish_handle(h) }
 
