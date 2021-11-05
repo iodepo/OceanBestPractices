@@ -1,0 +1,14 @@
+{
+  "name": "bulk-indexer",
+  "version": "1.0.0",
+  "description": "",
+  "main": "handler.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "p-map": "^4.0.0"
+  }
+}

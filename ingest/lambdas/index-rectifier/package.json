@@ -19,6 +19,7 @@
     "p-map": "^4.0.0"
   },
   "devDependencies": {
-    "aws-sdk-client-mock": "^0.5.5"
+    "aws-sdk-client-mock": "^0.5.5",
+    "nock": "^13.1.4"
   }
 }

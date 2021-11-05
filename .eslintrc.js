@@ -42,6 +42,7 @@ module.exports = {
     radix: ['error', 'as-needed'],
     'unicorn/custom-error-definition': 'error',
     'unicorn/no-unsafe-regex': 'error',
+    'unicorn/no-useless-undefined': 'off',
     'unicorn/no-unused-properties': 'error',
     'unicorn/prefer-module': 'off',
     'unicorn/prefer-node-protocol': 'off',

@@ -5,27 +5,35 @@ const { NodeHttpHandler } = require('@aws-sdk/node-http-handler');
 const { Sha256 } = require('@aws-crypto/sha256-browser');
 
 /**
+ * Signs and executes a request against Open Search. This code
+ * was copied (mostly) from https://docs.aws.amazon.com/opensearch-service/latest/developerguide/request-signing.html#request-signing-node
  *
- * @param {*} params
- * @returns
+ * @param {string} endpoint Open Search endpoint with or without protocol.
+ * @param {string} path Path of the Open Search request.
+ * @param {Object} body Body of the Open Search request.
+ * @param {Object} [options={}] Options to configure the request..
+ * @param {Object} [options.method=GET] HTTP method to use for the request.
+ * @param {Object} [options.region=us-east-1] Region in which the Open Search
+ * cluster exists.
+ *
+ * @returns {Promise<Object>} Open Search response for the given request.
  */
-const signAndRequest = async (params) => {
+const signAndRequest = async (endpoint, path, body, options = {}) => {
   const {
-    body,
-    endpoint,
-    path,
     method = 'GET',
     region = 'us-east-1',
-  } = params;
+  } = options;
+
+  const endpointWithoutProtocol = endpoint.replace(/^https?:\/\//, '');
 
   // Create the HTTP request
   const request = new HttpRequest({
     body: JSON.stringify(body),
     headers: {
       'Content-Type': 'application/json',
-      host: endpoint,
+      host: endpointWithoutProtocol,
     },
-    hostname: endpoint,
+    hostname: endpointWithoutProtocol,
     method,
     path,
   });
@@ -45,12 +53,13 @@ const signAndRequest = async (params) => {
   const { response } = await client.handle(signedRequest);
   console.log(`${response.statusCode} ${response.body.statusMessage}`);
   let responseBody = '';
-  await new Promise(() => {
+  await new Promise((resolve) => {
     response.body.on('data', (chunk) => {
       responseBody += chunk;
     });
     response.body.on('end', () => {
       console.log(`Response body: ${responseBody}`);
+      resolve(responseBody);
     });
   }, (error) => {
     console.log(`Error: ${error}`);
@@ -60,6 +69,26 @@ const signAndRequest = async (params) => {
 };
 
 module.exports = {
+  /**
+   * Queries OpenSearch for all items and returns them while also
+   * opening a scroll.
+   * See https://opensearch.org/docs/latest/opensearch/rest-api/scroll/
+   * for more details.
+   *
+   * @param {string} endpoint Open Search endpoint.
+   * @param {string} index Name of the index to query.
+   * @param {Object} [options={}] Options to the request.
+   * @param {Object} [options.includes=['*']] List of index fields
+   * to include in response to the query.
+   * @param {Object} [options.region=us-east-1] Region in which the
+   * Open Search index exists.
+   * @param {Object} [options.scrollTimeout=60] Specifies the amount of
+   * time the search context is maintained.
+   * @param {Object} [options.size=500] Number of results to include in a
+   * a query response.
+   *
+   * @returns {Promise<Object>} Open Search query results including a scroll ID.
+   */
   openScroll: async (endpoint, index, options = {}) => {
     const {
       includes = ['*'],
@@ -68,55 +97,99 @@ module.exports = {
       size = 500,
     } = options;
 
-    const params = {
-      body: {
-        _source: {
-          includes,
-        },
-        size,
+    const body = {
+      _source: {
+        includes,
       },
-      path: `${index}/_search?scroll=${scrollTimeout}m`,
-      endpoint,
-      region,
+      size,
     };
 
-    return signAndRequest(params);
+    return signAndRequest(
+      endpoint,
+      `${index}/_search?scroll=${scrollTimeout}m`,
+      body,
+      { region }
+    );
   },
 
+  /**
+   * Returns search results for an open Open Search scroll.
+   * See https://opensearch.org/docs/latest/opensearch/rest-api/scroll/
+   * for more details.
+   *
+   * @param {string} endpoint Open Search endpoint.
+   * @param {string} scrollId Scroll ID of the open scroll.
+   * @param {Object} [options={}] Options to the request.
+   * @param {string} [options.region=us-east-1] Region in which the Open Search
+   * cluster exists.
+   * @param {number} [options.scrollTimeout=60] Specifies the amount of time the
+   * search context is maintained.
+   *
+   * @returns {Promise<Object>} Open Search query results including scroll ID.
+   * The scroll ID in this response should always be used in future next
+   * scroll requests.
+   */
   nextScroll: async (endpoint, scrollId, options = {}) => {
     const {
       region = 'us-east-1',
       scrollTimeout = 60,
     } = options;
 
-    const params = {
-      body: {
-        scroll: `${scrollTimeout}m`,
-        scroll_id: scrollId,
-      },
-      path: '_search/scroll',
-      endpoint,
-      region,
+    const body = {
+      scroll: `${scrollTimeout}m`,
+      scroll_id: scrollId,
     };
 
-    return signAndRequest(params);
+    return signAndRequest(
+      endpoint,
+      '_search/scroll',
+      body,
+      { region }
+    );
   },
 
+  /**
+   * Closes an open Open Search scroll query.
+   * See https://opensearch.org/docs/latest/opensearch/rest-api/scroll/
+   * for more details.
+   *
+   * @param {string} endpoint Open Search endpoint.
+   * @param {string} scrollId Scroll ID of the open scroll.
+   * @param {Object} [options={}] Options to the request.
+   * @param {string} [options.region=us-east-1] Region in which
+   * the Open Search cluster exists.
+   *
+   * @returns {Promise<Object>} Open Search close scroll response.
+   */
   closeScroll: async (endpoint, scrollId, options = {}) => {
     const {
       region = 'us-east-1',
     } = options;
 
-    const params = {
-      method: 'DELETE',
-      path: `_search/scroll/${scrollId}`,
+    return signAndRequest(
       endpoint,
-      region,
-    };
-
-    return signAndRequest(params);
+      `_search/scroll/${scrollId}`,
+      undefined,
+      {
+        method: 'DELETE',
+        region,
+      }
+    );
   },
 
+  /**
+   * Deletes items from an Open Search index using the _bulk API.
+   * See: https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-bulk.html
+   *
+   * @param {string} endpoint Open Search endpoint.
+   * @param {string} index Name of the index where the items exist.
+   * @param {string[]} ids List of IDs to delete.
+   * @param {Object} [options={}] Options for the request.
+   * @param {string} [options.region=us-east-1] Region in which the Open
+   * Search cluster exists.
+   *
+   * @returns {Promise<Object>} Result of Open Search bulk delete.
+   */
   bulkDelete: async (endpoint, index, ids, options = {}) => {
     const {
       region = 'us-east-1',
@@ -130,14 +203,18 @@ module.exports = {
       },
     }));
 
+    const body = `${bulkData.map((d) => JSON.stringify(d)).join('\n')}\n`;
+
     const params = {
-      body: `${bulkData.map((d) => JSON.stringify(d)).join('\n')}\n`,
       method: 'POST',
-      path: '_bulk',
-      endpoint,
       region,
     };
 
-    return signAndRequest(params);
+    return signAndRequest(
+      endpoint,
+      '_bulk',
+      body,
+      params
+    );
   },
 };

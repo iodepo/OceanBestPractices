@@ -1,5 +1,7 @@
+// @ts-check
 const pMap = require('p-map');
-const DSpaceClient = require('./dspace-client');
+
+const dspaceClient = require('./dspace-client');
 const osClient = require('./open-search-client');
 const utils = require('./utils');
 
@@ -10,9 +12,6 @@ module.exports = {
    *
    * @param {Object[]} items List of existing index items that need to
    *                         be updated.
-   * @param {string} dspaceEndpoint Endpoint for the DSpace repository
-   *                                from which the items should be ingest.
-   *                                The endpoint should include the protocol.
    * @param {string} ingestTopicArn SNS Topic ARN where new documents
    *                                are queued.
    * @param {Object} [options={}] Additional options.
@@ -21,7 +20,6 @@ module.exports = {
    */
   commitUpdatedItems: async (
     items,
-    dspaceEndpoint,
     ingestTopicArn,
     options = {}
   ) => {
@@ -34,7 +32,8 @@ module.exports = {
       async (item) => {
         try {
           await utils.queueIngestDocument(
-            `${dspaceEndpoint}/${item.handle}`,
+            // eslint-disable-next-line no-underscore-dangle
+            item._id,
             ingestTopicArn,
             { region }
           );
@@ -89,15 +88,18 @@ module.exports = {
    *                            the OpenSearch item needs to be marked as
    *                            needing update.
    *
-   * @returns True if the index item should be marked as updated when compared
-  *           to the same DSpace item.
+   * @returns {boolean} True if the index item should be marked as updated when
+   * compared to the same DSpace item.
    */
   isUpdated: (indexItem, dspaceItem) => {
-    if (new Date(indexItem.lastModified) > new Date(dspaceItem.lastModified)) {
+    // eslint-disable-next-line no-underscore-dangle
+    if (new Date(indexItem._source.lastModified)
+        < new Date(dspaceItem.lastModified)) {
       return true;
     }
 
-    const indexItemPDFBitstream = indexItem.bitstreams
+    // eslint-disable-next-line no-underscore-dangle
+    const indexItemPDFBitstream = indexItem._source.bitstreams
       .find((b) => (b.bundleName === 'ORIGINAL' && b.mimeType === 'application/pdf'));
     const dspaceItemPDFBitstream = dspaceItem.bitstreams
       .find((b) => (b.bundleName === 'ORIGINAL' && b.mimeType === 'application/pdf'));
@@ -117,7 +119,7 @@ module.exports = {
    * @param {string} [options.region=us-east-1] AWS region containing the
    *                                            infrastructure.
    *
-   * @returns {Object}
+   * @returns {Promise<Object>} Object with removed and updated items.
    */
   diff: async (
     openSearchEndpoint,
@@ -133,10 +135,8 @@ module.exports = {
       updated: [],
     };
 
-    const dsc = new DSpaceClient(dspaceEndpoint);
-
     const scrollOptions = {
-      includes: ['_id', 'uuid', 'bitstreams', 'lastModified'],
+      includes: ['uuid', 'bitstreams', 'lastModified'],
       region,
     };
 
@@ -149,18 +149,22 @@ module.exports = {
         hits,
         async (indexItem) => {
           try {
-            const dspaceItem = await dsc.getItem(indexItem.uuid);
+            const dspaceItem = await dspaceClient.getItem(
+              dspaceEndpoint,
+              // eslint-disable-next-line no-underscore-dangle
+              indexItem._source.uuid
+            );
 
             // If we can't find the DSpace item for this UUID consider it
             // deleted. Also, check if the metadata has changed and if so
             // mark it updated. Otherwise consider it unchanged.
             if (dspaceItem === undefined) {
               diffResult.removed.push(indexItem);
-            } else if (this.isUpdated(indexItem, dspaceItem)) {
+            } else if (module.exports.isUpdated(indexItem, dspaceItem)) {
               diffResult.updated.push(indexItem);
             }
-          } catch {
-            console.log(`ERROR: Encountered error for diff of item: ${indexItem}`);
+          } catch (error) {
+            console.log(`ERROR: Encountered error: ${error} for diff of item: ${JSON.stringify(indexItem)}`);
           }
         },
         { concurrency: 5 }

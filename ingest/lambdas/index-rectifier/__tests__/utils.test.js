@@ -20,7 +20,7 @@ describe('utils', () => {
       mockSNS.on(PublishCommand).resolves(mockPublishCommandOutput);
 
       const result = await utils.queueIngestDocument(
-        'https://example.com/handle/123',
+        'def456',
         'arn:example:123'
       );
 
