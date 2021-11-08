@@ -75,8 +75,8 @@ sudo docker ps
 
 Loading a small ontology is easy if a `.owl` file is available. Navigate to the Virtuoso Conductor and choose _Database -> Interactive SQL_. In the SQL console, you can load a `.owl` file by executing a command similar to:
 
-```sql
-LOAD <http://purl.unep.org/sdg/sdgio.owl>;
+```text
+SPARQL LOAD <http://purl.unep.org/sdg/sdgio.owl>;
 ```
 
 ### [Importing a Large OWL Ontology (Bulk Loading)](#import-large-owl)
@@ -181,8 +181,8 @@ ENVO and SDGIO were reasonably sized Ontologies. You can use the instructions fo
 
 For example: after connecting to the Interactive SQL shell in the Virtuoso Conductor you can import ENVO by running the following SPARQL command:
 
-```sql
-LOAD <http://purl.obolibrary.org/obo/envo.owl>;
+```text
+SPARQL LOAD <http://purl.obolibrary.org/obo/envo.owl>;
 ```
 
 #### SKOS Vocabularies
