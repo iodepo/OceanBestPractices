@@ -37,6 +37,8 @@ export default class IngestLambdas extends Construct {
 
   public readonly indexRectifier: Function;
 
+  public readonly bulkIngester: Function;
+
   constructor(scope: Construct, id: string, props: LambdasProps) {
     super(scope, id);
 
@@ -135,6 +137,20 @@ export default class IngestLambdas extends Construct {
         INGEST_TOPIC_ARN: snsTopics.availableDocument.topicArn,
         OPEN_SEARCH_ENDPOINT: elasticsearchDomain.domainEndpoint,
         DSPACE_ENDPOINT: 'https://repository.oceanbestpractices.org',
+      },
+    });
+    snsTopics.availableDocument.grantPublish(this.indexRectifier);
+
+    this.bulkIngester = new Function(this, 'BulkIngester', {
+      functionName: `${stage}-obp-cdk-bulk-ingester`,
+      handler: 'handler.handler',
+      runtime: Runtime.NODEJS_14_X,
+      code: Code.fromAsset(path.join(lambdasPath, 'bulk-ingester')),
+      description: 'Queues all documents available in DSpace for ingest.',
+      timeout: Duration.minutes(15),
+      environment: {
+        DSPACE_ENDPOINT: 'https://repository.oceanbestpractices.org',
+        INGEST_TOPIC_ARN: snsTopics.availableDocument.topicArn,
       },
     });
     snsTopics.availableDocument.grantPublish(this.indexRectifier);
