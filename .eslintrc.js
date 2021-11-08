@@ -82,12 +82,25 @@ module.exports = {
       },
     },
     {
-      files: ['cdk/**/*.ts'],
+      files: [
+        'bin/*.ts',
+        'cdk/**/*.ts',
+      ],
       rules: {
         'no-new': 'off',
         '@typescript-eslint/ban-types': [
           'error',
           { types: { Function: false } },
+        ],
+        'unicorn/import-style': [
+          'error',
+          {
+            styles: {
+              path: {
+                namespace: true,
+              },
+            },
+          },
         ],
       },
     },

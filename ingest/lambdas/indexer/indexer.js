@@ -2,8 +2,6 @@ const AWS = require('aws-sdk');
 
 const s3 = new AWS.S3();
 
-const region = process.env.REGION || 'us-east-1';
-
 const metadataBucketName = process.env.DOCUMENT_METADATA_BUCKET;
 
 const esHost = process.env.ELASTIC_SEARCH_HOST;
@@ -57,6 +55,8 @@ const mapping = {
 };
 
 exports.handler = (event, context, callback) => {
+  const region = context.invokedFunctionArn.split(':')[3];
+
   let uuid; let contentBucketName; let contentKey; let sourceKey; let
     metadataKey;
 
@@ -204,10 +204,10 @@ function mapMetadata(metadata) {
   return indexDoc;
 }
 
-function indexDocument(doc, callback) {
+function indexDocument(doc, region, callback) {
   const indexBody = JSON.stringify(doc);
 
-  const req = getIndexRequest(doc.uuid, indexBody);
+  const req = getIndexRequest(doc.uuid, indexBody, region);
 
   const signer = new AWS.Signers.V4(req, 'es');
   signer.addAuthorization(creds, new Date());
@@ -236,7 +236,7 @@ function indexDocument(doc, callback) {
   });
 }
 
-function getIndexRequest(id, body) {
+function getIndexRequest(id, body, region) {
   const req = new AWS.HttpRequest(esEndpoint);
   req.method = 'POST';
   req.path = `/documents/doc/${id}`;
@@ -249,7 +249,7 @@ function getIndexRequest(id, body) {
   return req;
 }
 
-function buildPercolatorRequest(body) {
+function buildPercolatorRequest(body, region) {
   const req = new AWS.HttpRequest(esEndpoint);
   req.method = 'POST';
   req.path = '/terms/_search';
@@ -262,7 +262,7 @@ function buildPercolatorRequest(body) {
   return req;
 }
 
-function percolateTerms(title, contents, callback) {
+function percolateTerms(title, contents, region, callback) {
   const from = 0; const
     size = 300;
   const percolatorQuery = {
@@ -279,7 +279,7 @@ function percolateTerms(title, contents, callback) {
     from,
   };
 
-  const req = buildPercolatorRequest(JSON.stringify(percolatorQuery));
+  const req = buildPercolatorRequest(JSON.stringify(percolatorQuery), region);
   makePercolatorRequest(req, (err, hits) => {
     if (err === null) {
       const hitsData = hits.hits;

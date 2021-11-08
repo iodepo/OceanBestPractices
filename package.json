@@ -9,13 +9,16 @@
   "scripts": {
     "build": "./bin/build.sh",
     "cdk:list": "cdk list",
-    "cdk:dev:deploy": "cdk deploy Dev/*",
+    "cdk:dev:deploy": "cdk deploy Dev/* && npm run cdk:dev:update-config",
     "cdk:dev:destroy": "cdk destroy Dev/*",
     "cdk:dev:diff": "cdk diff Dev/*",
-    "cdk:prod:deploy": "cdk deploy Prod/*",
+    "cdk:dev:update-config": "ts-node bin/update-config.ts dev",
+    "cdk:prod:deploy": "cdk deploy Prod/* && npm run cdk:prod:update-config",
     "cdk:prod:diff": "cdk diff Prod/*",
-    "cdk:staging:deploy": "cdk deploy Staging/*",
+    "cdk:prod:update-config": "ts-node bin/update-config.ts prod",
+    "cdk:staging:deploy": "cdk deploy Staging/* && npm run cdk:staging:update-config",
     "cdk:staging:diff": "cdk diff Staging/*",
+    "cdk:staging:update-config": "ts-node bin/update-config.ts staging",
     "test": "jest",
     "test:watch": "jest --watchAll",
     "lint": "npm run lint:tsc && npm run lint:eslint",
@@ -43,6 +46,10 @@
     "@aws-cdk/aws-ssm": "^1.129.0",
     "@aws-cdk/core": "^1.129.0",
     "@aws-cdk/pipelines": "^1.129.0",
+    "@aws-sdk/client-cloudformation": "^3.37.0",
+    "@aws-sdk/client-s3": "^3.37.0",
+    "@aws-sdk/client-ssm": "^3.37.0",
+    "source-map-support": "^0.5.16",
     "type-fest": "^2.5.1"
   },
   "devDependencies": {
@@ -60,7 +67,6 @@
     "eslint-plugin-promise": "^5.1.1",
     "eslint-plugin-unicorn": "^37.0.1",
     "jest": "26.6.0",
-    "source-map-support": "^0.5.16",
     "ts-node": "^9.0.0",
     "typescript": "^4.4.3",
     "utf-8-validate": "^5.0.2"

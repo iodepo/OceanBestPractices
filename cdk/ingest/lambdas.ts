@@ -1,4 +1,4 @@
-import path from 'path';
+import * as path from 'path';
 import { IDomain } from '@aws-cdk/aws-elasticsearch';
 import {
   Code,
