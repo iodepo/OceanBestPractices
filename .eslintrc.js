@@ -54,6 +54,12 @@ module.exports = {
   },
   overrides: [
     {
+      files: ['api/lambdas/*', 'ingest/lambdas/*'],
+      rules: {
+        'import/prefer-default-export': 'off',
+      },
+    },
+    {
       files: ['**/*.ts', '**/*.tsx'],
       parser: '@typescript-eslint/parser',
       plugins: [

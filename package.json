@@ -50,11 +50,13 @@
     "@aws-sdk/client-cloudformation": "^3.37.0",
     "@aws-sdk/client-s3": "^3.37.0",
     "@aws-sdk/client-ssm": "^3.37.0",
+    "aws-sdk": "^2.1025.0",
     "source-map-support": "^0.5.16",
     "type-fest": "^2.5.1",
     "xml2js": "^0.4.23"
   },
   "devDependencies": {
+    "@types/aws-lambda": "^8.10.85",
     "@types/lodash": "^4.14.176",
     "@types/node": "^12.0.0",
     "@typescript-eslint/eslint-plugin": "^5.1.0",
@@ -69,6 +71,7 @@
     "eslint-plugin-unicorn": "^37.0.1",
     "jest": "^27.3.1",
     "lodash": "^4.17.21",
+    "ts-loader": "^9.2.6",
     "ts-node": "^9.0.0",
     "typescript": "^4.4.3",
     "utf-8-validate": "^5.0.2",

@@ -1,0 +1,15 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "experimentalDecorators": true,
+    "typeRoots": [
+      "./node_modules/@types"
+    ],
+    "resolveJsonModule": true,
+    "exactOptionalPropertyTypes": false
+  },
+  "exclude": [
+    "node_modules",
+    "cdk.out"
+  ]
+}

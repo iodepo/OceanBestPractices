@@ -40,9 +40,25 @@ module.exports = async () => {
       ...apiEntries,
       ...ingestEntries,
     },
+    module: {
+      rules: [
+        {
+          test: /\.ts$/,
+          use: {
+            loader: 'ts-loader',
+            options: {
+              configFile: 'tsconfig-webpack.json',
+            },
+          },
+          exclude: /node_modules/,
+        },
+      ],
+    },
     devtool: 'source-map',
     externals: { 'aws-sdk': 'aws-sdk' },
-    resolve: { extensions: ['.js'] },
+    resolve: {
+      extensions: ['.ts', '...'],
+    },
     output: {
       path: path.join(process.cwd(), 'dist'),
       library: { type: 'commonjs' },
