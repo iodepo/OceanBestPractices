@@ -1,11 +1,3 @@
-# Ignore anything in the samples/outputs folder. This is just a scratch directory for escaping sample text
-samples/outputs
-
-# Ignore lambda zip files created to upload to S3.
-api/*.zip
-ingest/downloader/*.zip
-ingest/indexer/*.zip
-ingest/scheduler/*.zip
-
-# Package directories.
-node_modules
+# Ignore anything in the samples/outputs folder. This is just a scratch
+# directory for escaping sample text
+samples/outputs/

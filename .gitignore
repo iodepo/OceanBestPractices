@@ -22,3 +22,5 @@ deployment-config.json
 # repo, that seems like a bad idea.
 # https://docs.aws.amazon.com/cdk/latest/guide/best-practices.html#best-practices-apps
 cdk.context.json
+
+/dist/
