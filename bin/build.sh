@@ -2,6 +2,7 @@
 
 set -e
 
+rm -rf dist
 npx webpack
 
 (

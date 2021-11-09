@@ -8,13 +8,17 @@ const getEntries = async (entriesPath, prefix) => {
   const files = await readdir(entriesPath);
 
   return _(files)
-    .map((f) => [
-      `${prefix}-${path.parse(f).name}`,
-      {
-        import: path.resolve(path.join(entriesPath, f)),
-        filename: path.join(prefix, '[name]', 'handler.js'),
-      },
-    ])
+    .map((f) => {
+      const { name } = path.parse(f);
+
+      return [
+        `${prefix}-${name}`,
+        {
+          import: path.resolve(path.join(entriesPath, f)),
+          filename: path.join(prefix, name, 'lambda.js'),
+        },
+      ];
+    })
     .fromPairs()
     .value();
 };
