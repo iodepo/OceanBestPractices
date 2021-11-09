@@ -17,7 +17,7 @@ import { StringParameter } from '@aws-cdk/aws-ssm';
 import { IDistribution } from '@aws-cdk/aws-cloudfront';
 import { IDomain } from '@aws-cdk/aws-elasticsearch';
 
-const lambdasPath = path.join(__dirname, '..', '..', 'api', 'lambdas');
+const lambdasPath = path.join(__dirname, '..', '..', 'dist', 'api');
 
 interface ApiProps {
   elasticsearch: IDomain

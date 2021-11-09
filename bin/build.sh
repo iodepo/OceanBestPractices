@@ -2,12 +2,7 @@
 
 set -e
 
-(
-  set -e
-  cd ingest/lambdas/scheduler
-  rm -rf node_modules
-  npm ci --production
-)
+npx webpack
 
 (
   set -e

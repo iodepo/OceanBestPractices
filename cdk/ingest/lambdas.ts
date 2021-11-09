@@ -13,7 +13,7 @@ import {
 import IngestBuckets from './buckets';
 import IngestSnsTopics from './sns-topics';
 
-const lambdasPath = path.join(__dirname, '..', '..', 'ingest', 'lambdas');
+const lambdasPath = path.join(__dirname, '..', '..', 'dist', 'ingest');
 
 interface LambdasProps {
   buckets: IngestBuckets
