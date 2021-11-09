@@ -1,9 +1,9 @@
 // @ts-check
 const pMap = require('p-map');
 
-const dspaceClient = require('./dspace-client');
-const osClient = require('./open-search-client');
-const utils = require('./utils');
+const dspaceClient = require('../../lib/dspace-client');
+const osClient = require('../../lib/open-search-client');
+const utils = require('./ingest-queue');
 
 module.exports = {
   /**

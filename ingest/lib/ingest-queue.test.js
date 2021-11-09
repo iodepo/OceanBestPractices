@@ -1,11 +1,11 @@
 const { mockClient } = require('aws-sdk-client-mock');
 const { SNSClient, PublishCommand } = require('@aws-sdk/client-sns');
 
-const utils = require('../utils');
+const utils = require('./ingest-queue');
 
 const mockSNS = mockClient(SNSClient);
 
-describe('utils', () => {
+describe('ingest-queue', () => {
   describe('queueAvailableDocument', () => {
     beforeEach(() => {
       mockSNS.reset();

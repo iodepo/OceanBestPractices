@@ -1,6 +1,6 @@
-const bulkIngester = require('../bulk-ingester');
-const dspaceClient = require('../../index-rectifier/dspace-client');
-const utils = require('../../index-rectifier/utils');
+const bulkIngester = require('./bulk-ingester');
+const dspaceClient = require('../../lib/dspace-client');
+const utils = require('./ingest-queue');
 
 describe('bulk-ingester', () => {
   test('should queue all DSpace items for ingest', async () => {

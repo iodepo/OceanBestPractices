@@ -1,8 +1,8 @@
 /* eslint-disable no-underscore-dangle */
-const dspaceClient = require('../dspace-client');
-const ir = require('../index-rectifier');
-const osClient = require('../open-search-client');
-const utils = require('../utils');
+const dspaceClient = require('../../lib/dspace-client');
+const ir = require('./index-rectifier');
+const osClient = require('../../lib/open-search-client');
+const utils = require('./ingest-queue');
 
 describe('index-rectifier', () => {
   describe('commitUpdatedItems', () => {

@@ -1,8 +1,8 @@
 // @ts-check
 const pMap = require('p-map');
 
-const dspaceClient = require('../index-rectifier/dspace-client');
-const utils = require('../index-rectifier/utils');
+const dspaceClient = require('../../lib/dspace-client');
+const utils = require('./ingest-queue');
 
 /**
  * Fetches all available items from DSpace and queues them for ingest.

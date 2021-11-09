@@ -6,8 +6,9 @@ const { readdir } = require('fs/promises');
 
 const getEntries = async (entriesPath, prefix) => {
   const files = await readdir(entriesPath);
+  const lambdaFiles = files.filter((f) => !f.endsWith('.test.js'));
 
-  return _(files)
+  return _(lambdaFiles)
     .map((f) => [
       `${prefix}-${path.parse(f).name}`,
       {
