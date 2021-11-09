@@ -12,13 +12,10 @@ import {
   Effect,
   PolicyStatement,
 } from '@aws-cdk/aws-iam';
-import {
-  BastionHostLinux,
-  Vpc,
-} from '@aws-cdk/aws-ec2';
 
 interface StatefulApiStackProps extends StackProps {
   stage: string
+  bastionIps: [string, ...string[]]
   esNodeType?: string
 }
 
@@ -28,6 +25,7 @@ export default class StatefulApiStack extends Stack {
   constructor(scope: Construct, id: string, props: StatefulApiStackProps) {
     const {
       stage,
+      bastionIps,
       esNodeType = 't2.small.elasticsearch',
       ...superProps
     } = props;
@@ -38,10 +36,6 @@ export default class StatefulApiStack extends Stack {
       terminationProtection: true,
       ...superProps,
     });
-
-    const vpc = Vpc.fromLookup(this, 'Vpc', { isDefault: true });
-
-    const esProxy = new BastionHostLinux(this, 'EsProxy', { vpc });
 
     this.elasticsearchDomain = new Domain(this, 'Elasticsearch', {
       version: ElasticsearchVersion.V6_8,
@@ -57,10 +51,7 @@ export default class StatefulApiStack extends Stack {
           principals: [new AnyPrincipal()],
           conditions: {
             IpAddress: {
-              'aws:SourceIp': [
-                esProxy.instancePrivateIp,
-                esProxy.instancePublicIp,
-              ],
+              'aws:SourceIp': bastionIps,
             },
           },
         }),
