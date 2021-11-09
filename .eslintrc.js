@@ -35,6 +35,7 @@ module.exports = {
       },
     ],
     'no-console': 'off',
+    'no-restricted-syntax': 'off',
     'object-property-newline': [
       'error',
       { allowAllPropertiesOnSameLine: false },

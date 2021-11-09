@@ -21,7 +21,7 @@ interface LambdasProps {
   scheduleInterval: number
   snsTopics: IngestSnsTopics
   textExtractorFunction: IFunction
-  stage: string
+  stackName: string
 }
 
 export default class IngestLambdas extends Construct {
@@ -43,12 +43,12 @@ export default class IngestLambdas extends Construct {
       elasticsearchDomain,
       scheduleInterval = 300,
       snsTopics,
-      stage,
+      stackName,
       textExtractorFunction,
     } = props;
 
     this.indexer = new Function(this, 'Indexer', {
-      functionName: `${stage}-obp-cdk-ingest-indexer`,
+      functionName: `${stackName}-ingest-indexer`,
       handler: 'lambda.handler',
       runtime: Runtime.NODEJS_14_X,
       code: Code.fromAsset(path.join(lambdasPath, 'indexer')),
@@ -65,7 +65,7 @@ export default class IngestLambdas extends Construct {
     elasticsearchDomain.grantWrite(this.indexer);
 
     this.bitstreamsDownloader = new Function(this, 'BitstreamsDownloader', {
-      functionName: `${stage}-obp-cdk-ingest-bitstreams-downloader`,
+      functionName: `${stackName}-ingest-bitstreams-downloader`,
       handler: 'lambda.handler',
       runtime: Runtime.NODEJS_14_X,
       code: Code.fromAsset(path.join(lambdasPath, 'bitstreams-downloader')),
@@ -81,7 +81,7 @@ export default class IngestLambdas extends Construct {
     this.indexer.grantInvoke(this.bitstreamsDownloader);
 
     this.invokeExtractor = new Function(this, 'InvokeExtractor', {
-      functionName: `${stage}-obp-cdk-ingest-invoke-extractor`,
+      functionName: `${stackName}-ingest-invoke-extractor`,
       handler: 'lambda.handler',
       runtime: Runtime.NODEJS_14_X,
       code: Code.fromAsset(path.join(lambdasPath, 'invoke-extractor')),
@@ -96,7 +96,7 @@ export default class IngestLambdas extends Construct {
     textExtractorFunction.grantInvoke(this.invokeExtractor);
 
     this.metadataDownloader = new Function(this, 'MetadataDownloader', {
-      functionName: `${stage}-obp-cdk-ingest-metadata-downloader`,
+      functionName: `${stackName}-ingest-metadata-downloader`,
       handler: 'lambda.handler',
       runtime: Runtime.NODEJS_14_X,
       code: Code.fromAsset(path.join(lambdasPath, 'metadata-downloader')),
@@ -109,7 +109,7 @@ export default class IngestLambdas extends Construct {
     buckets.documentMetadata.grantWrite(this.metadataDownloader);
 
     this.scheduler = new Function(this, 'Scheduler', {
-      functionName: `${stage}-obp-cdk-ingest-scheduler`,
+      functionName: `${stackName}-ingest-scheduler`,
       handler: 'lambda.handler',
       runtime: Runtime.NODEJS_14_X,
       code: Code.fromAsset(path.join(lambdasPath, 'scheduler')),

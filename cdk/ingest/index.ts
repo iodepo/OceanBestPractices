@@ -10,15 +10,15 @@ import {
   SnsDestination,
 } from '@aws-cdk/aws-s3-notifications';
 import { IFunction } from '@aws-cdk/aws-lambda';
-import { IDomain } from '@aws-cdk/aws-elasticsearch';
 import { IDistribution } from '@aws-cdk/aws-cloudfront';
+import { IDomain } from '@aws-cdk/aws-opensearchservice';
 import IngestLambdas from './lambdas';
 import IngestSnsTopics from './sns-topics';
 import IngestBuckets from './buckets';
 
 interface IngestProps {
-  elasticsearchDomain: IDomain
-  stage: string
+  openSearch: IDomain
+  stackName: string
   scheduleInterval?: number
   textExtractorFunction: IFunction
   websiteDistribution: IDistribution
@@ -29,26 +29,26 @@ export default class Ingest extends Construct {
     super(scope, id);
 
     const {
-      elasticsearchDomain,
+      openSearch,
       scheduleInterval = 300,
-      stage,
+      stackName,
       textExtractorFunction,
       websiteDistribution,
     } = props;
 
     const buckets = new IngestBuckets(this, 'Buckets', {
-      stage,
+      stackName,
       websiteDistribution,
     });
 
-    const snsTopics = new IngestSnsTopics(this, 'SnsTopics', { stage });
+    const snsTopics = new IngestSnsTopics(this, 'SnsTopics', { stackName });
 
     const lambdas = new IngestLambdas(this, 'Lambdas', {
       buckets,
-      elasticsearchDomain,
+      elasticsearchDomain: openSearch,
       scheduleInterval,
       snsTopics,
-      stage,
+      stackName,
       textExtractorFunction,
     });
 

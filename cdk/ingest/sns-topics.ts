@@ -2,7 +2,7 @@ import { Topic } from '@aws-cdk/aws-sns';
 import { Construct } from '@aws-cdk/core';
 
 interface SnsTopicsProps {
-  stage: string
+  stackName: string
 }
 
 export default class IngestSnsTopics extends Construct {
@@ -16,13 +16,13 @@ export default class IngestSnsTopics extends Construct {
     this.availableDocument = new Topic(
       this,
       'AvailableDocument',
-      { displayName: `${props.stage} Available Documents Topic` }
+      { displayName: `${props.stackName} Available Documents Topic` }
     );
 
     this.textExtractor = new Topic(
       this,
       'TextExtractor',
-      { displayName: `${props.stage}-Text Extractor Completed Topic` }
+      { displayName: `${props.stackName}-Text Extractor Completed Topic` }
     );
   }
 }

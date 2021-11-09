@@ -4,8 +4,9 @@ import 'source-map-support/register';
 import {
   App,
   Environment,
+  Tags,
 } from '@aws-cdk/core';
-import Obp from '../cdk/obp';
+import ObpStack from '../cdk/obp-stack';
 
 if (process.env['CDK_DEFAULT_ACCOUNT'] === undefined) {
   throw new Error('CDK_DEFAULT_ACCOUNT is not set');
@@ -22,20 +23,22 @@ const env: Required<Environment> = {
 
 const app = new App();
 
-new Obp(app, 'Dev', {
+const devStack = new ObpStack(app, 'DevStack', {
   env,
-  stage: 'dev',
-  esNodeType: 't3.small.elasticsearch',
-  terminationProtection: false,
+  stackName: 'dev-obp-cdk',
+  deletionProtection: false,
   disableWebsiteCache: true,
 });
+Tags.of(devStack).add('obp-stack', devStack.stackName);
 
-new Obp(app, 'Staging', {
+const stagingStack = new ObpStack(app, 'StagingStack', {
   env,
-  stage: 'staging',
+  stackName: 'staging-obp-cdk',
 });
+Tags.of(stagingStack).add('obp-stack', stagingStack.stackName);
 
-new Obp(app, 'Prod', {
+const prodStack = new ObpStack(app, 'ProdStack', {
   env,
-  stage: 'prod',
+  stackName: 'prod-obp-cdk',
 });
+Tags.of(prodStack).add('obp-stack', prodStack.stackName);

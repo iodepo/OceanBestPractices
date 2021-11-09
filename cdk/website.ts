@@ -3,8 +3,6 @@ import {
   CfnOutput,
   Construct,
   RemovalPolicy,
-  Stack,
-  StackProps,
 } from '@aws-cdk/core';
 import { Bucket } from '@aws-cdk/aws-s3';
 import {
@@ -28,38 +26,34 @@ import {
 import { StringParameter } from '@aws-cdk/aws-ssm';
 import { Mutable } from 'type-fest';
 
-interface WebsiteStackProps extends StackProps {
-  stage: string
+interface WebsiteProps {
+  stackName: string
+  deletionProtection: boolean
   domainNames?: [string, ...string[]]
   disableWebsiteCache?: boolean
 }
 
-export default class WebsiteStack extends Stack {
+export default class Website extends Construct {
   public readonly cloudfrontDistribution: Distribution;
 
-  constructor(scope: Construct, id: string, props: WebsiteStackProps) {
+  constructor(scope: Construct, id: string, props: WebsiteProps) {
     const {
+      deletionProtection,
       domainNames,
-      stage,
+      stackName,
       disableWebsiteCache = false,
-      ...superProps
     } = props;
 
-    super(scope, id, {
-      stackName: `${stage}-obp-cdk-website`,
-      description: `Website stack for the "${stage}" stage`,
-      terminationProtection: true,
-      ...superProps,
-    });
+    super(scope, id);
 
     const websiteBucket = new Bucket(this, 'WebsiteBucket', {
-      bucketName: `${stage}-obp-cdk-website`,
+      bucketName: `${stackName}-website`,
       removalPolicy: RemovalPolicy.DESTROY,
       autoDeleteObjects: true,
     });
 
     const configBucket = new Bucket(this, 'ConfigBucket', {
-      bucketName: `${stage}-obp-cdk-website-config`,
+      bucketName: `${stackName}-website-config`,
       removalPolicy: RemovalPolicy.DESTROY,
       autoDeleteObjects: true,
     });
@@ -73,7 +67,7 @@ export default class WebsiteStack extends Stack {
     if (domainNames !== undefined) {
       const certificateArn = StringParameter.valueForStringParameter(
         this,
-        `/OBP/${stage}/certificate-arn`
+        `/OBP/${stackName}/certificate-arn`
       );
 
       const certificate = Certificate.fromCertificateArn(
@@ -101,7 +95,7 @@ export default class WebsiteStack extends Stack {
 
     this.cloudfrontDistribution = new Distribution(this, 'Distribution', {
       ...sslOptions,
-      comment: `Ocean Best Practices website - ${stage}`,
+      comment: `Ocean Best Practices website - ${stackName}`,
       minimumProtocolVersion: SecurityPolicyProtocol.TLS_V1_1_2016,
       defaultRootObject: 'index.html',
       httpVersion: HttpVersion.HTTP2,
@@ -127,6 +121,12 @@ export default class WebsiteStack extends Stack {
         },
       },
     });
+
+    const removalPolicy = deletionProtection
+      ? RemovalPolicy.RETAIN
+      : RemovalPolicy.DESTROY;
+
+    this.cloudfrontDistribution.applyRemovalPolicy(removalPolicy);
 
     const websiteContentProps: Mutable<BucketDeploymentProps> = {
       destinationBucket: websiteBucket,
