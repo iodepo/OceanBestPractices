@@ -16,7 +16,7 @@ import {
 import { IDistribution } from '@aws-cdk/aws-cloudfront';
 import { IDomain } from '@aws-cdk/aws-opensearchservice';
 
-const lambdasPath = path.join(__dirname, '..', '..', 'dist', 'api');
+const lambdasPath = path.join(__dirname, '..', 'dist', 'api');
 
 interface ApiProps {
   graphDbHostname: string

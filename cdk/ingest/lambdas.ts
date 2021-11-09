@@ -1,5 +1,4 @@
 import * as path from 'path';
-import { IDomain } from '@aws-cdk/aws-elasticsearch';
 import {
   Code,
   Function,
@@ -10,6 +9,7 @@ import {
   Construct,
   Duration,
 } from '@aws-cdk/core';
+import { IDomain } from '@aws-cdk/aws-opensearchservice';
 import IngestBuckets from './buckets';
 import IngestSnsTopics from './sns-topics';
 
