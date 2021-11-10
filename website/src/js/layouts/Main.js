@@ -104,7 +104,11 @@ class Main extends Component {
               disabled={!search.length && activeSearch.length === 0}>
                 Search
             </button>
-            <SearchTipsModal call="Search Tips" location="home" />
+            <SearchTipsModal
+              call="Search Tips"
+              location="home"
+              hoverText="How to get the best out of your search"
+            />
             <div className="landing__archive">
               <Stats />
             </div>

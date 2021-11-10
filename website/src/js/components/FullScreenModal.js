@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { connect } from 'react-redux';
 import Modal from 'react-modal';
+import ReactTooltip from 'react-tooltip';
 
 import { trackEvent } from '../actions/tracker';
 
@@ -32,8 +33,8 @@ const customSmallStyles = {
 Modal.setAppElement('#root')
 
 class FullScreenModal extends Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
 
     this.state = {
       modalIsOpen: false
@@ -41,6 +42,7 @@ class FullScreenModal extends Component {
 
     this.openModal = this.openModal.bind(this);
     this.closeModal = this.closeModal.bind(this);
+    this.hoverText = props.hoverText;
   }
 
   fireEvent() {
@@ -114,24 +116,75 @@ class FullScreenModal extends Component {
         </div>
       </Modal>
     )
-    return (
+
+    /**
+     * the wrapper component for rendering modal, button, and other children as needed
+     */
+    const ModalWrapper = ({ children }) => (
       <div className='tips__modal-header-wrapper'>
-        <Superlink event_category={this.props.location || 'website'} event_action="link" event_label={`modal | ${this.props.modalCTA}`}>
-          <div className={labelClass} onClick={this.openModal}>{this.props.modalCTA}</div>
-        </Superlink>
-        {modal}
+        {children}
       </div>
+    );
+
+    /**
+     * shows the super link component which triggers the modal open event
+     * @param {string} [dataTip] - tooltip text
+     */
+    const superLink = ({
+      dataTip
+    }) => (
+      <Superlink event_category={this.props.location || 'website'} event_action="link" event_label={`modal | ${this.props.modalCTA}`}>
+        <div
+          className={labelClass}
+          onClick={this.openModal}
+          data-tip={dataTip}
+        >
+          {this.props.modalCTA}
+        </div>
+      </Superlink>
+    );
+
+    /**
+     * renders this component with ReactToolTip if hoverText prop is provided
+     */
+    
+    if (this.hoverText) {
+      return (
+        <ModalWrapper>
+          {superLink({
+            dataTip: this.hoverText
+          })}
+          <ReactTooltip
+            place='bottom'
+            effect='solid'
+            delayShow={300}
+            className='tooltip'
+            type='light'
+            border={true}
+            borderColor="Grey"
+          >
+            {this.hoverText}
+          </ReactTooltip>
+          {modal}
+        </ModalWrapper>
+      )
+    }
+
+    /**
+     * renders the default component
+     */
+    return (
+      <ModalWrapper>
+        {superLink({})}
+        {modal}
+      </ModalWrapper>
     );
   }
 }
 
-const mapDispatchToProps = ( dispatch ) => {
-
-  return {
-    trackEvent: (settings) => dispatch( trackEvent(settings) ),
-  };
-
-};
+const mapDispatchToProps = ( dispatch ) => ({
+  trackEvent: (settings) => dispatch(trackEvent(settings)),
+});
 
 export default connect(
   null,

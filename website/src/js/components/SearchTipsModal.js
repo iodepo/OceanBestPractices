@@ -11,7 +11,15 @@ import PDFViewer from '../../images/SearchTips/PDFViewer.png';
 import PDFBar from '../../images/SearchTips/PDFBar.jpg';
 import Tags1 from '../../images/SearchTips/Tags-1.png';
 import Tags2 from '../../images/SearchTips/Tags-2.png';
+
 class SearchTipsModal extends Component {
+  constructor(props) {
+    super(props);
+
+    this.call = props.call;
+    this.location = props.location;
+    this.hoverText = props.hoverText;
+  }
 
   render() {
     
@@ -49,7 +57,13 @@ class SearchTipsModal extends Component {
     };
 
     return (
-    <FullScreenModal modalCTA={this.props.call} modalTitle='Search Tips' modalClass='tip' location={this.props.location}>
+    <FullScreenModal 
+      modalCTA={this.call}
+      modalTitle='Search Tips'
+      modalClass='tip'
+      location={this.location}
+      hoverText={this.hoverText}
+    >
       <div className='tip__modal'>
         <div className='tip__modal-body' ref={this.modalBody}>
 
@@ -179,7 +193,7 @@ XML.</p>
                 retrieved by your search as well as your search terms
                 in context.'
               />
-               <p>The terms or phrases you queried for will be
+              <p>The terms or phrases you queried for will be
                 highlighted across the document and are viewable
                 individually (by using the dropdown menu which lists
                 them) or all together by clicking on “Highlight All
