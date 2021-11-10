@@ -86,6 +86,7 @@ const initialState = [
       'essential_climate_variables',
     ],
     active_search: false,
+    help_text: 'Search for the <b>full name of the ECV</b> eg.  Aerosols',
   },
   {
     title: 'EBV',
@@ -94,6 +95,7 @@ const initialState = [
       'essential_biodiversity_variables',
     ],
     active_search: false,
+    help_text: 'Search for the <b>full name of the EBV</b> eg.  Ecosystem Vertical Profile',
   },
 ];
 
