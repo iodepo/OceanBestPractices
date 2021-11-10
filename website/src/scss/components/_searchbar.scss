@@ -340,9 +340,9 @@
   .tip__label {
     display: block;
     margin: 0;
-    background-color: $primary-blue;
+    background-color: $obp-light-blue;
     color: #fff;
-    padding: .05em .4em .15em .4em;
+    padding: 0.25rem;
     border-radius: .2rem;
   }
 
@@ -361,6 +361,6 @@
 
   span {
     display: block;
-    margin-top: .25rem;
+    // margin-top: .25rem;
   }
 }

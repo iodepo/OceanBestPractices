@@ -1676,9 +1676,9 @@ html {
   .searchbar__advanced--status .tip__label {
     display: block;
     margin: 0;
-    background-color: #0068B3;
+    background-color: #75b3e1;
     color: #fff;
-    padding: .05em .4em .15em .4em;
+    padding: 0.25rem;
     border-radius: .2rem; }
   .searchbar__advanced--status a {
     text-decoration: none;
@@ -1688,8 +1688,7 @@ html {
   .searchbar__advanced--status .tip__label:hover {
     text-decoration: underline; }
   .searchbar__advanced--status span {
-    display: block;
-    margin-top: .25rem; }
+    display: block; }
 
 .search-filter {
   display: inline; }
