@@ -19,6 +19,7 @@ const initialState = [
       'editor',
     ],
     active_search: false,
+    help_text: 'Search applies to all authors on the document',
   },
   {
     title: 'Title',
@@ -29,6 +30,7 @@ const initialState = [
     ],
     active_search: false,
     autocomplete: true,
+    help_text: 'Search applies to the title of the document',
   },
   {
     title: 'EOV',
@@ -37,6 +39,7 @@ const initialState = [
       'essential_ocean_variables',
     ],
     active_search: false,
+    help_text: 'Search applies to all authors on the document',
   },
   {
     title: 'SDG',
@@ -45,6 +48,7 @@ const initialState = [
       'sustainable_development_goals',
     ],
     active_search: false,
+    help_text: 'Search applies to all authors on the document',
   },
   {
     title: 'Document Body',
@@ -54,6 +58,7 @@ const initialState = [
     ],
     active_search: false,
     autocomplete: true,
+    help_text: 'Search applies to all authors on the document',
   },
   {
     title: 'Journal',
@@ -62,6 +67,7 @@ const initialState = [
       'journal_title',
     ],
     active_search: false,
+    help_text: 'Search applies to all authors on the document',
   },
   {
     title: 'Issuing Agency',
@@ -70,6 +76,7 @@ const initialState = [
       'publisher',
     ],
     active_search: false,
+    help_text: 'Search applies to all authors on the document',
   },
   {
     title: 'DOI',
@@ -78,6 +85,7 @@ const initialState = [
       'identifier_doi',
     ],
     active_search: false,
+    help_text: 'Search applies to all authors on the document',
   },
 ];
 
