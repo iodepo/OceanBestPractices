@@ -23,6 +23,10 @@ const DropdownLink = ({ title, id, help_text, onClick }) => {
               effect='solid'
               delayShow={300}
               className='tooltip'
+              html={true}
+              type='light'
+              border={true}
+              borderColor="Grey"
             >
               {help_text}
             </ReactTooltip>
