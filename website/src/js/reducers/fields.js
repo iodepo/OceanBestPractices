@@ -2,6 +2,7 @@ import {
   SET_ACTIVE_FIELDS
 } from '../types/fields';
 
+// TODO: Update help_text fields with language provided by client
 const initialState = [
   {
     title: 'All Fields',
@@ -19,7 +20,7 @@ const initialState = [
       'editor',
     ],
     active_search: false,
-    help_text: 'Search applies to all authors on the document',
+    help_text: '__PUT_TOOLTIP_TEXT_HERE__',
   },
   {
     title: 'Title',
@@ -30,7 +31,7 @@ const initialState = [
     ],
     active_search: false,
     autocomplete: true,
-    help_text: 'Search applies to the title of the document',
+    help_text: '__PUT_TOOLTIP_TEXT_HERE__',
   },
   {
     title: 'EOV',
@@ -39,7 +40,7 @@ const initialState = [
       'essential_ocean_variables',
     ],
     active_search: false,
-    help_text: 'Search applies to all authors on the document',
+    help_text: '__PUT_TOOLTIP_TEXT_HERE__',
   },
   {
     title: 'SDG',
@@ -48,7 +49,7 @@ const initialState = [
       'sustainable_development_goals',
     ],
     active_search: false,
-    help_text: 'Search applies to all authors on the document',
+    help_text: '__PUT_TOOLTIP_TEXT_HERE__',
   },
   {
     title: 'Document Body',
@@ -58,7 +59,7 @@ const initialState = [
     ],
     active_search: false,
     autocomplete: true,
-    help_text: 'Search applies to all authors on the document',
+    help_text: '__PUT_TOOLTIP_TEXT_HERE__',
   },
   {
     title: 'Journal',
@@ -67,7 +68,7 @@ const initialState = [
       'journal_title',
     ],
     active_search: false,
-    help_text: 'Search applies to all authors on the document',
+    help_text: '__PUT_TOOLTIP_TEXT_HERE__',
   },
   {
     title: 'Issuing Agency',
@@ -76,7 +77,7 @@ const initialState = [
       'publisher',
     ],
     active_search: false,
-    help_text: 'Search applies to all authors on the document',
+    help_text: '__PUT_TOOLTIP_TEXT_HERE__',
   },
   {
     title: 'DOI',
@@ -85,7 +86,7 @@ const initialState = [
       'identifier_doi',
     ],
     active_search: false,
-    help_text: 'Search applies to all authors on the document',
+    help_text: '__PUT_TOOLTIP_TEXT_HERE__',
   },
 ];
 
