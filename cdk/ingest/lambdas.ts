@@ -18,7 +18,7 @@ const lambdasPath = path.join(__dirname, '..', '..', 'dist', 'ingest');
 interface LambdasProps {
   buckets: IngestBuckets
   elasticsearchDomain: IDomain
-  scheduleInterval: number
+  feedReadInterval: number
   snsTopics: IngestSnsTopics
   textExtractorFunction: IFunction
   stage: string
@@ -33,7 +33,7 @@ export default class IngestLambdas extends Construct {
 
   public readonly metadataDownloader: Function;
 
-  public readonly scheduler: Function;
+  public readonly feedIngester: Function;
 
   public readonly indexRectifier: Function;
 
@@ -45,7 +45,7 @@ export default class IngestLambdas extends Construct {
     const {
       buckets,
       elasticsearchDomain,
-      scheduleInterval = 300,
+      feedReadInterval = 300,
       snsTopics,
       stage,
       textExtractorFunction,
@@ -112,19 +112,20 @@ export default class IngestLambdas extends Construct {
     });
     buckets.documentMetadata.grantWrite(this.metadataDownloader);
 
-    this.scheduler = new Function(this, 'Scheduler', {
-      functionName: `${stage}-obp-cdk-ingest-scheduler`,
-      handler: 'scheduler.handler',
+    this.feedIngester = new Function(this, 'DSpaceFeedIngester', {
+      functionName: `${stage}-obp-cdk-ingest-feed-ingester`,
+      handler: 'dspace-feed-ingester.handler',
       runtime: Runtime.NODEJS_14_X,
-      code: Code.fromAsset(path.join(lambdasPath, 'scheduler')),
+      code: Code.fromAsset(path.join(lambdasPath, 'dspace-feed-ingester')),
       description: 'Periodically checks the OBP RSS feed for documents that need indexing.',
       timeout: Duration.minutes(1),
       environment: {
-        DOCUMENT_TOPIC_ARN: snsTopics.availableDocument.topicArn,
-        SCHEDULE_INTERVAL: scheduleInterval.toString(),
+        DSPACE_FEED_READ_INTERVAL: feedReadInterval.toString(),
+        DSPACE_ENDPOINT: 'https://repository.oceanbestpractices.org',
+        INGEST_TOPIC_ARN: snsTopics.availableDocument.topicArn,
       },
     });
-    snsTopics.availableDocument.grantPublish(this.scheduler);
+    snsTopics.availableDocument.grantPublish(this.feedIngester);
 
     this.indexRectifier = new Function(this, 'IndexRectifier', {
       functionName: `${stage}-obp-cdk-index-rectifier`,

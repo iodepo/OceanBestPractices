@@ -39,7 +39,7 @@ ONTOLOGY_PORT = options[:env]["VIRTUOSO_PORT"]
 ELASTIC_SEARCH_HOST = options[:env]["ELASTIC_SEARCH_HOST"]
 
 ONTOLOGY_NAME_SPACE = options[:ontology_name_space]
-ONTOLOGY_GRAPH = options[:ontology_graph] 
+ONTOLOGY_GRAPH = options[:ontology_graph]
 TERMINOLOGY_TITLE = options[:terminology_title]
 
 #"<http://purl.obolibrary.org/obo/chebi.owl>"
@@ -53,7 +53,7 @@ INDEX_NAME = "terms"
 ONTOLOGY_PATH = "/sparql"
 ELASTIC_SEARCH_PATH = "/#{INDEX_NAME}/doc"
 
-def query_for(tag) 
+def query_for(tag)
   #puts "Tag:\n#{tag}"
   #{ query: { match_phrase: { contents: tag[:label] } } }
   { query: { multi_match: { query: tag[:label], type: "phrase", fields: ["contents", "title"] }}, source_terminology: TERMINOLOGY_TITLE }
@@ -72,9 +72,9 @@ def index_tag(tag)
 end
 
 def bulk_index_tags(tags)
-  
+
   uri = URI(ELASTIC_SEARCH_HOST + ELASTIC_SEARCH_PATH + "/_bulk")
-  
+
   es_doc = tags.map do |tag|
     [
       { index: { "_index": INDEX_NAME, "_type": "doc", "_id": tag[:uri] } },
@@ -130,7 +130,7 @@ def fetch_tags(limit, offset, ont_ns, ont_graph)
   req = Net::HTTP::Get.new(uri)
   req['Accept'] = 'application/json'
 
-  res = Net::HTTP.start(uri.hostname, uri.port) { |http| 
+  res = Net::HTTP.start(uri.hostname, uri.port) { |http|
     http.request(req)
   }
 
@@ -146,7 +146,7 @@ tags = fetch_tags(limit, offset, ONTOLOGY_NAME_SPACE, ONTOLOGY_GRAPH)
 while tags.size > 0
   bulk_index_tags(tags)
   puts "Indexed terms from #{offset} to #{offset + limit}..."
-  
+
   offset += tags.size
   tags = fetch_tags(limit, offset, ONTOLOGY_NAME_SPACE, ONTOLOGY_GRAPH)
 end

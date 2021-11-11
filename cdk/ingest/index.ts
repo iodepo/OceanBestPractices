@@ -19,7 +19,7 @@ import IngestBuckets from './buckets';
 interface IngestProps {
   elasticsearchDomain: IDomain
   stage: string
-  scheduleInterval?: number
+  feedReadInterval?: number
   textExtractorFunction: IFunction
   websiteDistribution: IDistribution
 }
@@ -30,7 +30,7 @@ export default class Ingest extends Construct {
 
     const {
       elasticsearchDomain,
-      scheduleInterval = 300,
+      feedReadInterval = 300,
       stage,
       textExtractorFunction,
       websiteDistribution,
@@ -46,16 +46,16 @@ export default class Ingest extends Construct {
     const lambdas = new IngestLambdas(this, 'Lambdas', {
       buckets,
       elasticsearchDomain,
-      scheduleInterval,
+      feedReadInterval,
       snsTopics,
       stage,
       textExtractorFunction,
     });
 
     // Invoke the scheduler function every 5 minutes
-    new events.Rule(this, 'SchedulerEventRule', {
-      schedule: events.Schedule.rate(Duration.seconds(scheduleInterval)),
-      targets: [new eventTargets.LambdaFunction(lambdas.scheduler)],
+    new events.Rule(this, 'FeedReadEventRule', {
+      schedule: events.Schedule.rate(Duration.seconds(feedReadInterval)),
+      targets: [new eventTargets.LambdaFunction(lambdas.feedIngester)],
     });
     // Writes events to the "available document" topic
 
