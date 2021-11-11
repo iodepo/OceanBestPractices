@@ -1,4 +1,4 @@
-const dspaceFeedIngester = require('./dspace-feed-ingester');
+const dspaceFeedIngester = require('./rss-feed-ingester');
 const dspaceClient = require('../../lib/dspace-client');
 const ingestQueue = require('../lib/ingest-queue');
 

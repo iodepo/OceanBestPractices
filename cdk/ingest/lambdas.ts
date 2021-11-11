@@ -104,19 +104,20 @@ export default class IngestLambdas extends Construct {
       handler: 'metadata-downloader.handler',
       runtime: Runtime.NODEJS_14_X,
       code: Code.fromAsset(path.join(lambdasPath, 'metadata-downloader')),
-      description: 'Downloads the metadata for a given document UID from the OBP API',
+      description: 'Downloads the metadata for a given document UUID from DSpace',
       timeout: Duration.minutes(5),
       environment: {
         DOCUMENT_METADATA_BUCKET: buckets.documentMetadata.bucketName,
+        DSPACE_ENDPOINT: 'https://repository.oceanbestpractices.org',
       },
     });
     buckets.documentMetadata.grantWrite(this.metadataDownloader);
 
-    this.feedIngester = new Function(this, 'DSpaceFeedIngester', {
+    this.feedIngester = new Function(this, 'RSSFeedIngester', {
       functionName: `${stage}-obp-cdk-ingest-feed-ingester`,
-      handler: 'dspace-feed-ingester.handler',
+      handler: 'rss-feed-ingester.handler',
       runtime: Runtime.NODEJS_14_X,
-      code: Code.fromAsset(path.join(lambdasPath, 'dspace-feed-ingester')),
+      code: Code.fromAsset(path.join(lambdasPath, 'rss-feed-ingester')),
       description: 'Periodically checks the OBP RSS feed for documents that need indexing.',
       timeout: Duration.minutes(1),
       environment: {
