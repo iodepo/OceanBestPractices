@@ -48,7 +48,7 @@ describe('metadata-downloader', () => {
         handle: 'abc/123',
       }),
       Key: 'abc.json',
-      Bucket: 'document-metadata-bucket',
+      Bucket: 'obp-test-document-metadata-bucket',
     });
     expect(putObjectCommandCalls.length).toEqual(1);
 

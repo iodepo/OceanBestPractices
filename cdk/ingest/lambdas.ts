@@ -77,6 +77,7 @@ export default class IngestLambdas extends Construct {
       timeout: Duration.minutes(5),
       memorySize: 1024,
       environment: {
+        DSPACE_ENDPOINT: 'https://repository.oceanbestpractices.org',
         DOCUMENT_BINARY_BUCKET: buckets.documentSource.bucketName,
         INDEXER_FUNCTION_NAME: this.indexer.functionName,
       },

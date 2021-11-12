@@ -48,6 +48,7 @@
     "@aws-cdk/pipelines": "^1.129.0",
     "@aws-crypto/sha256-browser": "^2.0.0",
     "@aws-sdk/client-cloudformation": "^3.37.0",
+    "@aws-sdk/client-lambda": "^3.41.0",
     "@aws-sdk/client-s3": "^3.37.0",
     "@aws-sdk/client-sns": "^3.40.0",
     "@aws-sdk/client-ssm": "^3.37.0",
