@@ -1,8 +1,4 @@
-import {
-  BastionHostLinux,
-  Instance,
-  IVpc,
-} from '@aws-cdk/aws-ec2';
+import { BastionHostLinux, Instance, IVpc } from '@aws-cdk/aws-ec2';
 import { Construct } from '@aws-cdk/core';
 
 interface NeptuneProps {
@@ -22,13 +18,12 @@ export default class Bastion extends Construct {
     super(scope, id);
 
     const {
-      // deletionProtection,
-      stackName: instanceName,
+      stackName,
       vpc,
     } = props;
 
     const bastion = new BastionHostLinux(this, 'Bastion', {
-      instanceName,
+      instanceName: `${stackName}-bastion`,
       vpc,
     });
 

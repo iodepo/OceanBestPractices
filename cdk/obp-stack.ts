@@ -1,9 +1,5 @@
 import { Vpc } from '@aws-cdk/aws-ec2';
-import {
-  Construct,
-  Stack,
-  StackProps,
-} from '@aws-cdk/core';
+import { Construct, Stack, StackProps } from '@aws-cdk/core';
 import { Function } from '@aws-cdk/aws-lambda';
 import OpenSearch from './opensearch';
 import Ingest from './ingest';
@@ -82,8 +78,8 @@ export default class ObpStack extends Stack {
     new Api(this, 'Api', {
       stackName: this.stackName,
       region: this.region,
-      graphDbHostname: neptune.cluster.clusterEndpoint.hostname,
-      graphDbPort: neptune.cluster.clusterEndpoint.port,
+      graphDbHostname: neptune.neptuneCluster.clusterEndpoint.hostname,
+      graphDbPort: neptune.neptuneCluster.clusterEndpoint.port,
       openSearch: openSearch.domain,
       websiteDistribution: website.cloudfrontDistribution,
     });

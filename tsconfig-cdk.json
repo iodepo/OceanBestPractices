@@ -5,8 +5,7 @@
     "typeRoots": [
       "./node_modules/@types"
     ],
-    "resolveJsonModule": true,
-    "exactOptionalPropertyTypes": false
+    "resolveJsonModule": true
   },
   "exclude": [
     "node_modules",

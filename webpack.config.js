@@ -39,6 +39,14 @@ module.exports = async () => {
     entry: {
       ...apiEntries,
       ...ingestEntries,
+      neptuneBulkLoaderTask: {
+        import: './neptune-bulk-loader/task.ts',
+        filename: './neptune-bulk-loader/task/index.js',
+      },
+      neptuneBulkLoaderTaskLauncher: {
+        import: './neptune-bulk-loader/task-launcher.ts',
+        filename: './neptune-bulk-loader/task-launcher/lambda.js',
+      },
     },
     module: {
       rules: [

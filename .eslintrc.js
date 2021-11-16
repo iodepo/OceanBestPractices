@@ -24,6 +24,7 @@ module.exports = {
       'error',
       'multiline-arguments',
     ],
+    'implicit-arrow-linebreak': 'off',
     'max-len': [
       'error',
       {
@@ -54,7 +55,11 @@ module.exports = {
   },
   overrides: [
     {
-      files: ['api/lambdas/*', 'ingest/lambdas/*'],
+      files: [
+        'api/lambdas/*',
+        'ingest/lambdas/*',
+        'neptune-bulk-loader/task-launcher.ts',
+      ],
       rules: {
         'import/prefer-default-export': 'off',
       },
@@ -71,6 +76,7 @@ module.exports = {
       ],
       settings: { 'import/resolver': 'node' },
       rules: {
+        '@typescript-eslint/no-unused-vars': 'off',
         'dot-notation': 'off',
         'import/extensions': 'off',
         'import/no-extraneous-dependencies': [
@@ -81,7 +87,7 @@ module.exports = {
         'import-newlines/enforce': [
           'error',
           {
-            items: 1,
+            items: 3,
             'max-len': 80,
           },
         ],

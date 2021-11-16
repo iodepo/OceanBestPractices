@@ -3,16 +3,10 @@ import {
   CfnOutput,
   Construct,
   Duration,
+  Token,
 } from '@aws-cdk/core';
-import {
-  LambdaIntegration,
-  RestApi,
-} from '@aws-cdk/aws-apigateway';
-import {
-  Code,
-  Function,
-  Runtime,
-} from '@aws-cdk/aws-lambda';
+import { LambdaIntegration, RestApi } from '@aws-cdk/aws-apigateway';
+import { Code, Function, Runtime } from '@aws-cdk/aws-lambda';
 import { IDistribution } from '@aws-cdk/aws-cloudfront';
 import { IDomain } from '@aws-cdk/aws-opensearchservice';
 
@@ -60,7 +54,7 @@ export default class Api extends Construct {
       environment: {
         ELASTIC_SEARCH_HOST: openSearch.domainEndpoint,
         ONTOLOGY_STORE_HOST: graphDbHostname,
-        ONTOLOGY_STORE_PORT: graphDbPort.toString(),
+        ONTOLOGY_STORE_PORT: Token.asString(graphDbPort),
       },
     });
     openSearch.grantRead(getStatistics);
@@ -74,7 +68,7 @@ export default class Api extends Construct {
       timeout: Duration.seconds(100),
       environment: {
         ONTOLOGY_STORE_HOST: graphDbHostname,
-        ONTOLOGY_STORE_PORT: graphDbPort.toString(),
+        ONTOLOGY_STORE_PORT: Token.asString(graphDbPort),
       },
     });
 
@@ -87,7 +81,7 @@ export default class Api extends Construct {
       timeout: Duration.seconds(100),
       environment: {
         ONTOLOGY_STORE_HOST: graphDbHostname,
-        ONTOLOGY_STORE_PORT: graphDbPort.toString(),
+        ONTOLOGY_STORE_PORT: Token.asString(graphDbPort),
       },
     });
 
@@ -102,7 +96,7 @@ export default class Api extends Construct {
         ELASTIC_SEARCH_HOST: openSearch.domainEndpoint,
         REGION: region,
         ONTOLOGY_STORE_HOST: graphDbHostname,
-        ONTOLOGY_STORE_PORT: graphDbPort.toString(),
+        ONTOLOGY_STORE_PORT: Token.asString(graphDbPort),
       },
     });
     openSearch.grantReadWrite(searchByKeywords);

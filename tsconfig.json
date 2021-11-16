@@ -14,7 +14,7 @@
     "strict": true,
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,
-    "exactOptionalPropertyTypes": true,
+    "exactOptionalPropertyTypes": false,
     "noFallthroughCasesInSwitch": true,
     "noImplicitOverride": true,
     "noImplicitReturns": true,
