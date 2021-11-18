@@ -2,53 +2,21 @@
   "mappings": {
     "doc": {
       "properties": {
-        "contents": {
+        "_bitstreamSourceKey": {
+          "type": "keyword"
+        },
+        "_bitstreamText": {
           "type": "text"
         },
-        "uuid": {
-          "type": "text"
-        },
-        "title": {
+        "_primaryAuthor": {
           "type": "text",
           "fields": {
-            "raw": {
+            "keyword": {
               "type": "keyword"
             }
           }
         },
-        "abstract": {
-          "type": "text"
-        },
-        "author": {
-          "type": "text",
-          "fields": {
-            "raw": {
-              "type": "keyword"
-            }
-          }
-        },
-        "publisher": {
-          "type": "text",
-          "fields": {
-            "raw": {
-              "type": "keyword"
-            }
-          }
-        },
-        "language": {
-          "type": "keyword"
-        },
-        "issued_date": {
-          "type": "date",
-          "format": "yyyy"
-        },
-        "thumbnail": {
-          "type": "keyword"
-        },
-        "handle": {
-          "type": "keyword"
-        },
-        "terms": {
+        "_terms": {
           "type": "nested",
           "properties": {
             "uri": {
@@ -59,108 +27,46 @@
             }
           }
         },
-        "title_alt": {
-          "type": "text",
-          "fields": {
-            "raw": {
-              "type": "keyword"
-            }
-          }
-        },
-        "corp_author": {
-          "type": "text",
-          "fields": {
-            "raw": {
-              "type": "keyword"
-            }
-          }
-        },
-        "editor": {
-          "type": "text",
-          "fields": {
-            "raw": {
-              "type": "keyword"
-            }
-          }
-        },
-        "journal_title": {
-          "type": "text",
-          "fields": {
-            "raw": {
-              "type": "keyword"
-            }
-          }
-        },
-        "essential_ocean_variables": {
-          "type": "text"
-        },
-        "sustainable_development_goals": {
-          "type": "text"
-        },
-        "identifier_doi": {
+        "_thumbnailRetrieveLink": {
           "type": "keyword"
-        },
-        "identifier_orcid": {
-          "type": "keyword"
-        },
-        "resource_uri": {
-          "type": "keyword"
-        },
-        "refereed": {
-          "type": "keyword"
-        },
-        "citation": {
-          "type": "text"
-        },
-        "sourceKey": {
-          "type": "keyword"
-        },
-        "publication_status": {
-          "type": "keyword"
-        },
-        "current_status": {
-          "type": "keyword"
-        },
-        "relation_uri": {
-          "type": "keyword"
-        },
-        "bptype": {
-          "type": "keyword"
-        },
-        "relation_is_part_of_series": {
-          "type": "keyword"
-        },
-        "type": {
-          "type": "keyword"
-        },
-        "subjects_other": {
-          "type": "text"
-        },
-        "subjects_instrument_type": {
-          "type": "text"
-        },
-        "subjects_parameter_discipline": {
-          "type": "text"
-        },
-        "subjects_dm_processes": {
-          "type": "text"
-        },
-        "maturity_level": {
-          "type": "keyword"
-        },
-        "notes": {
-          "type": "text"
-        },
-        "coverage_spatial": {
-          "type": "keyword"
-        },
-        "lastModified": {
-          "type": "date",
-          "format": "yyyy-MM-dd H:m:s.S"
         },
         "bitstreams": {
           "type": "object",
           "dynamic": true
+        },
+        "handle": {
+          "type": "keyword"
+        },
+        "lastModified": {
+          "type": "date",
+          "format": "yyyy-MM-dd H:m:s.SSS"
+        },
+        "metadata": {
+          "type": "object",
+          "properties": {
+            "value": {
+              "type": "keyword"
+            }
+          }
+        },
+        "uuid": {
+          "type": "keyword"
+        },
+        "dc_abstract": {
+          "type": "text"
+        },
+        "dc_date_issued": {
+          "type": "date",
+          "format": "yyyy"
+        },
+        "dc_description_notes": {
+          "type": "text"
+        },
+        "dc_title": {
+          "type": "text"
+        },
+        "dc_title_alternative": {
+          "type": "text"
         }
       }
     }
