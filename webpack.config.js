@@ -4,11 +4,17 @@ const _ = require('lodash');
 const path = require('path');
 const { readdir } = require('fs/promises');
 
+/** @type {(f: string) => boolean} */
+const isTestFile = (f) => f.endsWith('.test.js') || f.endsWith('.test.ts');
+
+/** @type {(f: string) => boolean} */
+const isNotTestFile = _.negate(isTestFile);
+
 const getEntries = async (entriesPath, prefix) => {
   const files = await readdir(entriesPath);
-  const lambdaFiles = files.filter((f) => !f.endsWith('.test.js'));
 
-  return _(lambdaFiles)
+  return _(files)
+    .filter(isNotTestFile)
     .map((f) => [
       `${prefix}-${path.parse(f).name}`,
       {
