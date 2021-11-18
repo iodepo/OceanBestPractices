@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { connect } from 'react-redux';
 import { getLangNameFromCode } from 'language-name-map';
+import ReactTooltip from 'react-tooltip';
 
 import { getSearch } from '../actions/search';
 import { setOption } from '../actions/options';
@@ -143,13 +144,14 @@ class SearchResults extends Component {
    * shows the download citation button
    * @param {array} results - array of all results
    */
-  // TODO add tooltip component to the checkbox. Said tooltip component exists in another feature branch, we either need to merge that branch here to wait until its in dev and rebase.
-  // feature branch mentioned above: feature/OBP-281/search-field-help-text
   renderDownloadCitationsButton(results) {
     const isEnabled = this.state.selectedResults.length > 0;
+    const helpText = "Select the check box from individual results below to download citations as a text file.";
 
     return (
-      <li className="crumb-tail">
+      <li className="crumb-tail"
+          data-tip={helpText}
+      >
         <button
           className={`result__button result__button-secondary ${isEnabled ? 'is-active': null}`}
           onClick={() => this.onClickCitationDownload(results)}
@@ -158,6 +160,17 @@ class SearchResults extends Component {
           <span className="result__button-icon"><i className="fa fa-quote-right" aria-hidden="true"></i></span>
           <span>Download Citations</span>
         </button>
+        <ReactTooltip
+          place="top"
+          effect="solid"
+          delayShow={300}
+          className="tooltip"
+          type="light"
+          border={true}
+          borderColor="Grey"
+        >
+          {helpText}
+        </ReactTooltip>
       </li>
     );
   }
