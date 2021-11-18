@@ -8,6 +8,17 @@ import { env } from '../helpers/api';
 import Superlink from './Superlink';
 
 class Result extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      id: props.id,
+      showCitation: false,
+      showDocument: false,
+      resultSelected: props.resultSelected || false
+    }
+
+    this.handleResultCheck = this.handleResultCheck.bind(this);
+  }
   
   hashLinkScroll() {
     const { hash } = window.location;
@@ -23,12 +34,6 @@ class Result extends Component {
     }
   }
 
-  
-  state = {
-    showCitation: false,
-    showDocument: false,
-  };
-
   handleTagToggle() {
     this.props.onSetTerms({
       id: this.props.id,
@@ -41,6 +46,26 @@ class Result extends Component {
     this.props.onResetTerms();
   }
 
+  /**
+   * handles result checkbox event
+   */
+  handleResultCheck() {
+    const {
+      id,
+      resultSelected
+    } = this.state;
+
+    // toggle the selected state and call the parent function (if it's a function)
+    this.setState((prevState) => ({
+      ...prevState,
+      resultSelected: !resultSelected
+    }), () => {
+      if (typeof this.props.onCheck === 'function') {
+        this.props.onCheck(id);
+      }
+    });
+  }
+
   componentListFromStrings(string_list) {
     if ( !Array.isArray(string_list) ) return [];
 
@@ -49,10 +74,6 @@ class Result extends Component {
     });
   }
 
-  state = {
-    showCitation: false,
-  };
-
   launchPDF() {
     const pdfURL = `viewer/index.html?file=https://s3.amazonaws.com/obp-document-source-${env}/${this.props.uuid}.pdf&search=${constructViewerQuery(this.props.searchReducer.activeSearch, false)}`;
     window.open(pdfURL, '_blank');
@@ -60,7 +81,6 @@ class Result extends Component {
   }
 
   render() {
-
     // Find out if the tags are active by comparing the id saved on the state saved to the
     // id of the current element
     const isActiveTags = this.props.termsReducer.activeTerms && this.props.termsReducer.activeTerms.id === this.props.id;
@@ -71,8 +91,6 @@ class Result extends Component {
     var toggleTagsIcon = isActiveTags ? 'fa fa-times' : 'fa fa-tags';
     var citationIcon = showCitation ? 'fa fa-times' : 'fa fa-quote-right';
     var toggleLabelClassName = isActiveTags ? 'result__tag-label result__tag-label--is-active' : 'result__tag-label';
-
-
 
     var authorList = null;
     if (this.props.author) {
@@ -105,6 +123,21 @@ class Result extends Component {
         </Superlink>
       )
     }
+
+    // Don't show export checkbox if no citation is available
+    // TODO add tooltip component to the checkbox. Said tooltip component exists in another feature branch, we either need to merge that branch here to wait until its in dev and rebase.
+    // feature branch mentioned above: feature/OBP-281/search-field-help-text
+    let export_citation_checkbox = null;
+    if (this.props.citation) {
+      export_citation_checkbox = (
+        <div className="result__checkbox">
+          <Superlink event_category="citation" event_action="link | export_citation" event_label="Export Citation">
+            <input type="checkbox" checked={this.props.resultSelected} onChange={() => this.handleResultCheck()}/>
+          </Superlink>
+        </div>
+      )
+    }
+
     //Don't show Explore Document button if no PDF available (that's what the sourceKey returns. a file name if PDF or "" if not a PDF)
     let document_button = null;
     if (this.props.sourceKey && !(this.props.sourceKey === "")) {
@@ -117,6 +150,7 @@ class Result extends Component {
         </Superlink>
       )
     }
+
     return (
 
         <article className="result">
@@ -134,7 +168,11 @@ class Result extends Component {
                 : null
               }
             </div>
+            {
+              export_citation_checkbox
+            }
             { result_title }
+            
             <div className="result__author">
               {
                 authorList || null
