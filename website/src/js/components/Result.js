@@ -125,15 +125,11 @@ class Result extends Component {
     }
 
     // Don't show export checkbox if no citation is available
-    // TODO add tooltip component to the checkbox. Said tooltip component exists in another feature branch, we either need to merge that branch here to wait until its in dev and rebase.
-    // feature branch mentioned above: feature/OBP-281/search-field-help-text
     let export_citation_checkbox = null;
     if (this.props.citation) {
       export_citation_checkbox = (
         <div className="result__checkbox">
-          <Superlink event_category="citation" event_action="link | export_citation" event_label="Export Citation">
-            <input type="checkbox" checked={this.props.resultSelected} onChange={() => this.handleResultCheck()}/>
-          </Superlink>
+          <input type="checkbox" checked={this.props.resultSelected} onChange={() => this.handleResultCheck()}/>
         </div>
       )
     }
