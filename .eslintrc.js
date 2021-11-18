@@ -24,12 +24,13 @@ module.exports = {
       'error',
       'multiline-arguments',
     ],
+    'implicit-arrow-linebreak': 'off',
     'max-len': [
       'error',
       {
         code: 80,
         tabWidth: 2,
-        ignorePattern: '(test\\(|https?://)',
+        ignorePattern: '(test\\(|https?://|@typedef)',
         ignoreTemplateLiterals: true,
         ignoreStrings: true,
       },

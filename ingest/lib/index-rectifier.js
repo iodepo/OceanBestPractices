@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 // @ts-check
 const pMap = require('p-map');
 
@@ -5,18 +6,24 @@ const dspaceClient = require('../../lib/dspace-client');
 const osClient = require('../../lib/open-search-client');
 const utils = require('./ingest-queue');
 
+/**
+ * @typedef {import('../../lib/dspace-types').DSpaceItem} DSpaceItem
+ * @typedef {import('../../lib/dspace-types').OpenSearchItem} OpenSearchItem
+ */
+
 module.exports = {
   /**
    * Commits index items that have been marked as out of date by
    * queuing them for re-ingest. Queuing will be done in parallel.
    *
-   * @param {Object[]} items List of existing index items that need to
+   * @param {{_id: string}[]} items List of existing index items that need to
    *                         be updated.
    * @param {string} ingestTopicArn SNS Topic ARN where new documents
    *                                are queued.
    * @param {Object} [options={}] Additional options.
-   * @param {string} [options.region=us-east-1] AWS region containing the
+   * @param {string} [options.region='us-east-1'] AWS region containing the
    *                                            infrastructure.
+   * @returns {Promise<void>}
    */
   commitUpdatedItems: async (
     items,
@@ -49,13 +56,14 @@ module.exports = {
    * Commits removed items that have been marked as removed by
    * deleting them from the index.
    *
-   * @param {Object[]} items List of existing index items that need to
+   * @param {{_id: string}[]} items List of existing index items that need to
    *                         be deleted.
    * @param {string} openSearchEndpoint Endpoint for the OpenSearch index from
    *                                    which the items should be removed.
    * @param {Object} [options={}] Additional options.
    * @param {string} [options.region=us-east-1] AWS region containing the
    *                                            infrastructure.
+   * @returns {Promise<void>}
    */
   commitRemovedItems: async (
     items,
@@ -83,10 +91,9 @@ module.exports = {
    * Determines whether or not the given index item should be considered out of
    * date when compared to the same dspace item.
    *
-   * @param {Object} indexItem The item from the OpenSearch index.
-   * @param {Object} dspaceItem The item from DSpace from which we determine if
-   *                            the OpenSearch item needs to be marked as
-   *                            needing update.
+   * @param {OpenSearchItem} indexItem The item from the OpenSearch index.
+   * @param {DSpaceItem} dspaceItem The item from DSpace from which we determine
+   * if the OpenSearch item needs to be marked as needing update.
    *
    * @returns {boolean} True if the index item should be marked as updated when
    * compared to the same DSpace item.
@@ -104,6 +111,16 @@ module.exports = {
     const dspaceItemPDFBitstream = dspaceItem.bitstreams
       .find((b) => (b.bundleName === 'ORIGINAL' && b.mimeType === 'application/pdf'));
 
+    if (indexItemPDFBitstream === undefined
+      && dspaceItemPDFBitstream === undefined) {
+      return false;
+    }
+
+    if (indexItemPDFBitstream === undefined
+      || dspaceItemPDFBitstream === undefined) {
+      return true;
+    }
+
     return (indexItemPDFBitstream.checkSum.value
       !== dspaceItemPDFBitstream.checkSum.value);
   },
@@ -116,10 +133,11 @@ module.exports = {
    *                                from which the items should be ingest.
    *                                The endpoint should include the protocol.
    * @param {Object} [options={}] Additional options.
-   * @param {string} [options.region=us-east-1] AWS region containing the
+   * @param {string} [options.region='us-east-1'] AWS region containing the
    *                                            infrastructure.
    *
-   * @returns {Promise<Object>} Object with removed and updated items.
+   * @returns {Promise<{removed: string[], updated: string[]}>} Object with
+   * removed and updated items.
    */
   diff: async (
     openSearchEndpoint,
@@ -130,6 +148,7 @@ module.exports = {
       region = 'us-east-1',
     } = options;
 
+    /** @type {{removed: string[], updated: string[]}} */
     const diffResult = {
       removed: [],
       updated: [],
@@ -159,9 +178,9 @@ module.exports = {
             // deleted. Also, check if the metadata has changed and if so
             // mark it updated. Otherwise consider it unchanged.
             if (dspaceItem === undefined) {
-              diffResult.removed.push(indexItem);
+              diffResult.removed.push(indexItem._source.uuid);
             } else if (module.exports.isUpdated(indexItem, dspaceItem)) {
-              diffResult.updated.push(indexItem);
+              diffResult.updated.push(indexItem._source.uuid);
             }
           } catch (error) {
             console.log(`ERROR: Encountered error: ${error} for diff of item: ${JSON.stringify(indexItem)}`);
