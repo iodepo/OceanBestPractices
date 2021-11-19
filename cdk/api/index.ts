@@ -103,6 +103,18 @@ export default class Api extends Construct {
     });
     elasticsearch.grantReadWrite(searchByKeywords);
 
+    const sparqlFunction = new Function(this, 'SparqlFunction', {
+      functionName: `${stage}-obp-cdk-api-sparql`,
+      handler: 'sparql.handler',
+      runtime: Runtime.NODEJS_14_X,
+      code: Code.fromAsset(path.join(lambdasPath, 'sparql')),
+      description: 'Perform a SPARQL query',
+      timeout: Duration.minutes(5),
+      environment: {
+        SPARQL_URL: `https://${virtuosoHostname}:${8890}/sparql`,
+      },
+    });
+
     const api = new RestApi(this, 'Api', {
       restApiName: `${stage}-obp-cdk-api-api`,
       defaultCorsPreflightOptions: {
@@ -123,6 +135,9 @@ export default class Api extends Construct {
 
     const documentsPreview = documents.addResource('preview');
     documentsPreview.addMethod('POST', new LambdaIntegration(documentPreview));
+
+    const sparql = api.root.addResource('sparql');
+    sparql.addMethod('POST', new LambdaIntegration(sparqlFunction));
 
     const statistics = api.root.addResource('statistics');
     statistics.addMethod('GET', new LambdaIntegration(getStatistics));

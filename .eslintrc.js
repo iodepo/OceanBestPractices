@@ -24,6 +24,7 @@ module.exports = {
       'error',
       'multiline-arguments',
     ],
+    'implicit-arrow-linebreak': 'off',
     'max-len': [
       'error',
       {
