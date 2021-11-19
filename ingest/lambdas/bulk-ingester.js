@@ -1,4 +1,5 @@
-const bulkIngester = require('./bulk-ingester');
+// @ts-check
+const bulkIngester = require('../lib/bulk-ingester');
 
 const handler = async () => bulkIngester(
   process.env.DSPACE_ENDPOINT,
