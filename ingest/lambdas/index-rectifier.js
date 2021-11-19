@@ -1,4 +1,5 @@
-const ir = require('./index-rectifier');
+// @ts-check
+const ir = require('../lib/index-rectifier');
 
 const handler = async () => {
   const region = process.env.AWS_REGION;
@@ -13,7 +14,6 @@ const handler = async () => {
   // Queue updated items for re-ingest.
   await ir.commitUpdatedItems(
     result.updated,
-    process.env.DSPACE_ENDPOINT,
     process.env.INGEST_TOPIC_ARN,
     { region }
   );
@@ -21,8 +21,7 @@ const handler = async () => {
   // Remove deleted items from the index.
   await ir.commitRemovedItems(
     result.removed,
-    process.env.OPEN_SEARCH_ENDPOINT,
-    { region }
+    process.env.OPEN_SEARCH_ENDPOINT
   );
 };
 

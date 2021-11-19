@@ -12,14 +12,7 @@ describe('index-rectifier', () => {
         SequenceNumber: '456',
       }));
 
-      const updatedItems = [
-        {
-          _id: '123',
-        },
-        {
-          _id: '456',
-        },
-      ];
+      const updatedItems = ['123', '456'];
 
       await ir.commitUpdatedItems(
         updatedItems,
@@ -44,14 +37,7 @@ describe('index-rectifier', () => {
     test('should remove items from the index', async () => {
       osClient.bulkDelete = jest.fn();
 
-      const removedItems = [
-        {
-          _id: '123',
-        },
-        {
-          _id: '456',
-        },
-      ];
+      const removedItems = ['123', '456'];
 
       await ir.commitRemovedItems(
         removedItems,
@@ -62,8 +48,7 @@ describe('index-rectifier', () => {
       expect(osClient.bulkDelete).toBeCalledWith(
         'https://opensearch.example.com',
         'documents',
-        ['123', '456'],
-        { region: 'us-east-1' }
+        ['123', '456']
       );
     });
   });
@@ -191,7 +176,7 @@ describe('index-rectifier', () => {
   });
 
   describe('diff', () => {
-    test.only('should compare index items with the DSpace repository and produce a list of updated and removed items', async () => {
+    test('should compare index items with the DSpace repository and produce a list of updated and removed items', async () => {
       const mockIndexItem1 = {
         _id: '1',
         _source: {
@@ -362,8 +347,8 @@ describe('index-rectifier', () => {
       const result = await ir.diff(mockOpenSearchEndpoint, mockDSpaceEndpoint);
 
       expect(result).toEqual({
-        updated: [mockIndexItem1, mockIndexItem2],
-        removed: [mockIndexItem4],
+        updated: ['a', 'b'],
+        removed: ['d'],
       });
 
       expect(osClient.openScroll).toHaveBeenCalledTimes(1);
@@ -372,16 +357,15 @@ describe('index-rectifier', () => {
         'documents',
         {
           includes: ['uuid', 'bitstreams', 'lastModified'],
-          region: 'us-east-1',
         }
       );
 
       expect(osClient.nextScroll).toHaveBeenCalledTimes(2);
-      expect(osClient.nextScroll).toHaveBeenNthCalledWith(1, mockOpenSearchEndpoint, 'mockScrollId1', { region: 'us-east-1' });
-      expect(osClient.nextScroll).toHaveBeenNthCalledWith(2, mockOpenSearchEndpoint, 'mockScrollId2', { region: 'us-east-1' });
+      expect(osClient.nextScroll).toHaveBeenNthCalledWith(1, mockOpenSearchEndpoint, 'mockScrollId1');
+      expect(osClient.nextScroll).toHaveBeenNthCalledWith(2, mockOpenSearchEndpoint, 'mockScrollId2');
 
       expect(osClient.closeScroll).toHaveBeenCalledTimes(1);
-      expect(osClient.closeScroll).toHaveBeenCalledWith(mockDSpaceEndpoint, 'mockScrollId2', { region: 'us-east-1' });
+      expect(osClient.closeScroll).toHaveBeenCalledWith(mockDSpaceEndpoint, 'mockScrollId2');
 
       expect(dspaceClient.getItem).toHaveBeenCalledTimes(4);
       expect(dspaceClient.getItem).toHaveBeenNthCalledWith(

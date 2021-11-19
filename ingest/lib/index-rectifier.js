@@ -8,7 +8,7 @@ const utils = require('./ingest-queue');
 
 /**
  * @typedef {import('../../lib/dspace-types').DSpaceItem} DSpaceItem
- * @typedef {import('../../lib/dspace-types').OpenSearchItem} OpenSearchItem
+ * @typedef {import('../../lib/open-search-types').SearchItem} SearchItem
  */
 
 module.exports = {
@@ -26,26 +26,26 @@ module.exports = {
    * @returns {Promise<void>}
    */
   commitUpdatedItems: async (
-    items,
+    ids,
     ingestTopicArn,
     options = {}
   ) => {
-    if (items.length <= 0) return;
+    if (ids.length <= 0) return;
 
     const { region = 'us-east-1' } = options;
 
     await pMap(
-      items,
-      async (item) => {
+      ids,
+      async (id) => {
         try {
           await utils.queueIngestDocument(
             // eslint-disable-next-line no-underscore-dangle
-            item._id,
+            id,
             ingestTopicArn,
             { region }
           );
         } catch (error) {
-          console.log(`ERROR: Failed to queue updated document ${JSON.stringify(item)} with error: ${error}`);
+          console.log(`ERROR: Failed to queue updated document ${JSON.stringify(id)} with error: ${error}`);
         }
       },
       { concurrency: 5 }
@@ -56,31 +56,26 @@ module.exports = {
    * Commits removed items that have been marked as removed by
    * deleting them from the index.
    *
-   * @param {{_id: string}[]} items List of existing index items that need to
+   * @param {string[]} ids List of existing index items IDs that need to
    *                         be deleted.
    * @param {string} openSearchEndpoint Endpoint for the OpenSearch index from
    *                                    which the items should be removed.
    * @param {Object} [options={}] Additional options.
-   * @param {string} [options.region=us-east-1] AWS region containing the
-   *                                            infrastructure.
+   *
    * @returns {Promise<void>}
    */
   commitRemovedItems: async (
-    items,
-    openSearchEndpoint,
-    options = {}
+    ids,
+    openSearchEndpoint
   ) => {
-    if (items.length <= 0) return;
-
-    const { region = 'us-east-1' } = options;
+    if (ids.length <= 0) return;
 
     try {
       await osClient.bulkDelete(
         openSearchEndpoint,
         'documents',
         // eslint-disable-next-line no-underscore-dangle
-        items.map((item) => item._id),
-        { region }
+        ids
       );
     } catch (error) {
       console.log(`ERROR: Failed bulk delete with error: ${error}`);
@@ -91,7 +86,7 @@ module.exports = {
    * Determines whether or not the given index item should be considered out of
    * date when compared to the same dspace item.
    *
-   * @param {OpenSearchItem} indexItem The item from the OpenSearch index.
+   * @param {SearchItem} indexItem The item from the OpenSearch index.
    * @param {DSpaceItem} dspaceItem The item from DSpace from which we determine
    * if the OpenSearch item needs to be marked as needing update.
    *
@@ -133,21 +128,14 @@ module.exports = {
    *                                from which the items should be ingest.
    *                                The endpoint should include the protocol.
    * @param {Object} [options={}] Additional options.
-   * @param {string} [options.region='us-east-1'] AWS region containing the
-   *                                            infrastructure.
    *
    * @returns {Promise<{removed: string[], updated: string[]}>} Object with
    * removed and updated items.
    */
   diff: async (
     openSearchEndpoint,
-    dspaceEndpoint,
-    options = {}
+    dspaceEndpoint
   ) => {
-    const {
-      region = 'us-east-1',
-    } = options;
-
     /** @type {{removed: string[], updated: string[]}} */
     const diffResult = {
       removed: [],
@@ -156,7 +144,6 @@ module.exports = {
 
     const scrollOptions = {
       includes: ['uuid', 'bitstreams', 'lastModified'],
-      region,
     };
 
     // eslint-disable-next-line camelcase
@@ -192,13 +179,12 @@ module.exports = {
       // eslint-disable-next-line camelcase, no-await-in-loop
       ({ _scroll_id, hits: { hits } } = await osClient.nextScroll(
         openSearchEndpoint,
-        _scroll_id,
-        { region }
+        _scroll_id
       ));
     }
 
     // OpenSearch documentation recommends we close the scroll when we're done.
-    await osClient.closeScroll(dspaceEndpoint, _scroll_id, { region });
+    await osClient.closeScroll(dspaceEndpoint, _scroll_id);
 
     return diffResult;
   },
