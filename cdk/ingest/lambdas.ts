@@ -35,6 +35,10 @@ export default class IngestLambdas extends Construct {
 
   public readonly scheduler: Function;
 
+  public readonly indexRectifier: Function;
+
+  public readonly bulkIngester: Function;
+
   constructor(scope: Construct, id: string, props: LambdasProps) {
     super(scope, id);
 
@@ -121,5 +125,34 @@ export default class IngestLambdas extends Construct {
       },
     });
     snsTopics.availableDocument.grantPublish(this.scheduler);
+
+    this.indexRectifier = new Function(this, 'IndexRectifier', {
+      functionName: `${stage}-obp-cdk-index-rectifier`,
+      handler: 'handler.handler',
+      runtime: Runtime.NODEJS_14_X,
+      code: Code.fromAsset(path.join(lambdasPath, 'index-rectifier')),
+      description: 'Performs a diff against the OBP Search Index and DSpace; Updates or removes items as necessary.',
+      timeout: Duration.minutes(15),
+      environment: {
+        INGEST_TOPIC_ARN: snsTopics.availableDocument.topicArn,
+        OPEN_SEARCH_ENDPOINT: elasticsearchDomain.domainEndpoint,
+        DSPACE_ENDPOINT: 'https://repository.oceanbestpractices.org',
+      },
+    });
+    snsTopics.availableDocument.grantPublish(this.indexRectifier);
+
+    this.bulkIngester = new Function(this, 'BulkIngester', {
+      functionName: `${stage}-obp-cdk-bulk-ingester`,
+      handler: 'handler.handler',
+      runtime: Runtime.NODEJS_14_X,
+      code: Code.fromAsset(path.join(lambdasPath, 'bulk-ingester')),
+      description: 'Queues all documents available in DSpace for ingest.',
+      timeout: Duration.minutes(15),
+      environment: {
+        DSPACE_ENDPOINT: 'https://repository.oceanbestpractices.org',
+        INGEST_TOPIC_ARN: snsTopics.availableDocument.topicArn,
+      },
+    });
+    snsTopics.availableDocument.grantPublish(this.indexRectifier);
   }
 }
