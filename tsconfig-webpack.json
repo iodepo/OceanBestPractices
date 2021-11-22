@@ -6,6 +6,7 @@
   "exclude": [
     "bin",
     "cdk",
-    "cdk.out"
+    "cdk.out",
+    "tmp"
   ]
 }
