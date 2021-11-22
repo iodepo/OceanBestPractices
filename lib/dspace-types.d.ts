@@ -1,4 +1,3 @@
-/* eslint-disable camelcase */
 export interface Bitstream {
   bundleName: string
   mimeType: string

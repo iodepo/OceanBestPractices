@@ -11,6 +11,15 @@ const utils = require('./ingest-queue');
  * @typedef {import('../../lib/open-search-types').SearchItem} SearchItem
  */
 
+/**
+ * @typedef {import('../../lib/open-search-types').DocumentItem} DocumentItem
+ *
+ * @typedef {Object} IsUpdatedIndexItem
+ * @property {Pick<DocumentItem, 'lastModified' | 'bitstreams'>} _source
+ *
+ * @typedef {Pick<DSpaceItem, 'lastModified' | 'bitstreams'>} IsUpdatedDSpaceItem
+ */
+
 module.exports = {
   /**
    * Commits index items that have been marked as out of date by
@@ -39,7 +48,6 @@ module.exports = {
       async (id) => {
         try {
           await utils.queueIngestDocument(
-            // eslint-disable-next-line no-underscore-dangle
             id,
             ingestTopicArn,
             { region }
@@ -74,7 +82,6 @@ module.exports = {
       await osClient.bulkDelete(
         openSearchEndpoint,
         'documents',
-        // eslint-disable-next-line no-underscore-dangle
         ids
       );
     } catch (error) {
@@ -86,21 +93,19 @@ module.exports = {
    * Determines whether or not the given index item should be considered out of
    * date when compared to the same dspace item.
    *
-   * @param {SearchItem} indexItem The item from the OpenSearch index.
-   * @param {DSpaceItem} dspaceItem The item from DSpace from which we determine
-   * if the OpenSearch item needs to be marked as needing update.
+   * @param {IsUpdatedIndexItem} indexItem The item from the OpenSearch index.
+   * @param {IsUpdatedDSpaceItem} dspaceItem The item from DSpace from which we
+   * determine if the OpenSearch item needs to be marked as needing update.
    *
    * @returns {boolean} True if the index item should be marked as updated when
    * compared to the same DSpace item.
    */
   isUpdated: (indexItem, dspaceItem) => {
-    // eslint-disable-next-line no-underscore-dangle
-    if (new Date(indexItem._source.lastModified)
-        < new Date(dspaceItem.lastModified)) {
-      return true;
-    }
+    const esLastModified = new Date(indexItem._source.lastModified);
+    const dspaceLastModified = new Date(dspaceItem.lastModified);
 
-    // eslint-disable-next-line no-underscore-dangle
+    if (esLastModified < dspaceLastModified) return true;
+
     const indexItemPDFBitstream = indexItem._source.bitstreams
       .find((b) => (b.bundleName === 'ORIGINAL' && b.mimeType === 'application/pdf'));
     const dspaceItemPDFBitstream = dspaceItem.bitstreams
@@ -127,7 +132,6 @@ module.exports = {
    * @param {string} dspaceEndpoint Endpoint for the DSpace repository
    *                                from which the items should be ingest.
    *                                The endpoint should include the protocol.
-   * @param {Object} [options={}] Additional options.
    *
    * @returns {Promise<{removed: string[], updated: string[]}>} Object with
    * removed and updated items.
@@ -157,7 +161,6 @@ module.exports = {
           try {
             const dspaceItem = await dspaceClient.getItem(
               dspaceEndpoint,
-              // eslint-disable-next-line no-underscore-dangle
               indexItem._source.uuid
             );
 

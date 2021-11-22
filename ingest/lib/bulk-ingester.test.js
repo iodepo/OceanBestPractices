@@ -1,10 +1,12 @@
+// @ts-check
 const bulkIngester = require('./bulk-ingester');
 const dspaceClient = require('../../lib/dspace-client');
 const utils = require('./ingest-queue');
 
 describe('bulk-ingester', () => {
   test('should queue all DSpace items for ingest', async () => {
-    utils.queueIngestDocument = jest.fn(() => ({
+    utils.queueIngestDocument = jest.fn(async () => ({
+      $metadata: {},
       MessageId: 'abc',
       SequenceNumber: '123',
     }));
