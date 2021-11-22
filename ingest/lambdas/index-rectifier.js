@@ -7,8 +7,7 @@ const handler = async () => {
   // Perform an Index and DSpace diff.
   const result = await ir.diff(
     process.env.OPEN_SEARCH_ENDPOINT,
-    process.env.DSPACE_ENDPOINT,
-    { region }
+    process.env.DSPACE_ENDPOINT
   );
 
   // Queue updated items for re-ingest.
@@ -25,4 +24,4 @@ const handler = async () => {
   );
 };
 
-module.exports = handler;
+module.exports = { handler };

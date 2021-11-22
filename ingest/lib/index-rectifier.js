@@ -30,7 +30,7 @@ module.exports = {
     ingestTopicArn,
     options = {}
   ) => {
-    if (ids.length <= 0) return;
+    if (ids.length === 0) return;
 
     const { region = 'us-east-1' } = options;
 
@@ -68,7 +68,7 @@ module.exports = {
     ids,
     openSearchEndpoint
   ) => {
-    if (ids.length <= 0) return;
+    if (ids.length === 0) return;
 
     try {
       await osClient.bulkDelete(
