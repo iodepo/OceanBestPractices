@@ -15,7 +15,7 @@ This project includes all APIs, functions, queries, mappings, and resources nece
 
 The OBP infrastructure relies heavily on AWS services. Most services can be deployed and managed via AWS Cloudformation.
 
-It'd be a good idea to install the [AWS SAM Local](https://docs.aws.amazon.com/lambda/latest/dg/test-sam-local.html) library for local Lambda testing. 
+It'd be a good idea to install the [AWS SAM Local](https://docs.aws.amazon.com/lambda/latest/dg/test-sam-local.html) library for local Lambda testing.
 
 While you can do everything you need to do in order to deploy via the AWS console, this documentation is written as though you're deploying via the [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html).
 
@@ -40,173 +40,13 @@ The OBP documentation includes enough information to deploy the entire OBP infra
 
 ### Creating the Document Index
 
-Create a new document index in an Elastic Search cluster:
-
-```
-PUT documents
-{
-    "mappings": {
-        "doc": {
-            "properties": {
-                "contents": {
-                    "type": "text"
-                },
-                "uuid": {
-                    "type": "text"
-                },
-                "title": {
-                    "type": "text",
-                    "fields": {
-                        "raw": {
-                            "type": "keyword"
-                        }
-                    }
-                },
-                "abstract": {
-                    "type": "text"
-                },
-                "author": {
-                    "type": "text",
-                    "fields": {
-                        "raw": {
-                            "type": "keyword"
-                        }
-                    }
-                },
-                "publisher": {
-                    "type": "text",
-                    "fields": {
-                        "raw": {
-                            "type": "keyword"
-                        }
-                    }
-                },
-                "language": {
-                    "type": "keyword"
-                },
-                "issued_date": {
-                    "type": "date",
-                    "format": "yyyy"
-                },
-                "thumbnail": {
-                    "type": "keyword"
-                },
-                "handle": {
-                    "type": "keyword"
-                },
-                "terms": {
-                    "type": "nested",
-                    "properties": {
-                        "uri": {"type": "keyword" },
-                        "label": { "type": "text" }
-                    }
-                },
-                "title_alt": {
-                    "type": "text",
-                    "fields": {
-                        "raw": {
-                            "type": "keyword"
-                        }
-                    }
-                },
-                "corp_author": {
-                    "type": "text",
-                    "fields": {
-                        "raw": {
-                            "type": "keyword"
-                        }
-                    }
-                },
-                "editor": {
-                    "type": "text",
-                    "fields": {
-                        "raw": {
-                            "type": "keyword"
-                        }
-                    }
-                },
-                "journal_title": {
-                    "type": "text",
-                    "fields": {
-                        "raw": {
-                            "type": "keyword"
-                        }
-                    }
-                },
-                "essential_ocean_variables": {
-                    "type": "text"
-                },
-                "sustainable_development_goals": {
-                    "type": "text"
-                },
-                "identifier_doi": {
-                    "type": "keyword"
-                },
-                "identifier_orcid": {
-                    "type": "keyword"
-                },
-                "resource_uri": {
-                    "type": "keyword"
-                },
-                "refereed": {
-                    "type": "keyword"
-                },
-                "citation": {
-                    "type": "text"
-                },
-                "sourceKey": {
-                    "type": "keyword"
-                },
-                "publication_status": {
-                    "type": "keyword"
-                },
-                "current_status": {
-                    "type": "keyword"
-                },
-                "relation_uri": {
-                    "type": "keyword"
-                },
-                "bptype": {
-                    "type": "keyword"
-                },
-                "relation_is_part_of_series": {
-                    "type": "keyword"
-                },
-                "type": {
-                    "type": "keyword"
-                },
-                "subjects_other": {
-                    "type": "text"
-                },
-                "subjects_instrument_type": {
-                    "type": "text"
-                },
-                "subjects_parameter_discipline": {
-                    "type": "text"
-                },
-                "subjects_dm_processes": {
-                    "type": "text"
-                },
-                "maturity_level": {
-                    "type": "keyword"
-                },
-                "notes": {
-                    "type": "text"
-                },
-                "coverage_spatial": {
-                    "type": "keyword"
-                }
-            }
-        }
-    }
-}
-```
+Create a new document index in an Elastic Search cluster using an HTTP request `PUT documents` and the mapping found in [Documents Mapping](../ingest/open-search/documents-mapping.json).
 
 ### Creating and Populating the Percolator Index
 
 First we need to create the `terms` index in Elasticsearch. This index will be used to store objects that map to individual terms in our triple store. This index represents the queries we want our documents to match. To learn more about how the Elasticsearch Percolator works take a look at the [documentation](https://www.elastic.co/guide/en/elasticsearch/reference/7.6/percolator.html).
 
-To create this index you can execute the following HTTP request on your Elasticsearch host: 
+To create this index you can execute the following HTTP request on your Elasticsearch host:
 
 ```
 PUT terms
@@ -229,7 +69,7 @@ PUT terms
                 }
             }
     }
-    
+
 }
 ```
 
@@ -382,7 +222,7 @@ Searching documents with a terms filter:
                     }
                 }]
             }
-        
+
     },
     "highlight" : {
         "fields" : {
