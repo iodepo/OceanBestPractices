@@ -30,13 +30,27 @@ module.exports = {
       {
         code: 80,
         tabWidth: 2,
-        ignorePattern: '(test\\(|https?://)',
+        ignorePattern: '(test\\(|https?://|@typedef)',
         ignoreTemplateLiterals: true,
         ignoreStrings: true,
       },
     ],
     'no-console': 'off',
-    'no-restricted-syntax': 'off',
+    'no-restricted-syntax': [
+      'error',
+      {
+        selector: 'ForInStatement',
+        message: 'for..in loops iterate over the entire prototype chain, which is virtually never what you want. Use Object.{keys,values,entries}, and iterate over the resulting array.',
+      },
+      {
+        selector: 'LabeledStatement',
+        message: 'Labels are a form of GOTO; using them makes code confusing and hard to maintain and understand.',
+      },
+      {
+        selector: 'WithStatement',
+        message: '`with` is disallowed in strict mode because it makes code impossible to predict and optimize.',
+      },
+    ],
     'object-property-newline': [
       'error',
       { allowAllPropertiesOnSameLine: false },
@@ -44,6 +58,7 @@ module.exports = {
     radix: ['error', 'as-needed'],
     'unicorn/custom-error-definition': 'error',
     'unicorn/no-unsafe-regex': 'error',
+    'unicorn/no-useless-undefined': 'off',
     'unicorn/no-unused-properties': 'error',
     'unicorn/prefer-module': 'off',
     'unicorn/prefer-node-protocol': 'off',
