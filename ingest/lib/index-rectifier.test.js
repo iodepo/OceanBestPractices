@@ -1,3 +1,4 @@
+// @ts-check
 /* eslint-disable no-underscore-dangle */
 const dspaceClient = require('../../lib/dspace-client');
 const ir = require('./index-rectifier');
@@ -7,19 +8,13 @@ const utils = require('./ingest-queue');
 describe('index-rectifier', () => {
   describe('commitUpdatedItems', () => {
     test('should queue updated items for ingest', async () => {
-      utils.queueIngestDocument = jest.fn(() => ({
+      utils.queueIngestDocument = jest.fn(async () => ({
+        $metadata: {},
         MessageId: 'foo',
         SequenceNumber: '456',
       }));
 
-      const updatedItems = [
-        {
-          _id: '123',
-        },
-        {
-          _id: '456',
-        },
-      ];
+      const updatedItems = ['123', '456'];
 
       await ir.commitUpdatedItems(
         updatedItems,
@@ -44,14 +39,7 @@ describe('index-rectifier', () => {
     test('should remove items from the index', async () => {
       osClient.bulkDelete = jest.fn();
 
-      const removedItems = [
-        {
-          _id: '123',
-        },
-        {
-          _id: '456',
-        },
-      ];
+      const removedItems = ['123', '456'];
 
       await ir.commitRemovedItems(
         removedItems,
@@ -62,8 +50,7 @@ describe('index-rectifier', () => {
       expect(osClient.bulkDelete).toBeCalledWith(
         'https://opensearch.example.com',
         'documents',
-        ['123', '456'],
-        { region: 'us-east-1' }
+        ['123', '456']
       );
     });
   });
@@ -71,35 +58,27 @@ describe('index-rectifier', () => {
   describe('isUpdated', () => {
     test('should determine an index item needs updating if lastModified has changed', () => {
       const dspaceItem = {
-        uuid: '73ff2010-39d3-4b2d-bef3-420f347c3999',
         lastModified: '2020-11-01 23:05:25.261',
         bitstreams: [
           {
-            uuid: 'd8045f8b-19c7-4878-b33a-4eff97d24447',
             bundleName: 'ORIGINAL',
-            description: 'PDF',
             mimeType: 'application/pdf',
             checkSum: {
               value: 'f91a9870078dc75784288b41be5f1911',
-              checkSumAlgorithm: 'MD5',
             },
           },
         ],
       };
 
       const indexItem = {
-        _id: '73ff2010-39d3-4b2d-bef3-420f347c3999',
         _source: {
           lastModified: '2020-05-06 23:05:25.261',
           bitstreams: [
             {
-              uuid: 'd8045f8b-19c7-4878-b33a-4eff97d24447',
               bundleName: 'ORIGINAL',
-              description: 'PDF',
               mimeType: 'application/pdf',
               checkSum: {
                 value: 'f91a9870078dc75784288b41be5f1911',
-                checkSumAlgorithm: 'MD5',
               },
             },
           ],
@@ -191,7 +170,7 @@ describe('index-rectifier', () => {
   });
 
   describe('diff', () => {
-    test.only('should compare index items with the DSpace repository and produce a list of updated and removed items', async () => {
+    test('should compare index items with the DSpace repository and produce a list of updated and removed items', async () => {
       const mockIndexItem1 = {
         _id: '1',
         _source: {
@@ -362,8 +341,8 @@ describe('index-rectifier', () => {
       const result = await ir.diff(mockOpenSearchEndpoint, mockDSpaceEndpoint);
 
       expect(result).toEqual({
-        updated: [mockIndexItem1, mockIndexItem2],
-        removed: [mockIndexItem4],
+        updated: ['a', 'b'],
+        removed: ['d'],
       });
 
       expect(osClient.openScroll).toHaveBeenCalledTimes(1);
@@ -372,16 +351,15 @@ describe('index-rectifier', () => {
         'documents',
         {
           includes: ['uuid', 'bitstreams', 'lastModified'],
-          region: 'us-east-1',
         }
       );
 
       expect(osClient.nextScroll).toHaveBeenCalledTimes(2);
-      expect(osClient.nextScroll).toHaveBeenNthCalledWith(1, mockOpenSearchEndpoint, 'mockScrollId1', { region: 'us-east-1' });
-      expect(osClient.nextScroll).toHaveBeenNthCalledWith(2, mockOpenSearchEndpoint, 'mockScrollId2', { region: 'us-east-1' });
+      expect(osClient.nextScroll).toHaveBeenNthCalledWith(1, mockOpenSearchEndpoint, 'mockScrollId1');
+      expect(osClient.nextScroll).toHaveBeenNthCalledWith(2, mockOpenSearchEndpoint, 'mockScrollId2');
 
       expect(osClient.closeScroll).toHaveBeenCalledTimes(1);
-      expect(osClient.closeScroll).toHaveBeenCalledWith(mockDSpaceEndpoint, 'mockScrollId2', { region: 'us-east-1' });
+      expect(osClient.closeScroll).toHaveBeenCalledWith(mockDSpaceEndpoint, 'mockScrollId2');
 
       expect(dspaceClient.getItem).toHaveBeenCalledTimes(4);
       expect(dspaceClient.getItem).toHaveBeenNthCalledWith(

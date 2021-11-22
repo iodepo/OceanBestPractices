@@ -1,3 +1,4 @@
+// @ts-check
 const { mockClient } = require('aws-sdk-client-mock');
 const { SNSClient, PublishCommand } = require('@aws-sdk/client-sns');
 

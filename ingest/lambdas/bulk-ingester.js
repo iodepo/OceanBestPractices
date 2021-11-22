@@ -1,8 +1,18 @@
-const bulkIngester = require('./bulk-ingester');
+// @ts-check
+const bulkIngester = require('../lib/bulk-ingester');
 
-const handler = async () => bulkIngester(
-  process.env.DSPACE_ENDPOINT,
-  process.env.INGEST_TOPIC_ARN
-);
+const handler = async () => {
+  const dspaceEndpoint = process.env.DSPACE_ENDPOINT;
+  const ingestTopicArn = process.env.INGEST_TOPIC_ARN;
+  if (!dspaceEndpoint || !ingestTopicArn) {
+    console.log('WARN: Bulk ingester called without required environment variables.');
+    return;
+  }
 
-module.exports = handler;
+  bulkIngester(
+    dspaceEndpoint,
+    ingestTopicArn
+  );
+};
+
+module.exports = { handler };
