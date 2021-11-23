@@ -1,9 +1,7 @@
 import got, { Got } from 'got';
 import { z } from 'zod';
 import pWaitFor from 'p-wait-for';
-
-const zodTypeGuard = <T>(schema: z.ZodSchema<T>) =>
-  (x: unknown): x is T => schema.safeParse(x).success;
+import { zodTypeGuard } from '../lib/zod-utils';
 
 export const BulkLoaderDataFormatSchema = z.enum([
   'csv',
@@ -31,26 +29,26 @@ interface LoadParams {
   namedGraphUri: string
 }
 
-const LoaderOkResponseSchema = z.object({
+const loaderOkResponseSchema = z.object({
   status: z.literal('200 OK'),
   payload: z.object({
     loadId: z.string(),
   }),
 });
-const isLoaderOkResponse = zodTypeGuard(LoaderOkResponseSchema);
+const isLoaderOkResponse = zodTypeGuard(loaderOkResponseSchema);
 
-const LoaderErrorResponseSchema = z.object({
+const loaderErrorResponseSchema = z.object({
   code: z.string(),
   requestId: z.string(),
   detailedMessage: z.string(),
 });
 
-const LoaderResponseSchema = z.union([
-  LoaderOkResponseSchema,
-  LoaderErrorResponseSchema,
+const loaderResponseSchema = z.union([
+  loaderOkResponseSchema,
+  loaderErrorResponseSchema,
 ]);
 
-const GetStatusOkResponseSchema = z.object({
+const getStatusOkResponseSchema = z.object({
   status: z.literal('200 OK'),
   payload: z.object({
     overallStatus: z.object({
@@ -110,7 +108,7 @@ export class NeptuneBulkLoaderClient implements BulkLoaderClient {
       }
     );
 
-    const loaderResponse = LoaderResponseSchema.parse(body);
+    const loaderResponse = loaderResponseSchema.parse(body);
 
     if (isLoaderOkResponse(loaderResponse)) {
       return loaderResponse.payload.loadId;
@@ -129,7 +127,7 @@ export class NeptuneBulkLoaderClient implements BulkLoaderClient {
       }
     );
 
-    const getStatusResponse = GetStatusOkResponseSchema.parse(body);
+    const getStatusResponse = getStatusOkResponseSchema.parse(body);
 
     return getStatusResponse.payload.overallStatus.status;
   }
