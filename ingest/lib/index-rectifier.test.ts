@@ -1,17 +1,32 @@
 /* eslint-disable no-underscore-dangle */
 import * as dspaceClient from '../../lib/dspace-client';
 import * as ir from './index-rectifier';
+import { queueIngestDocument } from './ingest-queue';
 import * as osClient from '../../lib/open-search-client';
-import queueIngestDocument from './ingest-queue';
+
+jest.mock('./ingest-queue');
+
+const mockQueueIngestDocument = queueIngestDocument as jest.MockedFunction<typeof queueIngestDocument>; // eslint-disable-line max-len
+
+jest.mock('../../lib/open-search-client', () => ({
+  bulkDelete: jest.fn(),
+  nextScroll: jest.fn(),
+  openScroll: jest.fn(),
+  closeScroll: jest.fn(),
+}));
+
+jest.mock('../../lib/dspace-client', () => ({
+  getItem: jest.fn(),
+}));
 
 describe('index-rectifier', () => {
   describe('commitUpdatedItems', () => {
     test('should queue updated items for ingest', async () => {
-      queueIngestDocument = jest.fn(async () => ({
+      mockQueueIngestDocument.mockResolvedValue({
         $metadata: {},
         MessageId: 'foo',
         SequenceNumber: '456',
-      }));
+      });
 
       const updatedItems = ['123', '456'];
 
@@ -24,19 +39,19 @@ describe('index-rectifier', () => {
       expect(queueIngestDocument).toBeCalledWith(
         '123',
         'arn:ingestTopicArn',
-        { region: 'us-east-1' }
+        'us-east-1'
       );
       expect(queueIngestDocument).toBeCalledWith(
         '456',
         'arn:ingestTopicArn',
-        { region: 'us-east-1' }
+        'us-east-1'
       );
     });
   });
 
   describe('commitRemovedItems', () => {
     test('should remove items from the index', async () => {
-      osClient.bulkDelete = jest.fn();
+      (osClient.bulkDelete as jest.Mock) = jest.fn();
 
       const removedItems = ['123', '456'];
 
@@ -246,7 +261,7 @@ describe('index-rectifier', () => {
         },
       };
 
-      osClient.openScroll = jest.fn().mockImplementation(() => ({
+      (osClient.openScroll as jest.Mock).mockImplementation(() => ({
         _scroll_id: 'mockScrollId1',
         hits: {
           hits: [
@@ -255,8 +270,7 @@ describe('index-rectifier', () => {
         },
       }));
 
-      osClient.nextScroll = jest
-        .fn()
+      (osClient.nextScroll as jest.Mock)
         .mockImplementationOnce(() => ({
           _scroll_id: 'mockScrollId2',
           hits: {
@@ -274,7 +288,7 @@ describe('index-rectifier', () => {
           },
         }));
 
-      osClient.closeScroll = jest.fn().mockImplementation(() => ({
+      (osClient.closeScroll as jest.Mock).mockImplementation(() => ({
         succeeded: true,
         num_freed: 5,
       }));
@@ -328,8 +342,7 @@ describe('index-rectifier', () => {
         ],
       };
 
-      dspaceClient.getItem = jest
-        .fn()
+      (dspaceClient.getItem as jest.Mock)
         .mockImplementationOnce(() => (mockDSpaceItem1))
         .mockImplementationOnce(() => (mockDSpaceItem2))
         .mockImplementationOnce(() => (mockDSpaceItem3))

@@ -1,3 +1,4 @@
+/* eslint-disable import/no-unresolved, import/extensions */
 // @ts-check
 const pMap = require('p-map');
 

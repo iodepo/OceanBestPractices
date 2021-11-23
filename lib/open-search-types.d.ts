@@ -14,7 +14,12 @@ export interface DocumentItemTerm {
 }
 
 export interface TermItem {
-  query: string
+  query: {
+    multi_match: {
+      query: string
+    }
+  },
+  source_terminology: string,
 }
 
 export interface PutDocumentItemResponse {

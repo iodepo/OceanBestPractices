@@ -1,3 +1,3 @@
-const indexer = require('./indexer');
-
-describe('indexer', () => {});
+describe('indexer', () => {
+  test.skip('placeholder', () => (undefined));
+});

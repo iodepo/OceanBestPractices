@@ -1,7 +1,10 @@
 import * as osClient from '../../lib/open-search-client';
+
+// @ts-expect-error We need to migrate this file to TS or add a types file
+// for it
 import * as s3Client from '../../lib/s3-client';
 
-const metadataBucketName = process.env.DOCUMENT_METADATA_BUCKET;
+const metadataBucketName = process.env['DOCUMENT_METADATA_BUCKET'];
 
 /**
  * The mapping defines the translations between the DSpace repository field names

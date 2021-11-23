@@ -1,16 +1,13 @@
 /* eslint-disable camelcase */
 /* eslint-disable no-underscore-dangle */
-import pMap from 'p-map';
-import {
-  string,
-  z,
-} from 'zod';
+import * as pMap from 'p-map';
 
 import * as dspaceClient from '../../lib/dspace-client';
 import { DSpaceItem } from '../../lib/dspace-types';
 import * as osClient from '../../lib/open-search-client';
 import { DocumentItem } from '../../lib/open-search-types';
-import queueIngestDocument from './ingest-queue';
+import { openSearchScrollDocumentsResponseSchema } from '../../lib/schemas';
+import { queueIngestDocument } from './ingest-queue';
 
 /**
  * Commits index items that have been marked as out of date by
@@ -141,11 +138,22 @@ export const diff = async (
     includes: ['uuid', 'bitstreams', 'lastModified'],
   };
 
-  let { _scroll_id, hits: { hits } } = await osClient.openScroll<DocumentItem>(
+  const rawOpenScrollResponse = await osClient.openScroll(
     openSearchEndpoint,
     'documents',
     scrollOptions
   );
+
+  const openScrollResponse = openSearchScrollDocumentsResponseSchema.safeParse(
+    rawOpenScrollResponse
+  );
+
+  if (!openScrollResponse.success) {
+    console.log(`ERROR: Failed to scroll documents: ${openScrollResponse.error}`);
+    return diffResult;
+  }
+
+  let { _scroll_id, hits: { hits } } = openScrollResponse.data;
 
   while (hits.length > 0) {
     // eslint-disable-next-line no-await-in-loop
@@ -173,11 +181,24 @@ export const diff = async (
       { concurrency: 5 }
     );
 
-    // eslint-disable-next-line camelcase, no-await-in-loop
-    ({ _scroll_id, hits: { hits } } = await osClient.nextScroll<DocumentItem>(
+    // eslint-disable-next-line no-await-in-loop
+    const rawNextScrollResponse = await osClient.nextScroll(
       openSearchEndpoint,
       _scroll_id
-    ));
+    );
+
+    const nextScrollResponse = openSearchScrollDocumentsResponseSchema
+      .safeParse(
+        rawNextScrollResponse
+      );
+
+    if (!nextScrollResponse.success) {
+      console.log(`ERROR: Failed to continue documents scroll: ${nextScrollResponse.error}`);
+      hits = [];
+    } else {
+      // eslint-disable-next-line camelcase
+      ({ _scroll_id, hits: { hits } } = nextScrollResponse.data);
+    }
   }
 
   // OpenSearch documentation recommends we close the scroll when we're done.

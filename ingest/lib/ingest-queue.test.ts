@@ -3,7 +3,7 @@ import {
   PublishCommand,
   SNSClient,
 } from '@aws-sdk/client-sns';
-import queueIngestDocument from './ingest-queue';
+import { queueIngestDocument } from './ingest-queue';
 
 const mockSNS = mockClient(SNSClient);
 

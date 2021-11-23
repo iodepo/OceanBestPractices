@@ -1,14 +1,13 @@
 /* eslint-disable camelcase */
 /* eslint-disable no-underscore-dangle */
 import got4aws from 'got4aws';
-import { z } from 'zod';
+import { percolateResponseSchema } from './schemas';
 
 import {
   CloseScrollResponse,
   DocumentItem,
   DocumentItemTerm,
   PutDocumentItemResponse,
-  ScrollResponse,
 } from './open-search-types';
 
 export interface OpenScrollOptions {
@@ -26,22 +25,23 @@ export interface OpenScrollOptions {
  * @param prefixUrl - Open Search endpoint.
  * @param index - Name of the index to query.
  * @param options - Options to the request.
+ * @param {string[]} [options.includes=['*']] -
  *
  * @returns Open Search query results including a
  * scroll ID.
  */
-export const openScroll = async<T> (
+export const openScroll = async (
   prefixUrl: string,
   index: string,
   options: OpenScrollOptions = {}
-): Promise<ScrollResponse<T>> => {
+): Promise<unknown> => {
   const {
     includes = ['*'],
     scrollTimeout = 60,
     size = 500,
   } = options;
 
-  return got4aws().post(
+  return await got4aws().post(
     `${index}/_search`,
     {
       prefixUrl,
@@ -69,11 +69,11 @@ export const openScroll = async<T> (
  * @returns Open Search query results including scroll ID. The scroll ID
  * in this response should always be used in future next scroll requests.
  */
-export const nextScroll = async<T> (
+export const nextScroll = async (
   prefixUrl: string,
   scrollId: string,
   scrollTimeout = 60
-): Promise<ScrollResponse<T>> => got4aws().post(
+): Promise<unknown> => got4aws().post(
   '_search/scroll',
   {
     prefixUrl,
@@ -188,24 +188,6 @@ export const percolateDocumentFields = async (
     size,
   };
 
-  const percolateResponseSchema = z.object({
-    hits: z.object({
-      hits: z.array(
-        z.object({
-          _id: z.string(),
-          _source: z.object({
-            query: z.object({
-              multi_match: z.object({
-                query: z.string(),
-              }),
-            }),
-            source_terminology: z.string(),
-          }),
-        })
-      ),
-    }),
-  });
-
   const rawPercolateResponse = await got4aws().post(
     'terms/_search',
     {
@@ -216,22 +198,22 @@ export const percolateDocumentFields = async (
     }
   );
 
-  try {
-    const percolateResponse = percolateResponseSchema
-      .parse(rawPercolateResponse);
+  const percolateResponse = percolateResponseSchema
+    .safeParse(rawPercolateResponse);
 
-    // It's possible we'll tweak this response as we improve the
-    // percolator query. Leaving this as is for now.
-    const { hits: { hits } } = percolateResponse;
-    return hits.map((h) => ({
-      label: h._source.query.multi_match.query,
-      uri: h._id,
-      source_terminology: h._source.source_terminology,
-    }));
-  } catch (error) {
-    console.log(`ERROR: Failed to parse percolate response: ${error}`);
-    throw error;
+  if (!percolateResponse.success) {
+    console.log(`ERROR: Failed to parse percolate response: ${percolateResponse.error}`);
+    throw percolateResponse.error;
   }
+
+  // It's possible we'll tweak this response as we improve the
+  // percolator query. Leaving this as is for now.
+  const { hits: { hits } } = percolateResponse.data;
+  return hits.map((h) => ({
+    label: h._source.query.multi_match.query,
+    uri: h._id,
+    source_terminology: h._source.source_terminology,
+  }));
 };
 
 /**
