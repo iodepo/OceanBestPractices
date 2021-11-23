@@ -1,17 +1,23 @@
-// @ts-check
-const nock = require('nock');
-const osClient = require('./open-search-client');
+import * as nock from 'nock';
+import {
+  bulkDelete,
+  closeScroll,
+  nextScroll,
+  openScroll,
+  percolateDocumentFields,
+  putDocumentItem,
+} from './open-search-client';
 
 describe('open-search-client', () => {
-  let awsAccessKeyIdBefore;
-  let awsSecretAccessKey;
+  let awsAccessKeyIdBefore: string | undefined;
+  let awsSecretAccessKey: string | undefined;
 
   beforeAll(() => {
-    awsAccessKeyIdBefore = process.env.AWS_ACCESS_KEY_ID;
-    process.env.AWS_ACCESS_KEY_ID = 'test-key-id';
+    awsAccessKeyIdBefore = process.env['AWS_ACCESS_KEY_ID'];
+    process.env['AWS_ACCESS_KEY_ID'] = 'test-key-id';
 
-    awsSecretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
-    process.env.AWS_SECRET_ACCESS_KEY = 'test-access-key';
+    awsSecretAccessKey = process.env['AWS_SECRET_ACCESS_KEY'];
+    process.env['AWS_SECRET_ACCESS_KEY'] = 'test-access-key';
 
     nock.disableNetConnect();
   });
@@ -23,8 +29,8 @@ describe('open-search-client', () => {
   afterAll(() => {
     nock.enableNetConnect();
 
-    process.env.AWS_ACCESS_KEY_ID = awsAccessKeyIdBefore;
-    process.env.AWS_SECRET_ACCESS_KEY = awsSecretAccessKey;
+    process.env['AWS_ACCESS_KEY_ID'] = awsAccessKeyIdBefore;
+    process.env['AWS_SECRET_ACCESS_KEY'] = awsSecretAccessKey;
   });
 
   describe('openScroll', () => {
@@ -37,7 +43,11 @@ describe('open-search-client', () => {
             hits: [], // We don't actually care about faking hits.
           },
         });
-      const result = await osClient.openScroll('https://open-search.example.com', 'documents', { size: 2 });
+      const result = await openScroll(
+        'https://open-search.example.com',
+        'documents',
+        { size: 2 }
+      );
 
       expect(result).toEqual({
         _scroll_id: 'mockScrollId1',
@@ -59,7 +69,10 @@ describe('open-search-client', () => {
           },
         });
 
-      const result = await osClient.nextScroll('https://open-search.example.com', 'mockScrollId1');
+      const result = await nextScroll(
+        'https://open-search.example.com',
+        'mockScrollId1'
+      );
       expect(result).toEqual({
         _scroll_id: 'mockScrollId1',
         hits: {
@@ -78,7 +91,10 @@ describe('open-search-client', () => {
           num_freed: 5,
         });
 
-      const result = await osClient.closeScroll('https://open-search.example.com', 'mockScrollId1');
+      const result = await closeScroll(
+        'https://open-search.example.com',
+        'mockScrollId1'
+      );
       expect(result).toEqual({
         succeeded: true,
         num_freed: 5,
@@ -134,7 +150,11 @@ describe('open-search-client', () => {
         .post('/_bulk', expectedRequestBody)
         .reply(200, mockBulkDeleteResponse);
 
-      const result = await osClient.bulkDelete('https://open-search.example.com', 'documents', ['1', '2']);
+      const result = await bulkDelete(
+        'https://open-search.example.com',
+        'documents',
+        ['1', '2']
+      );
       expect(result).toEqual(mockBulkDeleteResponse);
     });
   });
@@ -212,7 +232,7 @@ describe('open-search-client', () => {
         })
         .reply(200, mockPercolatorResponse);
 
-      const result = await osClient.percolateDocumentFields(
+      const result = await percolateDocumentFields(
         'https://open-search.example.com',
         {
           title: 'Ocean Stuff',
@@ -264,13 +284,15 @@ describe('open-search-client', () => {
           qualifier: 'author',
           schema: 'dc',
         }],
+        lastModified: '2021-11-01 15:10:17.231',
+        bitstreams: [],
       };
 
       nock('https://open-search.example.com')
         .post('/documents/doc/abc', documentItem)
         .reply(201, mockIndexResponse);
 
-      const result = await osClient.putDocumentItem(
+      const result = await putDocumentItem(
         'https://open-search.example.com',
         documentItem
       );

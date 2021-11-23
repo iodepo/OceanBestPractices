@@ -1,14 +1,13 @@
-// @ts-check
 /* eslint-disable no-underscore-dangle */
-const dspaceClient = require('../../lib/dspace-client');
-const ir = require('./index-rectifier');
-const osClient = require('../../lib/open-search-client');
-const utils = require('./ingest-queue');
+import * as dspaceClient from '../../lib/dspace-client';
+import * as ir from './index-rectifier';
+import * as osClient from '../../lib/open-search-client';
+import queueIngestDocument from './ingest-queue';
 
 describe('index-rectifier', () => {
   describe('commitUpdatedItems', () => {
     test('should queue updated items for ingest', async () => {
-      utils.queueIngestDocument = jest.fn(async () => ({
+      queueIngestDocument = jest.fn(async () => ({
         $metadata: {},
         MessageId: 'foo',
         SequenceNumber: '456',

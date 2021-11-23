@@ -7,8 +7,19 @@ export interface DocumentItem {
   bitstreams: Bitstream[]
 }
 
+export interface DocumentItemTerm {
+  label: string,
+  uri: string,
+  source_terminology: string
+}
+
 export interface TermItem {
   query: string
+}
+
+export interface PutDocumentItemResponse {
+  _index: string,
+  _id: string,
 }
 
 export interface SearchItem<T> {

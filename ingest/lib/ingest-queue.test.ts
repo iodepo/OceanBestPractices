@@ -1,8 +1,9 @@
-// @ts-check
-const { mockClient } = require('aws-sdk-client-mock');
-const { SNSClient, PublishCommand } = require('@aws-sdk/client-sns');
-
-const utils = require('./ingest-queue');
+import { mockClient } from 'aws-sdk-client-mock';
+import {
+  PublishCommand,
+  SNSClient,
+} from '@aws-sdk/client-sns';
+import queueIngestDocument from './ingest-queue';
 
 const mockSNS = mockClient(SNSClient);
 
@@ -20,7 +21,7 @@ describe('ingest-queue', () => {
 
       mockSNS.on(PublishCommand).resolves(mockPublishCommandOutput);
 
-      const result = await utils.queueIngestDocument(
+      const result = await queueIngestDocument(
         'def456',
         'arn:example:123'
       );

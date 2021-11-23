@@ -1,6 +1,5 @@
-// @ts-check
-const nock = require('nock');
-const dspaceClient = require('./dspace-client');
+import * as nock from 'nock';
+import * as dspaceClient from './dspace-client';
 
 describe('dspace-client', () => {
   describe('find', () => {
