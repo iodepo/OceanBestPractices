@@ -1,5 +1,5 @@
 import { APIGatewayProxyResult } from 'aws-lambda';
-import * as nock from 'nock';
+import nock from 'nock';
 import { handler } from './sparql';
 
 describe('post-sparql', () => {
