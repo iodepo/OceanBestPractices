@@ -5,9 +5,7 @@ import type {
 } from 'aws-lambda';
 import { URL } from 'url';
 import { pick } from 'lodash';
-
-export const getStringFromEnv = (key: string): string | Error =>
-  process.env[key] || new Error(`${key} not set`);
+import { getStringFromEnv } from '../../lib/env-utils';
 
 export const okResponse = (
   contentType: string,
