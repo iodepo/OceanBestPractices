@@ -1,28 +1,39 @@
+import ECS from 'aws-sdk/clients/ecs';
 import pMap from 'p-map';
-import { ECS } from 'aws-sdk';
-import type { S3Event } from 'aws-lambda';
+import { z } from 'zod';
+import { getListFromEnv, getStringFromEnv } from '../lib/env-utils';
 
-function getStringFromEnv(key: string): string {
-  const value = process.env[key];
+const eventSchema = z.object({
+  Records: z.array(z.object({
+    s3: z.object({
+      bucket: z.object({
+        name: z.string().min(1),
+      }),
+      object: z.object({
+        key: z.string().min(1),
+      }),
+    }),
+  })),
+});
 
-  if (value) return value;
+export const handler = async (rawEvent: unknown) => {
+  const event = eventSchema.parse(rawEvent);
 
-  throw new Error(`${key} not set`);
-}
-
-function getListFromEnv(key: string): string[] {
-  return getStringFromEnv(key).split(',');
-}
-
-export async function handler(event: S3Event) {
   const s3TriggerObjects = event.Records.map(
     (record) => `s3://${record.s3.bucket.name}/${record.s3.object.key}`
   );
 
   const cluster = getStringFromEnv('TASK_CLUSTER');
+  if (cluster instanceof Error) throw cluster;
+
   const securityGroups = getListFromEnv('TASK_SECURITY_GROUPS');
+  if (securityGroups instanceof Error) throw securityGroups;
+
   const subnets = getListFromEnv('TASK_SUBNETS');
+  if (subnets instanceof Error) throw subnets;
+
   const taskDefinition = getStringFromEnv('TASK_DEFINITION');
+  if (taskDefinition instanceof Error) throw taskDefinition;
 
   const ecs = new ECS({ region: process.env['AWS_REGION'] });
 
@@ -52,4 +63,4 @@ export async function handler(event: S3Event) {
       },
     }).promise()
   );
-}
+};
