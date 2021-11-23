@@ -58,9 +58,7 @@ describe('task-launcher.handler()', () => {
         payload: {
           loadId: 'load-id-1',
         },
-      });
-
-    const loaderStatusScope = nock('https://neptune.local:8182')
+      })
       .get('/loader')
       .query({ loadId: 'load-id-1' })
       .reply(200, {
@@ -85,6 +83,5 @@ describe('task-launcher.handler()', () => {
     await neptuneBulkLoader();
 
     expect(loaderScope.isDone()).toBe(true);
-    expect(loaderStatusScope.isDone()).toBe(true);
   });
 });

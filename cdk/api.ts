@@ -102,14 +102,14 @@ export default class Api extends Construct {
     openSearch.grantReadWrite(searchByKeywords);
 
     const sparqlFunction = new Function(this, 'SparqlFunction', {
-      functionName: `${stage}-obp-cdk-api-sparql`,
+      functionName: `${stackName}-api-sparql`,
       handler: 'sparql.handler',
       runtime: Runtime.NODEJS_14_X,
       code: Code.fromAsset(path.join(lambdasPath, 'sparql')),
       description: 'Perform a SPARQL query',
       timeout: Duration.minutes(5),
       environment: {
-        SPARQL_URL: `https://${virtuosoHostname}:${8890}/sparql`,
+        SPARQL_URL: `https://${graphDbHostname}:${Token.asString(graphDbPort)}/sparql`,
       },
     });
 
