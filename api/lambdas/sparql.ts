@@ -7,12 +7,19 @@ import { URL } from 'url';
 import { pick } from 'lodash';
 import { getStringFromEnv } from '../../lib/env-utils';
 
+const defaultHeaders = {
+  'Access-Control-Allow-Origin': '*',
+};
+
 export const okResponse = (
   contentType: string,
   body: string
 ): APIGatewayProxyResult => ({
   statusCode: 200,
-  headers: { 'Content-Type': contentType },
+  headers: {
+    ...defaultHeaders,
+    'Content-Type': contentType,
+  },
   body,
 });
 
@@ -21,19 +28,28 @@ export const badRequestResponse = (
   contentType?: string
 ): APIGatewayProxyResult => ({
   statusCode: 400,
-  headers: { 'Content-Type': contentType ?? 'text/plain' },
+  headers: {
+    ...defaultHeaders,
+    'Content-Type': contentType ?? 'text/plain',
+  },
   body,
 });
 
 export const internalServerErrorResponse: APIGatewayProxyResult = {
   statusCode: 500,
-  headers: { 'Content-Type': 'text/plain' },
+  headers: {
+    ...defaultHeaders,
+    'Content-Type': 'text/plain',
+  },
   body: 'Internal Server Error',
 };
 
 export const badGatewayResponse: APIGatewayProxyResult = {
   statusCode: 502,
-  headers: { 'Content-Type': 'text/plain' },
+  headers: {
+    ...defaultHeaders,
+    'Content-Type': 'text/plain',
+  },
   body: 'Bad Gateway',
 };
 

@@ -71,6 +71,18 @@ describe('post-sparql', () => {
     expect(response.statusCode).toBe(200);
   });
 
+  it('sets the Access-Control-Allow-Origin header in the response', async () => {
+    nock('http://sparql.local')
+      .post('/sparql', 'query=blah')
+      .reply(200, {});
+
+    const response = await handler({ body: 'blah' });
+
+    if (response.headers === undefined) fail('No headers in response');
+
+    expect(response.headers['Access-Control-Allow-Origin']).toBe('*');
+  });
+
   it('forwards the server response Content-Type to the client', async () => {
     nock('http://sparql.local')
       .post('/sparql', 'query=blah')
@@ -80,9 +92,7 @@ describe('post-sparql', () => {
 
     if (response.headers === undefined) fail('No headers in response');
 
-    const contentType = response.headers['Content-Type'];
-
-    expect(contentType).toBe('some-content-type');
+    expect(response.headers['Content-Type']).toBe('some-content-type');
   });
 
   it('forwards the server response body to the client', async () => {
