@@ -58,8 +58,6 @@ export type PostSparqlEvent = Pick<APIGatewayProxyEventV2, 'body'>;
 export const handler = async (
   event: PostSparqlEvent
 ): Promise<APIGatewayProxyResult> => {
-  const { body: query } = event;
-
   const sparqlUrlString = getStringFromEnv('SPARQL_URL');
 
   if (sparqlUrlString instanceof Error) {
@@ -75,8 +73,10 @@ export const handler = async (
     return internalServerErrorResponse;
   }
 
+  const query = event.body;
+
   if (!query) {
-    return badRequestResponse('Missing query parameter for POST request');
+    return badRequestResponse('No query specified in request body');
   }
 
   const response = await got.post(
