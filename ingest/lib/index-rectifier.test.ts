@@ -20,13 +20,13 @@ describe('index-rectifier', () => {
         'arn:ingestTopicArn'
       );
 
-      expect(utils.queueIngestDocument).toBeCalledTimes(2);
-      expect(utils.queueIngestDocument).toBeCalledWith(
+      expect(queueIngestDocument).toBeCalledTimes(2);
+      expect(queueIngestDocument).toBeCalledWith(
         '123',
         'arn:ingestTopicArn',
         { region: 'us-east-1' }
       );
-      expect(utils.queueIngestDocument).toBeCalledWith(
+      expect(queueIngestDocument).toBeCalledWith(
         '456',
         'arn:ingestTopicArn',
         { region: 'us-east-1' }

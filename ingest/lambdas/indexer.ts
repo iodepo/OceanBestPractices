@@ -1,7 +1,5 @@
-// @ts-check
-const osClient = require('../../lib/open-search-client');
-const s3Client = require('../../lib/s3-client');
-const DocumentItem = require('../lib/document-item');
+import * as osClient from '../../lib/open-search-client';
+import * as s3Client from '../../lib/s3-client';
 
 const metadataBucketName = process.env.DOCUMENT_METADATA_BUCKET;
 
@@ -134,7 +132,7 @@ const handler = async (event) => {
   console.log(`INFO: Indexed document item ${documentItem.uuid}`);
 };
 
-module.exports = handler;
+module.exports = { handler };
 
 /**
  * Iterates through our target fields and extracts the values from the original

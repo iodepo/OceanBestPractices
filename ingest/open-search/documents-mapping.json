@@ -24,6 +24,9 @@
             },
             "label": {
               "type": "text"
+            },
+            "source_terminology": {
+              "type": "keyword"
             }
           }
         },
