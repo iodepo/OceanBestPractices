@@ -8,18 +8,52 @@ describe('env-utils', () => {
   });
 
   describe('getStringFromEnv', () => {
-    it('throws an Error if the environment variable is not set', () => {
-      expect(() => getStringFromEnv(testVar)).toThrow(Error);
+    describe('without allowMissing set', () => {
+      it('throws an Error if the environment variable is not set', () => {
+        expect(() => getStringFromEnv(testVar)).toThrow(Error);
+      });
+
+      it('throws an Error if the environment variable is an empty string', () => {
+        process.env[testVar] = '';
+        expect(() => getStringFromEnv(testVar)).toThrow(Error);
+      });
+
+      it('returns the value if the environment variable is set', () => {
+        process.env[testVar] = 'asdf';
+        expect(getStringFromEnv(testVar)).toBe('asdf');
+      });
     });
 
-    it('throws an Error if the environment variable is an empty string', () => {
-      process.env[testVar] = '';
-      expect(() => getStringFromEnv(testVar)).toThrow(Error);
+    describe('with allowMissing set to false', () => {
+      it('returns the value if the environment variable is set', () => {
+        process.env[testVar] = 'asdf';
+        expect(getStringFromEnv(testVar, false)).toBe('asdf');
+      });
+
+      it('throws an Error if the environment variable is not set', () => {
+        expect(() => getStringFromEnv(testVar, false)).toThrow(Error);
+      });
+
+      it('throws an Error if the environment variable is an empty string', () => {
+        process.env[testVar] = '';
+        expect(() => getStringFromEnv(testVar, false)).toThrow(Error);
+      });
     });
 
-    it('returns the value if the environment variable is set', () => {
-      process.env[testVar] = 'asdf';
-      expect(getStringFromEnv(testVar)).toBe('asdf');
+    describe('with allowMissing set to true', () => {
+      it('returns the value if the environment variable is set', () => {
+        process.env[testVar] = 'asdf';
+        expect(getStringFromEnv(testVar, true)).toBe('asdf');
+      });
+
+      it('returns undefined if the environment variable is not set', () => {
+        expect(getStringFromEnv(testVar, true)).toBe(undefined);
+      });
+
+      it('returns the value if the environment variable is an empty string', () => {
+        process.env[testVar] = '';
+        expect(getStringFromEnv(testVar, true)).toBe('');
+      });
     });
   });
 

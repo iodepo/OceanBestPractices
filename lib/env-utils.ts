@@ -1,13 +1,27 @@
 /**
- * Get a value from an environment variable, returning an Error if it is not set
+ * Get a value from an environment variable
  */
-export const getStringFromEnv = (key: string): string => {
+export function getStringFromEnv(
+  key: string,
+   allowMissing: false
+): string;
+export function getStringFromEnv(
+  key: string,
+   allowMissing: true
+): string | undefined;
+export function getStringFromEnv(
+  key: string
+): string;
+export function getStringFromEnv(
+  key: string,
+  allowMissing = false
+): string | undefined {
   const value = process.env[key];
 
-  if (value) return value;
+  if (value || allowMissing) return value;
 
   throw new Error(`${key} not set`);
-};
+}
 
 /**
  * Get a comma-delimited list from an environmet variable
