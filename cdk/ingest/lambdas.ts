@@ -125,7 +125,7 @@ export default class IngestLambdas extends Construct {
 
     this.indexRectifier = new Function(this, 'IndexRectifier', {
       functionName: `${stackName}-index-rectifier`,
-      handler: 'handler.handler',
+      handler: 'lambda.handler',
       runtime: Runtime.NODEJS_14_X,
       code: Code.fromAsset(path.join(lambdasPath, 'index-rectifier')),
       description: 'Performs a diff against the OBP Search Index and DSpace; Updates or removes items as necessary.',
