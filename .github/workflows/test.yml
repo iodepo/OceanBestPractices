@@ -7,14 +7,12 @@ jobs:
       - uses: actions/checkout@v2
       - name: Build the docker-compose stack
         run: docker-compose up -d
-      - name: Check running containers
-        run: docker ps -a
       - uses: actions/setup-node@v2
         with:
           node-version: "14"
       - name: Install dependencies
         run: npm install
       - name: Wait for LocalStack S3 server
-        run: ./bin/wait-for-localstack-s3.ts
+        run: npx ts-node ./bin/wait-for-localstack-s3.ts
       - name: Run tests
         run: npm run test -- --passWithNoTests
