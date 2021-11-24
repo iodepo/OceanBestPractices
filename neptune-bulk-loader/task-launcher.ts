@@ -24,16 +24,9 @@ export const handler = async (rawEvent: unknown) => {
   );
 
   const cluster = getStringFromEnv('TASK_CLUSTER');
-  if (cluster instanceof Error) throw cluster;
-
   const securityGroups = getListFromEnv('TASK_SECURITY_GROUPS');
-  if (securityGroups instanceof Error) throw securityGroups;
-
   const subnets = getListFromEnv('TASK_SUBNETS');
-  if (subnets instanceof Error) throw subnets;
-
   const taskDefinition = getStringFromEnv('TASK_DEFINITION');
-  if (taskDefinition instanceof Error) throw taskDefinition;
 
   const ecs = new ECS({ region: process.env['AWS_REGION'] });
 

@@ -18,19 +18,10 @@ type MainResult = Error | undefined;
 
 export const neptuneBulkLoader = async (): Promise<MainResult> => {
   const iamRoleArn = getStringFromEnv('IAM_ROLE_ARN');
-  if (iamRoleArn instanceof Error) throw iamRoleArn;
-
   const insecureHttps = getBoolFromEnv('INSECURE_HTTPS', false);
-  if (insecureHttps instanceof Error) throw insecureHttps;
-
   const metadataUrl = getStringFromEnv('S3_TRIGGER_OBJECT');
-  if (metadataUrl instanceof Error) throw metadataUrl;
-
   const neptuneUrl = getStringFromEnv('NEPTUNE_URL');
-  if (neptuneUrl instanceof Error) throw neptuneUrl;
-
   const region = getStringFromEnv('AWS_REGION');
-  if (region instanceof Error) throw region;
 
   const s3 = new S3();
 

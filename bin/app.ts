@@ -1,24 +1,13 @@
 #!/usr/bin/env node
 
 import 'source-map-support/register';
-import {
-  App,
-  Environment,
-  Tags,
-} from '@aws-cdk/core';
+import { App, Environment, Tags } from '@aws-cdk/core';
 import ObpStack from '../cdk/obp-stack';
-
-if (process.env['CDK_DEFAULT_ACCOUNT'] === undefined) {
-  throw new Error('CDK_DEFAULT_ACCOUNT is not set');
-}
-
-if (process.env['CDK_DEFAULT_REGION'] === undefined) {
-  throw new Error('CDK_DEFAULT_REGION is not set');
-}
+import { getStringFromEnv } from '../lib/env-utils';
 
 const env: Required<Environment> = {
-  account: process.env['CDK_DEFAULT_ACCOUNT'],
-  region: process.env['CDK_DEFAULT_REGION'],
+  account: getStringFromEnv('CDK_DEFAULT_ACCOUNT'),
+  region: getStringFromEnv('CDK_DEFAULT_REGION'),
 };
 
 const app = new App();

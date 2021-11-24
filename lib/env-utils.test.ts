@@ -8,13 +8,13 @@ describe('env-utils', () => {
   });
 
   describe('getStringFromEnv', () => {
-    it('returns an Error if the environment variable is not set', () => {
-      expect(getStringFromEnv(testVar)).toBeInstanceOf(Error);
+    it('throws an Error if the environment variable is not set', () => {
+      expect(() => getStringFromEnv(testVar)).toThrow(Error);
     });
 
-    it('returns an Error if the environment variable is an empty string', () => {
+    it('throws an Error if the environment variable is an empty string', () => {
       process.env[testVar] = '';
-      expect(getStringFromEnv(testVar)).toBeInstanceOf(Error);
+      expect(() => getStringFromEnv(testVar)).toThrow(Error);
     });
 
     it('returns the value if the environment variable is set', () => {
@@ -24,13 +24,13 @@ describe('env-utils', () => {
   });
 
   describe('getListFromEnv', () => {
-    it('returns an Error if the environment variable is not set', () => {
-      expect(getListFromEnv(testVar)).toBeInstanceOf(Error);
+    it('throws an Error if the environment variable is not set', () => {
+      expect(() => getListFromEnv(testVar)).toThrow(Error);
     });
 
-    it('returns an Error if the environment variable is an empty string', () => {
+    it('throws an Error if the environment variable is an empty string', () => {
       process.env[testVar] = '';
-      expect(getListFromEnv(testVar)).toBeInstanceOf(Error);
+      expect(() => getListFromEnv(testVar)).toThrow(Error);
     });
 
     it('returns a single-element list', () => {
@@ -46,18 +46,18 @@ describe('env-utils', () => {
 
   describe('getBoolFromEnv', () => {
     describe('without a default', () => {
-      it('returns an Error if the environment variable is not set', () => {
-        expect(getBoolFromEnv(testVar)).toBeInstanceOf(Error);
+      it('throws an Error if the environment variable is not set', () => {
+        expect(() => getBoolFromEnv(testVar)).toThrow(Error);
       });
 
-      it('returns an Error if the environment variable is an empty string', () => {
+      it('throws an Error if the environment variable is an empty string', () => {
         process.env[testVar] = '';
-        expect(getBoolFromEnv(testVar)).toBeInstanceOf(Error);
+        expect(() => getBoolFromEnv(testVar)).toThrow(Error);
       });
 
-      it('returns an Error if the environment variable is an invalid value', () => {
+      it('throws an Error if the environment variable is an invalid value', () => {
         process.env[testVar] = 'ASDF';
-        expect(getBoolFromEnv(testVar)).toBeInstanceOf(Error);
+        expect(() => getBoolFromEnv(testVar)).toThrow(Error);
       });
 
       for (const val of ['true', 'True', 'TRUE']) {
@@ -86,9 +86,9 @@ describe('env-utils', () => {
         expect(getBoolFromEnv(testVar, false)).toBe(false);
       });
 
-      it('returns an Error if the environment variable is an invalid value', () => {
+      it('throws an Error if the environment variable is an invalid value', () => {
         process.env[testVar] = 'ASDF';
-        expect(getBoolFromEnv(testVar)).toBeInstanceOf(Error);
+        expect(() => getBoolFromEnv(testVar)).toThrow(Error);
       });
     });
   });
