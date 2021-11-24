@@ -1149,6 +1149,13 @@ html {
 .wrapper--landing .searchbar__tag-wrapper, .wrapper--landing .searchbar__advanced--status {
   display: none; }
 
+.welcome-modal .foot-notes {
+  color: #5D6877;
+  font-size: small; }
+
+.welcome-modal .highlighted {
+  color: #0068B3; }
+
 .link-list {
   list-style: none;
   margin: 0;
