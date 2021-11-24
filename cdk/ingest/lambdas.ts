@@ -5,10 +5,7 @@ import {
   IFunction,
   Runtime,
 } from '@aws-cdk/aws-lambda';
-import {
-  Construct,
-  Duration,
-} from '@aws-cdk/core';
+import { Construct, Duration } from '@aws-cdk/core';
 import { IDomain } from '@aws-cdk/aws-opensearchservice';
 import IngestBuckets from './buckets';
 import IngestSnsTopics from './sns-topics';
@@ -127,7 +124,7 @@ export default class IngestLambdas extends Construct {
     snsTopics.availableDocument.grantPublish(this.scheduler);
 
     this.indexRectifier = new Function(this, 'IndexRectifier', {
-      functionName: `${stage}-obp-cdk-index-rectifier`,
+      functionName: `${stackName}-index-rectifier`,
       handler: 'handler.handler',
       runtime: Runtime.NODEJS_14_X,
       code: Code.fromAsset(path.join(lambdasPath, 'index-rectifier')),
@@ -142,7 +139,7 @@ export default class IngestLambdas extends Construct {
     snsTopics.availableDocument.grantPublish(this.indexRectifier);
 
     this.bulkIngester = new Function(this, 'BulkIngester', {
-      functionName: `${stage}-obp-cdk-bulk-ingester`,
+      functionName: `${stackName}-bulk-ingester`,
       handler: 'handler.handler',
       runtime: Runtime.NODEJS_14_X,
       code: Code.fromAsset(path.join(lambdasPath, 'bulk-ingester')),
