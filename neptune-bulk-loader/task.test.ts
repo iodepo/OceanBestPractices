@@ -20,7 +20,7 @@ describe('task-launcher.handler()', () => {
   });
 
   afterAll(async () => {
-    await s3Utils.deleteBucket(bulkLoaderBucket);
+    await s3Utils.deleteBucket(bulkLoaderBucket, true);
 
     nock.enableNetConnect();
   });

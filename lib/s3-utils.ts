@@ -1,4 +1,5 @@
 import type S3 from 'aws-sdk/clients/s3';
+import pMap from 'p-map';
 import { s3 } from './aws-clients';
 
 export class S3ObjectLocation {
@@ -13,6 +14,13 @@ export class S3ObjectLocation {
 
   public get url() {
     return `s3://${this.bucket}/${this.key}`;
+  }
+
+  public get apiParams() {
+    return {
+      Bucket: this.bucket,
+      Key: this.key,
+    };
   }
 
   static fromS3Url(url: string) {
@@ -64,16 +72,34 @@ export const createBucket = async (bucket: string): Promise<void> => {
   await s3().createBucket({ Bucket: bucket }).promise();
 };
 
-export const deleteBucket = async (bucket: string): Promise<void> => {
-  await s3().deleteBucket({ Bucket: bucket }).promise();
-};
-
 export const listBucket = async (bucket: string): Promise<string[]> => {
   const response = await s3().listObjectsV2({ Bucket: bucket }).promise();
 
   return (response.Contents || [])
     .map((c) => c.Key)
     .filter((k): k is string => typeof k === 'string');
+};
+
+export const deleteObject = async (
+  s3Location: S3ObjectLocation
+): Promise<void> => {
+  await s3().deleteObject(s3Location.apiParams).promise();
+};
+
+export const emptyBucket = async (bucket: string): Promise<void> => {
+  const keys = await listBucket(bucket);
+
+  const locations = keys.map((key) => (new S3ObjectLocation(bucket, key)));
+
+  await pMap(locations, deleteObject, { concurrency: 5 });
+};
+
+export const deleteBucket = async (
+  bucket: string,
+  force = false
+): Promise<void> => {
+  if (force) await emptyBucket(bucket);
+  await s3().deleteBucket({ Bucket: bucket }).promise();
 };
 
 export const putJson = async (
