@@ -40,6 +40,11 @@ class Main extends Component {
 
   componentDidMount() {
 
+    if (!document.cookie.includes('obp-search_visited')) {
+      document.cookie = 'obp-search_visited=true; expires=Tue, 19 Jan 2038 04:14:07 GMT'
+      alert('First time here? Let\'s teach you some stuff.')
+    }
+
     this.props.dispatch(getStats());
 
     // Clear the search query for mount. If a user navigates back to the homepage,
