@@ -9,12 +9,13 @@ import { LambdaIntegration, RestApi } from '@aws-cdk/aws-apigateway';
 import { Code, Function, Runtime } from '@aws-cdk/aws-lambda';
 import { IDistribution } from '@aws-cdk/aws-cloudfront';
 import { IDomain } from '@aws-cdk/aws-opensearchservice';
+import * as neptune from '@aws-cdk/aws-neptune';
+import * as ec2 from '@aws-cdk/aws-ec2';
 
 const lambdasPath = path.join(__dirname, '..', 'dist', 'api');
 
 interface ApiProps {
-  graphDbHostname: string
-  graphDbPort: number
+  neptuneCluster: neptune.IDatabaseCluster & ec2.IConnectable
   openSearch: IDomain
   region: string
   stackName: string
@@ -26,13 +27,15 @@ export default class Api extends Construct {
     super(scope, id);
 
     const {
-      graphDbHostname,
-      graphDbPort,
+      neptuneCluster,
       openSearch,
       region,
       stackName,
       websiteDistribution,
     } = props;
+
+    const neptuneHostname = neptuneCluster.clusterEndpoint.hostname;
+    const neptunePort = Token.asString(neptuneCluster.clusterEndpoint.port);
 
     const documentPreview = new Function(this, 'DocumentPreview', {
       functionName: `${stackName}-api-document-preview`,
@@ -53,8 +56,8 @@ export default class Api extends Construct {
       description: 'Returns general statistics about the OBP index size and ontology count.',
       environment: {
         ELASTIC_SEARCH_HOST: openSearch.domainEndpoint,
-        ONTOLOGY_STORE_HOST: graphDbHostname,
-        ONTOLOGY_STORE_PORT: Token.asString(graphDbPort),
+        ONTOLOGY_STORE_HOST: neptuneHostname,
+        ONTOLOGY_STORE_PORT: neptunePort,
       },
     });
     openSearch.grantRead(getStatistics);
@@ -67,8 +70,8 @@ export default class Api extends Construct {
       description: 'Queries ontologies for terms related to the given term.',
       timeout: Duration.seconds(100),
       environment: {
-        ONTOLOGY_STORE_HOST: graphDbHostname,
-        ONTOLOGY_STORE_PORT: Token.asString(graphDbPort),
+        ONTOLOGY_STORE_HOST: neptuneHostname,
+        ONTOLOGY_STORE_PORT: neptunePort,
       },
     });
 
@@ -80,8 +83,8 @@ export default class Api extends Construct {
       description: 'Returns a subset of ontology terms that complete the given keyword.',
       timeout: Duration.seconds(100),
       environment: {
-        ONTOLOGY_STORE_HOST: graphDbHostname,
-        ONTOLOGY_STORE_PORT: Token.asString(graphDbPort),
+        ONTOLOGY_STORE_HOST: neptuneHostname,
+        ONTOLOGY_STORE_PORT: neptunePort,
       },
     });
 
@@ -95,8 +98,8 @@ export default class Api extends Construct {
       environment: {
         ELASTIC_SEARCH_HOST: openSearch.domainEndpoint,
         REGION: region,
-        ONTOLOGY_STORE_HOST: graphDbHostname,
-        ONTOLOGY_STORE_PORT: Token.asString(graphDbPort),
+        ONTOLOGY_STORE_HOST: neptuneHostname,
+        ONTOLOGY_STORE_PORT: neptunePort,
       },
     });
     openSearch.grantReadWrite(searchByKeywords);
@@ -109,9 +112,10 @@ export default class Api extends Construct {
       description: 'Perform a SPARQL query',
       timeout: Duration.minutes(5),
       environment: {
-        SPARQL_URL: `https://${graphDbHostname}:${Token.asString(graphDbPort)}/sparql`,
+        SPARQL_URL: `https://${neptuneCluster.clusterEndpoint.socketAddress}/sparql`,
       },
     });
+    neptuneCluster.connections.allowDefaultPortFrom(sparqlFunction);
 
     const api = new RestApi(this, 'Api', {
       restApiName: `${stackName}-api-api`,
