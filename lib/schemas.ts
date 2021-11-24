@@ -11,18 +11,20 @@ export const termsItemSchema = z.object({
 
 export type TermsItem = z.infer<typeof termsItemSchema>;
 
+export const bitstreamSchema = z.object({
+  bundleName: z.string(),
+  mimeType: z.string(),
+  checkSum: z.object({
+    value: z.string(),
+  }),
+});
+
+export type Bitstream = z.infer<typeof bitstreamSchema>;
+
 export const documentsItemSchema = z.object({
   uuid: z.string(),
   lastModified: z.string(),
-  bitstreams: z.array(
-    z.object({
-      bundleName: z.string(),
-      mimeType: z.string(),
-      checkSum: z.object({
-        value: z.string(),
-      }),
-    })
-  ),
+  bitstreams: z.array(bitstreamSchema),
 });
 
 export type DocumentsItem = z.infer<typeof documentsItemSchema>;
