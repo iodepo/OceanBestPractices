@@ -1,8 +1,5 @@
 import got from 'got';
-import type {
-  APIGatewayProxyEventV2,
-  APIGatewayProxyResult,
-} from 'aws-lambda';
+import type { APIGatewayProxyEventV2, APIGatewayProxyResult } from 'aws-lambda';
 import { URL } from 'url';
 import { pick } from 'lodash';
 import { getStringFromEnv } from '../../lib/env-utils';
@@ -58,9 +55,10 @@ export type PostSparqlEvent = Pick<APIGatewayProxyEventV2, 'body'>;
 export const handler = async (
   event: PostSparqlEvent
 ): Promise<APIGatewayProxyResult> => {
-  const sparqlUrlString = getStringFromEnv('SPARQL_URL');
-
-  if (sparqlUrlString instanceof Error) {
+  let sparqlUrlString: string;
+  try {
+    sparqlUrlString = getStringFromEnv('SPARQL_URL');
+  } catch {
     console.log('SPARQL_URL not set');
     return internalServerErrorResponse;
   }

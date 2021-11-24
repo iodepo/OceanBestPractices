@@ -14,14 +14,18 @@ const getEntries = async (entriesPath, prefix) => {
   const files = await readdir(entriesPath);
 
   return _(files)
-    .filter(isNotTestFile)
-    .map((f) => [
-      `${prefix}-${path.parse(f).name}`,
-      {
-        import: path.resolve(path.join(entriesPath, f)),
-        filename: path.join(prefix, '[name]', 'handler.js'),
-      },
-    ])
+    .filter(isNotTestFile)    
+    .map((f) => {
+      const { name } = path.parse(f);
+
+      return [
+        `${prefix}-${name}`,
+        {
+          import: path.resolve(path.join(entriesPath, f)),
+          filename: path.join(prefix, name, 'lambda.js'),
+        },
+      ];
+    })
     .fromPairs()
     .value();
 };
@@ -42,10 +46,34 @@ module.exports = async () => {
     entry: {
       ...apiEntries,
       ...ingestEntries,
+      neptuneBulkLoaderTask: {
+        import: './neptune-bulk-loader/task.ts',
+        filename: './neptune-bulk-loader/task/index.js',
+      },
+      neptuneBulkLoaderTaskLauncher: {
+        import: './neptune-bulk-loader/task-launcher.ts',
+        filename: './neptune-bulk-loader/task-launcher/lambda.js',
+      },
+    },
+    module: {
+      rules: [
+        {
+          test: /\.ts$/,
+          use: {
+            loader: 'ts-loader',
+            options: {
+              configFile: 'tsconfig-webpack.json',
+            },
+          },
+          exclude: /node_modules/,
+        },
+      ],
     },
     devtool: 'source-map',
     externals: { 'aws-sdk': 'aws-sdk' },
-    resolve: { extensions: ['.js'] },
+    resolve: {
+      extensions: ['.ts', '...'],
+    },
     output: {
       path: path.join(process.cwd(), 'dist'),
       library: { type: 'commonjs' },

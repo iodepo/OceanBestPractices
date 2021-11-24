@@ -1,15 +1,12 @@
 import * as path from 'path';
-import { IDomain } from '@aws-cdk/aws-elasticsearch';
 import {
   Code,
   Function,
   IFunction,
   Runtime,
 } from '@aws-cdk/aws-lambda';
-import {
-  Construct,
-  Duration,
-} from '@aws-cdk/core';
+import { Construct, Duration } from '@aws-cdk/core';
+import { IDomain } from '@aws-cdk/aws-opensearchservice';
 import IngestBuckets from './buckets';
 import IngestSnsTopics from './sns-topics';
 
@@ -21,7 +18,7 @@ interface LambdasProps {
   scheduleInterval: number
   snsTopics: IngestSnsTopics
   textExtractorFunction: IFunction
-  stage: string
+  stackName: string
 }
 
 export default class IngestLambdas extends Construct {
@@ -47,13 +44,13 @@ export default class IngestLambdas extends Construct {
       elasticsearchDomain,
       scheduleInterval = 300,
       snsTopics,
-      stage,
+      stackName,
       textExtractorFunction,
     } = props;
 
     this.indexer = new Function(this, 'Indexer', {
-      functionName: `${stage}-obp-cdk-ingest-indexer`,
-      handler: 'indexer.handler',
+      functionName: `${stackName}-ingest-indexer`,
+      handler: 'lambda.handler',
       runtime: Runtime.NODEJS_14_X,
       code: Code.fromAsset(path.join(lambdasPath, 'indexer')),
       description: 'Responsible for percolating (tagging) and indexing document metadata based on a given document UID',
@@ -69,8 +66,8 @@ export default class IngestLambdas extends Construct {
     elasticsearchDomain.grantWrite(this.indexer);
 
     this.bitstreamsDownloader = new Function(this, 'BitstreamsDownloader', {
-      functionName: `${stage}-obp-cdk-ingest-bitstreams-downloader`,
-      handler: 'bitstreams-downloader.handler',
+      functionName: `${stackName}-ingest-bitstreams-downloader`,
+      handler: 'lambda.handler',
       runtime: Runtime.NODEJS_14_X,
       code: Code.fromAsset(path.join(lambdasPath, 'bitstreams-downloader')),
       description: 'Downloads the binary file for a given document UID from the OBP API',
@@ -85,8 +82,8 @@ export default class IngestLambdas extends Construct {
     this.indexer.grantInvoke(this.bitstreamsDownloader);
 
     this.invokeExtractor = new Function(this, 'InvokeExtractor', {
-      functionName: `${stage}-obp-cdk-ingest-invoke-extractor`,
-      handler: 'invoke-extractor.handler',
+      functionName: `${stackName}-ingest-invoke-extractor`,
+      handler: 'lambda.handler',
       runtime: Runtime.NODEJS_14_X,
       code: Code.fromAsset(path.join(lambdasPath, 'invoke-extractor')),
       description: 'Invokes the text extractor (3rd party library) functions for a given document UID',
@@ -100,8 +97,8 @@ export default class IngestLambdas extends Construct {
     textExtractorFunction.grantInvoke(this.invokeExtractor);
 
     this.metadataDownloader = new Function(this, 'MetadataDownloader', {
-      functionName: `${stage}-obp-cdk-ingest-metadata-downloader`,
-      handler: 'metadata-downloader.handler',
+      functionName: `${stackName}-ingest-metadata-downloader`,
+      handler: 'lambda.handler',
       runtime: Runtime.NODEJS_14_X,
       code: Code.fromAsset(path.join(lambdasPath, 'metadata-downloader')),
       description: 'Downloads the metadata for a given document UID from the OBP API',
@@ -113,8 +110,8 @@ export default class IngestLambdas extends Construct {
     buckets.documentMetadata.grantWrite(this.metadataDownloader);
 
     this.scheduler = new Function(this, 'Scheduler', {
-      functionName: `${stage}-obp-cdk-ingest-scheduler`,
-      handler: 'scheduler.handler',
+      functionName: `${stackName}-ingest-scheduler`,
+      handler: 'lambda.handler',
       runtime: Runtime.NODEJS_14_X,
       code: Code.fromAsset(path.join(lambdasPath, 'scheduler')),
       description: 'Periodically checks the OBP RSS feed for documents that need indexing.',
@@ -127,8 +124,8 @@ export default class IngestLambdas extends Construct {
     snsTopics.availableDocument.grantPublish(this.scheduler);
 
     this.indexRectifier = new Function(this, 'IndexRectifier', {
-      functionName: `${stage}-obp-cdk-index-rectifier`,
-      handler: 'handler.handler',
+      functionName: `${stackName}-index-rectifier`,
+      handler: 'lambda.handler',
       runtime: Runtime.NODEJS_14_X,
       code: Code.fromAsset(path.join(lambdasPath, 'index-rectifier')),
       description: 'Performs a diff against the OBP Search Index and DSpace; Updates or removes items as necessary.',
@@ -142,7 +139,7 @@ export default class IngestLambdas extends Construct {
     snsTopics.availableDocument.grantPublish(this.indexRectifier);
 
     this.bulkIngester = new Function(this, 'BulkIngester', {
-      functionName: `${stage}-obp-cdk-bulk-ingester`,
+      functionName: `${stackName}-bulk-ingester`,
       handler: 'handler.handler',
       runtime: Runtime.NODEJS_14_X,
       code: Code.fromAsset(path.join(lambdasPath, 'bulk-ingester')),
