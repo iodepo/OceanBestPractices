@@ -14,12 +14,14 @@ import * as neptune from '@aws-cdk/aws-neptune';
 import * as path from 'path';
 import * as s3 from '@aws-cdk/aws-s3';
 import * as s3Notifications from '@aws-cdk/aws-s3-notifications';
+import { IDomain } from '@aws-cdk/aws-opensearchservice';
 
 interface NeptuneProps {
   stackName: string
   deletionProtection: boolean
   allowFrom?: ec2.IConnectable[]
   vpc: ec2.IVpc
+  openSearch: IDomain
 }
 
 export default class Neptune extends Construct {
@@ -33,6 +35,7 @@ export default class Neptune extends Construct {
       stackName,
       vpc,
       allowFrom = [],
+      openSearch,
     } = props;
 
     const removalPolicy = deletionProtection
@@ -92,6 +95,8 @@ export default class Neptune extends Construct {
       environment: {
         IAM_ROLE_ARN: neptuneRole.roleArn,
         NEPTUNE_URL: neptuneUrl,
+        ES_URL: openSearch.domainEndpoint,
+        ES_TERMS_INDEX: 'terms',
       },
       logging: ecs.LogDriver.awsLogs({
         streamPrefix: `${stackName}-neptune-bulk-loader`,
