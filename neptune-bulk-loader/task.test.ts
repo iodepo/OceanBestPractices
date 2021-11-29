@@ -14,10 +14,12 @@ describe('task-launcher.handler()', () => {
   });
 
   beforeEach(() => {
+    process.env['AWS_ACCESS_KEY_ID'] = 'access-key-id';
+    process.env['AWS_REGION'] = 'us-east-1';
+    process.env['AWS_SECRET_ACCESS_KEY'] = 'secret-access-key';
+    process.env['ES_URL'] = 'http://localhost:9200';
     process.env['IAM_ROLE_ARN'] = 'iam-role-arn';
     process.env['NEPTUNE_URL'] = 'https://neptune.local:8182';
-    process.env['AWS_REGION'] = 'us-east-1';
-    process.env['ES_URL'] = 'http://localhost:9200';
 
     const termsIndex = `terms-index-${cryptoRandomString({ length: 6 })}`;
     process.env['ES_TERMS_INDEX'] = termsIndex;
