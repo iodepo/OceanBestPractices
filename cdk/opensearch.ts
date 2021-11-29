@@ -1,16 +1,6 @@
-import {
-  Construct,
-  RemovalPolicy,
-} from '@aws-cdk/core';
-import {
-  Domain,
-  EngineVersion,
-} from '@aws-cdk/aws-opensearchservice';
-import {
-  AnyPrincipal,
-  Effect,
-  PolicyStatement,
-} from '@aws-cdk/aws-iam';
+import { Construct, RemovalPolicy } from '@aws-cdk/core';
+import { Domain, EngineVersion } from '@aws-cdk/aws-opensearchservice';
+import { AnyPrincipal, Effect, PolicyStatement } from '@aws-cdk/aws-iam';
 
 interface OpenSearchProps {
   deletionProtection: boolean
@@ -55,7 +45,7 @@ export default class OpenSearch extends Construct {
 
     this.domain = new Domain(this, 'OpenSearch', {
       domainName: stackName,
-      version: EngineVersion.ELASTICSEARCH_6_8,
+      version: EngineVersion.ELASTICSEARCH_7_10,
       capacity: {
         dataNodeInstanceType: searchNodeType,
         dataNodes: 1,

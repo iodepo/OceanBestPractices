@@ -97,7 +97,7 @@ module.exports = {
         'import/extensions': 'off',
         'import/no-extraneous-dependencies': [
           'error',
-          { devDependencies: ['**/*.test.ts'] },
+          { devDependencies: ['**/*.test.ts', '/bin/*.ts'] },
         ],
         'import/no-unresolved': 'off',
         'import-newlines/enforce': [

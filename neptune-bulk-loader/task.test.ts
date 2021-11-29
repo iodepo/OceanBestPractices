@@ -1,28 +1,27 @@
 import nock from 'nock';
-import S3 from 'aws-sdk/clients/s3';
+import cryptoRandomString from 'crypto-random-string';
 import { neptuneBulkLoader } from './task';
+import * as s3Utils from '../lib/s3-utils';
 
-jest.mock('aws-sdk/clients/s3');
-
-const S3Mock = S3 as jest.MockedClass<typeof S3>;
-
-S3Mock.prototype.getObject = jest.fn();
+const bulkLoaderBucket = `bucket-${cryptoRandomString({ length: 6 })}`;
 
 describe('task-launcher.handler()', () => {
-  beforeAll(() => {
+  beforeAll(async () => {
     nock.disableNetConnect();
+    nock.enableNetConnect('localhost');
+
+    await s3Utils.createBucket(bulkLoaderBucket);
   });
 
   beforeEach(() => {
     process.env['IAM_ROLE_ARN'] = 'iam-role-arn';
-    process.env['S3_TRIGGER_OBJECT'] = 's3://my-bucket/my-metadata-key';
     process.env['NEPTUNE_URL'] = 'https://neptune.local:8182';
     process.env['AWS_REGION'] = 'us-east-1';
-
-    S3Mock.prototype.getObject.mockClear();
   });
 
-  afterAll(() => {
+  afterAll(async () => {
+    await s3Utils.deleteBucket(bulkLoaderBucket, true);
+
     nock.enableNetConnect();
   });
 
@@ -41,15 +40,21 @@ describe('task-launcher.handler()', () => {
   }
 
   it('sends the correct loader request to the Neptune bulk loader', async () => {
-    S3Mock.prototype.getObject = jest.fn().mockReturnValue({
-      promise: () => Promise.resolve({
-        Body: Buffer.from(JSON.stringify({
-          source: 's3://my-bucket/my-source-key',
-          format: 'csv',
-          namedGraphUri: 'https://graph.local',
-        })),
-      }),
-    });
+    const metadataLocation = new s3Utils.S3ObjectLocation(
+      bulkLoaderBucket,
+      `bulk-loader-trigger/${cryptoRandomString({ length: 10 })}.json`
+    );
+
+    await s3Utils.putJson(
+      metadataLocation,
+      {
+        source: `s3://${bulkLoaderBucket}/my-source.xml`,
+        format: 'csv',
+        namedGraphUri: 'https://graph.local',
+      }
+    );
+
+    process.env['S3_TRIGGER_OBJECT'] = metadataLocation.url;
 
     const loaderScope = nock('https://neptune.local:8182')
       .post('/loader')

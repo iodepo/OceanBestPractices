@@ -1,7 +1,6 @@
 import pino from 'pino';
 import { z } from 'zod';
-import S3 from 'aws-sdk/clients/s3';
-import { getJsonFromS3, s3ObjectLocationFromS3Url } from './s3-utils';
+import * as s3Utils from '../lib/s3-utils';
 import {
   BulkLoaderDataFormatSchema,
   NeptuneBulkLoaderClient,
@@ -23,8 +22,6 @@ export const neptuneBulkLoader = async (): Promise<MainResult> => {
   const neptuneUrl = getStringFromEnv('NEPTUNE_URL');
   const region = getStringFromEnv('AWS_REGION');
 
-  const s3 = new S3();
-
   const logger = pino({ level: 'debug' });
 
   const bulkLoaderClient = new NeptuneBulkLoaderClient({
@@ -37,9 +34,9 @@ export const neptuneBulkLoader = async (): Promise<MainResult> => {
 
   logger.info(`Metadata URL: ${metadataUrl}`);
 
-  const metadataLocation = s3ObjectLocationFromS3Url(metadataUrl);
+  const metadataLocation = s3Utils.S3ObjectLocation.fromS3Url(metadataUrl);
 
-  const rawMetadata = await getJsonFromS3(metadataLocation, s3);
+  const rawMetadata = await s3Utils.getObjectJson(metadataLocation);
 
   const metadata = metadataSchema.parse(rawMetadata);
 
