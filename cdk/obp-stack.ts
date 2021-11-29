@@ -39,13 +39,6 @@ export default class ObpStack extends Stack {
       vpc,
     });
 
-    const neptune = new Neptune(this, 'Neptune', {
-      deletionProtection,
-      stackName: this.stackName,
-      allowFrom: [bastion.instance],
-      vpc,
-    });
-
     const openSearch = new OpenSearch(this, 'Elasticsearch', {
       deletionProtection,
       stackName: this.stackName,
@@ -54,6 +47,14 @@ export default class ObpStack extends Stack {
         bastion.privateIp,
         bastion.publicIp,
       ],
+    });
+
+    const neptune = new Neptune(this, 'Neptune', {
+      deletionProtection,
+      stackName: this.stackName,
+      allowFrom: [bastion.instance],
+      openSearch: openSearch.domain,
+      vpc,
     });
 
     const website = new Website(this, 'Website', {

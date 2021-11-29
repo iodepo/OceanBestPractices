@@ -17,6 +17,10 @@ describe('task-launcher.handler()', () => {
     process.env['IAM_ROLE_ARN'] = 'iam-role-arn';
     process.env['NEPTUNE_URL'] = 'https://neptune.local:8182';
     process.env['AWS_REGION'] = 'us-east-1';
+    process.env['ES_URL'] = 'http://localhost:9200';
+
+    const termsIndex = `terms-index-${cryptoRandomString({ length: 6 })}`;
+    process.env['ES_TERMS_INDEX'] = termsIndex;
   });
 
   afterAll(async () => {
