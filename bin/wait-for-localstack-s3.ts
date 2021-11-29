@@ -1,8 +1,11 @@
 #!/usr/bin/env npx ts-node
 /* eslint-disable no-await-in-loop */
 
-import delay from 'delay';
 import { s3 } from '../lib/aws-clients';
+
+const sleep = (ms: number): Promise<void> => (new Promise(
+  (resolve) => setTimeout(resolve, ms)
+));
 
 (async () => {
   process.env['NODE_ENV'] = 'test';
@@ -19,7 +22,7 @@ import { s3 } from '../lib/aws-clients';
       await s3Client.listBuckets().promise();
       s3IsUp = true;
     } catch {
-      if (Date.now() + 1000 < waitUntil) await delay(1000);
+      if (Date.now() + 1000 < waitUntil) await sleep(1000);
       else timedOut = true;
     }
   } while (!s3IsUp && !timedOut);
