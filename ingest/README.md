@@ -19,13 +19,13 @@ It'd be a good idea to install the [AWS SAM Local](https://docs.aws.amazon.com/l
 
 While you can do everything you need to do in order to deploy via the AWS console, this documentation is written as though you're deploying via the [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html).
 
-The OBP infrastructure leverages a 3rd party text extractor which can be found here: (https://github.com/skylander86/lambda-text-extractor). There is also a fork available at the Element 84 organization in case anything were to change with the original repository: (https://github.com/Element84/lambda-text-extractor).
+The OBP infrastructure leverages a 3rd party text extractor which can be found here: (<https://github.com/skylander86/lambda-text-extractor>). There is also a fork available at the Element 84 organization in case anything were to change with the original repository: (<https://github.com/Element84/lambda-text-extractor>).
 
 The OBP documentation includes enough information to deploy the entire OBP infrastructure, however, it might be worth reading through some basic [Elasticsearch](https://www.elastic.co/guide/index.html) documentation to become comfortable with the service that provides our main search and tagging indices.
 
 ## Indexing Documents
 
-#### Overview:
+#### Overview
 
 1. Creating the Document Index
 2. Creating the Percolater
@@ -51,29 +51,26 @@ To create this index you can execute the following HTTP request on your Elastics
 ```
 PUT terms
 {
-    "mappings": {
-            "doc": {
-                "properties": {
-                    "contents": {
-                        "type": "text"
-                    },
-                    "query": {
-                        "type": "percolator"
-                    },
-                    "title": {
-                        "type": "text"
-                    },
-                    "source_terminology": {
-                        "type": "keyword"
-                    }
-                }
-            }
+  "mappings": {
+    "properties": {
+      "contents": {
+        "type": "text"
+      },
+      "query": {
+        "type": "percolator"
+      },
+      "title": {
+        "type": "text"
+      },
+      "source_terminology": {
+        "type": "keyword"
+      }
     }
-
+  }
 }
 ```
 
-Assuming you have the ontologies and vocabularies configured in Virtuoso (see [Virtuoso.md](./Virtuoso.md) for more instructions) you can use helper scripts to populate the percolator index. The (create-tag-index.rb)[./ingest/percolator/create-tag-index.rb] will execute a SPARQL command to fetch relevant terms from a Virtuoso graph and populate the terms index. For example, if you wanted to populate the index with terms from the graph `http://purl.obolibrary.org/obo/envo.owl` you could run:
+Assuming you have the ontologies and vocabularies configured in Virtuoso (see [Virtuoso.md](./Virtuoso.md) for more instructions) you can use helper scripts to populate the percolator index. The [create-tag-index.rb](./ingest/percolator/create-tag-index.rb) will execute a SPARQL command to fetch relevant terms from a Virtuoso graph and populate the terms index. For example, if you wanted to populate the index with terms from the graph `http://purl.obolibrary.org/obo/envo.owl` you could run:
 
 ```
 > ./create-tag-index.rb -n 'ENVO' -t 'Environmental Ontology' -g '<http://purl.obolibrary.org/obo/envo.owl>' -e ../../env.iode.json
