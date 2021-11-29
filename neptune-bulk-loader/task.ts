@@ -73,6 +73,12 @@ export const neptuneBulkLoader = async (): Promise<MainResult> => {
 
   await createTermsIndex(esUrl, termsIndex);
 
+  await osClient.deleteByQuery(esUrl, termsIndex, {
+    match: {
+      graph_uri: metadata.namedGraphUri,
+    },
+  });
+
   return undefined;
 };
 
