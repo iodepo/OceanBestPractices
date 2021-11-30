@@ -1,13 +1,9 @@
-import { z } from 'zod';
 import { isError } from 'lodash';
 // @ts-expect-error This is a JS file so has no types
 import * as osClient from '../lib/open-search-client';
-import * as s3Utils from '../lib/s3-utils';
-import {
-  BulkLoaderDataFormatSchema,
-  NeptuneBulkLoaderClient,
-} from './neptune-bulk-loader-client';
+import { NeptuneBulkLoaderClient } from './neptune-bulk-loader-client';
 import { getBoolFromEnv, getStringFromEnv } from '../lib/env-utils';
+import { loadMetadata } from './metadata';
 
 const createTermsIndex = async (
   esUrl: string,
@@ -22,12 +18,6 @@ const createTermsIndex = async (
     ) throw error;
   }
 };
-
-const metadataSchema = z.object({
-  source: z.string().url(),
-  format: BulkLoaderDataFormatSchema,
-  namedGraphUri: z.string().url(),
-});
 
 type MainResult = Error | undefined;
 
@@ -49,11 +39,7 @@ export const neptuneBulkLoader = async (): Promise<MainResult> => {
 
   console.log(`Metadata URL: ${metadataUrl}`);
 
-  const metadataLocation = s3Utils.S3ObjectLocation.fromS3Url(metadataUrl);
-
-  const rawMetadata = await s3Utils.getObjectJson(metadataLocation);
-
-  const metadata = metadataSchema.parse(rawMetadata);
+  const metadata = await loadMetadata(metadataUrl);
 
   console.log('Metadata:', JSON.stringify(metadata));
 

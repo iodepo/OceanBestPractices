@@ -1,3 +1,4 @@
+import { z } from 'zod';
 import type S3 from 'aws-sdk/clients/s3';
 import pMap from 'p-map';
 import { s3 } from './aws-clients';
@@ -67,6 +68,14 @@ const getObjectText = (s3Location: S3ObjectLocation): Promise<string> =>
 
 export const getObjectJson = (s3Location: S3ObjectLocation): Promise<unknown> =>
   getObjectText(s3Location).then(JSON.parse);
+
+export const safeGetObjectJson = async <T extends z.ZodTypeAny>(
+  s3Location: S3ObjectLocation,
+  schema: T
+): Promise<z.infer<typeof schema>> => {
+  const obj = await getObjectJson(s3Location);
+  return schema.parse(obj);
+};
 
 export const createBucket = async (bucket: string): Promise<void> => {
   await s3().createBucket({ Bucket: bucket }).promise();
