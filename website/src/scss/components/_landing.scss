@@ -103,3 +103,13 @@
     display:none;
   }
 }
+
+.welcome-modal {
+  .foot-notes {
+    color: $dark-gray;
+    font-size: small;
+  }
+  .highlighted {
+    color: $primary-blue;
+  }
+}

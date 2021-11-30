@@ -29,18 +29,18 @@ const customSmallStyles = {
   }
 };
 
-Modal.setAppElement('#root')
-
 class FullScreenModal extends Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
 
     this.state = {
-      modalIsOpen: false
+      modalIsOpen: props.open === true
     };
 
     this.openModal = this.openModal.bind(this);
     this.closeModal = this.closeModal.bind(this);
+    this.closeLabel = props.closeLabel || "Close";
+    this.appElement = props.appElement || document.querySelector("#root");
   }
 
   fireEvent() {
@@ -64,6 +64,10 @@ class FullScreenModal extends Component {
   closeModal() {
     this.setState({
       modalIsOpen: false
+    }, () => {
+      if (typeof this.props.onClose === 'function') {
+        this.props.onClose();
+      }
     });
   }
 
@@ -85,6 +89,7 @@ class FullScreenModal extends Component {
         style={customSmallStyles}
         contentLabel="Example Modal"
         shouldCloseOnEsc={true}
+        appElement={this.appElement}
       >
         <div className='tip__modal-header'>
           <span>{this.props.modalTitle}{titleCTA}</span>
@@ -92,7 +97,9 @@ class FullScreenModal extends Component {
         </div>
         {this.props.children}
         <div className='tip__modal-footer'>
-          <button className='tip__modal-footer-close' onClick={this.closeModal}>Close</button>
+          <button className='tip__modal-footer-close' onClick={this.closeModal}>
+            {this.closeLabel}
+          </button>
         </div>
       </Modal>
     ) :
@@ -103,6 +110,7 @@ class FullScreenModal extends Component {
         style={customStyles}
         contentLabel="Example Modal"
         shouldCloseOnEsc={true}
+        appElement={this.appElement}
       >
         <div className='tip__modal-header'>
           <span>{this.props.modalTitle}{titleCTA}</span>
@@ -110,10 +118,23 @@ class FullScreenModal extends Component {
         </div>
         {this.props.children}
         <div className='tip__modal-footer'>
-          <button className='tip__modal-footer-close' onClick={this.closeModal}>Close</button>
+          <button className='tip__modal-footer-close' onClick={this.closeModal}>
+            {this.closeLabel}
+          </button>
         </div>
       </Modal>
     )
+
+    // renders modal without a link to open (modal will never show if props.open is not true)
+    if (this.props.noLink === true) {
+      return (
+        <div className='tips__modal-header-wrapper'>
+          {modal}
+        </div>
+      )
+    }
+
+    // default render link to open modal
     return (
       <div className='tips__modal-header-wrapper'>
         <Superlink event_category={this.props.location || 'website'} event_action="link" event_label={`modal | ${this.props.modalCTA}`}>
