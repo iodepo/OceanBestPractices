@@ -246,7 +246,7 @@ export const getIndex = async (
 export const createIndex = (
   prefixUrl: string,
   index: string,
-  indexBody: unknown
+  indexBody?: Record<string, unknown>
 ): Promise<unknown> =>
   gotEs(prefixUrl).put(
     index,

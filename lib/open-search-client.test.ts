@@ -1,6 +1,7 @@
 import nock from 'nock';
-const { get } = require('lodash');
 import cryptoRandomString from 'crypto-random-string';
+import { get } from 'lodash';
+
 import * as osClient from './open-search-client';
 
 describe('open-search-client', () => {
@@ -15,6 +16,15 @@ describe('open-search-client', () => {
     process.env['AWS_SECRET_ACCESS_KEY'] = 'test-access-key';
 
     nock.disableNetConnect();
+
+    nock.enableNetConnect((host) => {
+      const [hostname, port] = host.split(':');
+
+      if (port === undefined) throw new Error('Expected a local stack or ES port.');
+
+      return hostname === 'localhost'
+        && ['4566', '9200'].includes(port);
+    });
   });
 
   afterEach(() => {

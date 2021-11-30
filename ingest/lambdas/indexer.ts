@@ -1,4 +1,7 @@
+import { DSpaceItem, Metadata } from '../../lib/dspace-types';
+import { getStringFromEnv } from '../../lib/env-utils';
 import * as osClient from '../../lib/open-search-client';
+import { DocumentItem } from '../../lib/open-search-types';
 
 // @ts-expect-error We need to migrate this file to TS or add a types file
 // for it
@@ -51,8 +54,34 @@ const mapping = {
   // bitstreams: 'bitstreams',
 };
 
-const handler = async (event) => {
-  const region = process.env.AWS_REGION;
+const buildMetadataSearchFields = (
+  metadataItems: Metadata[]
+): Record<string, string | string[]> => {
+  // TODO: This might need to be an array.
+  const searchFields: Record<string, string | string[]> = {};
+
+  // eslint-disable-next-line unicorn/no-array-for-each
+  metadataItems.forEach((metadata: Metadata) => {
+    const key = metadata.key.replace('.', '_');
+    searchFields[key] = metadata.value;
+  });
+
+  return searchFields;
+};
+
+const buildBitstreamSourceKey = () => {};
+
+const buildBitstreamText = () => {};
+
+const buildPrimaryAuther = () => {};
+
+const buildTerms = async () => {};
+
+const buildThumbnailRetrieveLink = () => {};
+
+export const handler = async (event: unknown) => {
+  const openSearchEndpoint = getStringFromEnv('OPEN_SEARCH_ENDPOINT');
+  const region = getStringFromEnv('AWS_REGION');
 
   let uuid; let contentsBucketName; let contentsKey;
 
@@ -80,12 +109,10 @@ const handler = async (event) => {
 
   // Promote the metadata fields to make search easier.
   // eslint-disable-next-line unicorn/no-array-for-each
-  dspaceItem.metadata.forEach((metadataItem) => {
-    const key = metadataItem.key.replace('.', '_');
-    documentItem[key] = metadataItem.value;
-  });
+  Object.assign(documentItem, buildMetadataSearchFields(dspaceItem.metadata));
 
   // Promote custom fields.
+  Object.assign(documentItem, buildCustomSearchFields(dspaceItem));
 
   // Get the title attribute to percolate later.
   const percolateFields = {
@@ -112,7 +139,7 @@ const handler = async (event) => {
 
   // Tag the DSpace item and add the results to the document item...
   const terms = await osClient.percolateDocumentFields(
-    process.env.OPEN_SEARCH_ENDPOINT,
+    openSearchEndpoint,
     percolateFields,
     { region }
   );
@@ -127,15 +154,12 @@ const handler = async (event) => {
 
   // Index our document item.
   await osClient.putDocumentItem(
-    process.env.OPEN_SEARCH_ENDPOINT,
-    documentItem,
-    { region }
+    openSearchEndpoint,
+    documentItem
   );
 
   console.log(`INFO: Indexed document item ${documentItem.uuid}`);
 };
-
-module.exports = { handler };
 
 /**
  * Iterates through our target fields and extracts the values from the original
