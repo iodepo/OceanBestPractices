@@ -1,5 +1,4 @@
 import { isError } from 'lodash';
-// @ts-expect-error This is a JS file so has no types
 import * as osClient from '../lib/open-search-client';
 import { NeptuneBulkLoaderClient } from './neptune-bulk-loader-client';
 import { getBoolFromEnv, getStringFromEnv } from '../lib/env-utils';
