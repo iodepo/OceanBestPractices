@@ -1,4 +1,7 @@
-module.exports = {
+// @ts-check
+
+/** @type {import('eslint').Linter.Config} */
+const config = {
   root: true,
   env: {
     node: true,
@@ -141,3 +144,5 @@ module.exports = {
     },
   ],
 };
+
+module.exports = config;
