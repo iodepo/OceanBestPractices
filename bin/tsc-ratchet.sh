@@ -1,10 +1,10 @@
 #!/bin/sh
 
-set -e
+set -evx
 
 mkdir -p tmp
 
-npx tsc -p tsconfig-lint.json | tee tmp/tsc.log
+npx tsc --noEmit | tee tmp/tsc.log
 
 PROBLEMS=$(grep -c 'error TS\d' tmp/tsc.log)
 
