@@ -51,7 +51,7 @@ describe('index-rectifier', () => {
 
   describe('commitRemovedItems', () => {
     test('should remove items from the index', async () => {
-      (osClient.bulkDelete as jest.Mock) = jest.fn();
+      (osClient.bulkDelete as jest.Mock).mockImplementation();
 
       const removedItems = ['123', '456'];
 

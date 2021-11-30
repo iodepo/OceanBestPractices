@@ -1,6 +1,6 @@
 /* eslint-disable camelcase */
 /* eslint-disable no-underscore-dangle */
-import * as pMap from 'p-map';
+import pMap from 'p-map';
 
 import * as dspaceClient from '../../lib/dspace-client';
 import { DSpaceItem } from '../../lib/dspace-types';

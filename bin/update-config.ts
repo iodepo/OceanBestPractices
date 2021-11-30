@@ -4,14 +4,8 @@ import {
   CloudFormationClient,
   DescribeStacksCommand,
 } from '@aws-sdk/client-cloudformation';
-import {
-  PutObjectCommand,
-  S3Client,
-} from '@aws-sdk/client-s3';
-import {
-  SSMClient,
-  GetParameterCommand,
-} from '@aws-sdk/client-ssm';
+import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { SSMClient, GetParameterCommand } from '@aws-sdk/client-ssm';
 
 async function fetchRecaptchaSiteKey(stage: string) {
   const client = new SSMClient({});
@@ -56,18 +50,18 @@ function putConfig(bucketName: string, config: unknown) {
 }
 
 async function main() {
-  const [stage] = process.argv.slice(2);
+  const [stackName] = process.argv.slice(2);
 
-  if (!stage) throw new Error('Usage: update-config STAGE');
+  if (!stackName) throw new Error('Usage: update-config STACK');
 
   const [
     recaptchaSiteKey,
     apiUrl,
     configBucketName,
   ] = await Promise.all([
-    fetchRecaptchaSiteKey(stage),
-    fetchStackOutputValue(`${stage}-obp-cdk-stateless-api`, 'api-url'),
-    fetchStackOutputValue(`${stage}-obp-cdk-website`, 'config-bucket-name'),
+    fetchRecaptchaSiteKey(stackName),
+    fetchStackOutputValue(stackName, 'api-url'),
+    fetchStackOutputValue(stackName, 'config-bucket-name'),
   ]);
 
   if (apiUrl === undefined) {
@@ -90,4 +84,4 @@ async function main() {
   await putConfig(configBucketName, config);
 }
 
-main();
+main().catch(console.error);

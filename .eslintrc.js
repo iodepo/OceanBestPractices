@@ -72,6 +72,16 @@ module.exports = {
   },
   overrides: [
     {
+      files: [
+        'api/lambdas/*',
+        'ingest/lambdas/*',
+        'neptune-bulk-loader/task-launcher.ts',
+      ],
+      rules: {
+        'import/prefer-default-export': 'off',
+      },
+    },
+    {
       files: ['**/*.ts', '**/*.tsx'],
       parser: '@typescript-eslint/parser',
       plugins: [
@@ -83,17 +93,18 @@ module.exports = {
       ],
       settings: { 'import/resolver': 'node' },
       rules: {
+        '@typescript-eslint/no-unused-vars': 'off',
         'dot-notation': 'off',
         'import/extensions': 'off',
         'import/no-extraneous-dependencies': [
           'error',
-          { devDependencies: ['**/*.test.ts'] },
+          { devDependencies: ['**/*.test.ts', '/bin/*.ts'] },
         ],
         'import/no-unresolved': 'off',
         'import-newlines/enforce': [
           'error',
           {
-            items: 1,
+            items: 3,
             'max-len': 80,
           },
         ],

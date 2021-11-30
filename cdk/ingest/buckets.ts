@@ -15,7 +15,7 @@ import {
 } from '@aws-cdk/core';
 
 interface BucketsProps {
-  stage: string
+  stackName: string
   websiteDistribution: IDistribution
 }
 
@@ -32,19 +32,19 @@ export default class IngestBuckets extends Construct {
     super(scope, id);
 
     const {
-      stage,
+      stackName,
       websiteDistribution,
     } = props;
 
     this.documentMetadata = new Bucket(this, 'DocumentMetadata', {
-      bucketName: `${stage}-obp-cdk-document-metadata`,
+      bucketName: `${stackName}-document-metadata`,
       lifecycleRules: [{ expiration: Duration.days(15) }],
       removalPolicy: RemovalPolicy.DESTROY,
       autoDeleteObjects: true,
     });
 
     this.documentSource = new Bucket(this, 'DocumentSource', {
-      bucketName: `${stage}-obp-cdk-document-source`,
+      bucketName: `${stackName}-document-source`,
       accessControl: BucketAccessControl.PUBLIC_READ,
       cors: [
         {
@@ -65,14 +65,14 @@ export default class IngestBuckets extends Construct {
     }));
 
     this.textExtractorTemp = new Bucket(this, 'TextExtractorTemp', {
-      bucketName: `${stage}-obp-cdk-doc-extracted-temp`,
+      bucketName: `${stackName}-doc-extracted-temp`,
       lifecycleRules: [{ expiration: Duration.days(5) }],
       removalPolicy: RemovalPolicy.DESTROY,
       autoDeleteObjects: true,
     });
 
     this.textExtractorDestination = new Bucket(this, 'TextExtractorDestination', {
-      bucketName: `${stage}-obp-cdk-doc-extracted`,
+      bucketName: `${stackName}-doc-extracted`,
       lifecycleRules: [{ expiration: Duration.days(15) }],
       removalPolicy: RemovalPolicy.DESTROY,
       autoDeleteObjects: true,

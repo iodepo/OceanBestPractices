@@ -1,12 +1,7 @@
-import * as nock from 'nock';
-import {
-  bulkDelete,
-  closeScroll,
-  nextScroll,
-  openScroll,
-  percolateDocumentFields,
-  putDocumentItem,
-} from './open-search-client';
+import nock from 'nock';
+const { get } = require('lodash');
+import cryptoRandomString from 'crypto-random-string';
+import * as osClient from './open-search-client';
 
 describe('open-search-client', () => {
   let awsAccessKeyIdBefore: string | undefined;
@@ -43,7 +38,7 @@ describe('open-search-client', () => {
             hits: [], // We don't actually care about faking hits.
           },
         });
-      const result = await openScroll(
+      const result = await osClient.openScroll(
         'https://open-search.example.com',
         'documents',
         { size: 2 }
@@ -69,7 +64,7 @@ describe('open-search-client', () => {
           },
         });
 
-      const result = await nextScroll(
+      const result = await osClient.nextScroll(
         'https://open-search.example.com',
         'mockScrollId1'
       );
@@ -91,7 +86,7 @@ describe('open-search-client', () => {
           num_freed: 5,
         });
 
-      const result = await closeScroll(
+      const result = await osClient.closeScroll(
         'https://open-search.example.com',
         'mockScrollId1'
       );
@@ -150,7 +145,7 @@ describe('open-search-client', () => {
         .post('/_bulk', expectedRequestBody)
         .reply(200, mockBulkDeleteResponse);
 
-      const result = await bulkDelete(
+      const result = await osClient.bulkDelete(
         'https://open-search.example.com',
         'documents',
         ['1', '2']
@@ -232,7 +227,7 @@ describe('open-search-client', () => {
         })
         .reply(200, mockPercolatorResponse);
 
-      const result = await percolateDocumentFields(
+      const result = await osClient.percolateDocumentFields(
         'https://open-search.example.com',
         {
           title: 'Ocean Stuff',
@@ -292,12 +287,93 @@ describe('open-search-client', () => {
         .post('/documents/doc/abc', documentItem)
         .reply(201, mockIndexResponse);
 
-      const result = await putDocumentItem(
+      const result = await osClient.putDocumentItem(
         'https://open-search.example.com',
         documentItem
       );
 
       expect(result).toEqual(mockIndexResponse);
+    });
+  });
+
+  describe('using localstack', () => {
+    const esUrl = 'http://localhost:9200';
+
+    describe('indexExists()', () => {
+      it('returns true if the index exists', async () => {
+        const indexName = `index-${cryptoRandomString({ length: 6 })}`;
+
+        await osClient.createIndex(esUrl, indexName);
+
+        expect(await osClient.indexExists(esUrl, indexName)).toBe(true);
+      });
+
+      it('returns false if the index does not exist', async () => {
+        const indexName = `index-${cryptoRandomString({ length: 6 })}`;
+
+        expect(await osClient.indexExists(esUrl, indexName)).toBe(false);
+      });
+    });
+
+    describe('createIndex()', () => {
+      it('creates the requested index', async () => {
+        const indexName = `index-${cryptoRandomString({ length: 6 })}`;
+
+        await osClient.createIndex(esUrl, indexName);
+
+        expect(await osClient.indexExists(esUrl, indexName)).toBe(true);
+      });
+
+      it('throws an Error if the index already exists', async () => {
+        const indexName = `index-${cryptoRandomString({ length: 6 })}`;
+
+        await osClient.createIndex(esUrl, indexName);
+
+        const promisedResult = osClient.createIndex(esUrl, indexName);
+
+        await expect(promisedResult)
+          .rejects.toThrow('resource_already_exists_exception');
+      });
+    });
+
+    describe('createTermsIndex()', () => {
+      it('creates the expected index mappings', async () => {
+        const indexName = `index-${cryptoRandomString({ length: 6 })}`;
+
+        await osClient.createTermsIndex(esUrl, indexName);
+
+        const createdIndex = await osClient.getIndex(esUrl, indexName);
+
+        const createdMappings = get(createdIndex, [indexName, 'mappings']);
+
+        expect(createdMappings).toEqual({
+          properties: {
+            contents: {
+              type: 'text',
+            },
+            query: {
+              type: 'percolator',
+            },
+            title: {
+              type: 'text',
+            },
+            source_terminology: {
+              type: 'keyword',
+            },
+          },
+        });
+      });
+
+      it('throws an Error if the index already exists', async () => {
+        const indexName = `index-${cryptoRandomString({ length: 6 })}`;
+
+        await osClient.createTermsIndex(esUrl, indexName);
+
+        const promisedResult = osClient.createIndex(esUrl, indexName);
+
+        await expect(promisedResult)
+          .rejects.toThrow('resource_already_exists_exception');
+      });
     });
   });
 });

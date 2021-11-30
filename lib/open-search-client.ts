@@ -1,6 +1,7 @@
 /* eslint-disable camelcase */
 /* eslint-disable no-underscore-dangle */
 import got4aws from 'got4aws';
+import { get } from 'lodash';
 import { percolateResponseSchema } from './schemas';
 
 import {
@@ -9,6 +10,16 @@ import {
   DocumentItemTerm,
   PutDocumentItemResponse,
 } from './open-search-types';
+
+/**
+ * @param prefixUrl
+ * @returns {Got}
+ */
+const gotEs = (prefixUrl: string) => got4aws().extend({
+  prefixUrl,
+  responseType: 'json',
+  resolveBodyOnly: true,
+});
 
 export interface OpenScrollOptions {
   includes?: string[]
@@ -217,6 +228,46 @@ export const percolateDocumentFields = async (
 };
 
 /**
+ * @param prefixUrl
+ * @param index
+ * @returns
+ */
+export const getIndex = async (
+  prefixUrl: string,
+  index: string
+): Promise<unknown> => gotEs(prefixUrl).get(index);
+
+/**
+  * @param prefixUrl
+  * @param index
+  * @param indexBody
+  * @returns
+  */
+export const createIndex = (
+  prefixUrl: string,
+  index: string,
+  indexBody: unknown
+): Promise<unknown> =>
+  gotEs(prefixUrl).put(
+    index,
+    {
+      json: indexBody,
+      resolveBodyOnly: false,
+      throwHttpErrors: false,
+    }
+  ).then(({ statusCode, body }) => {
+    if (statusCode === 200) return body;
+
+    const errorMessage = get(
+      body,
+      'error.type',
+      `Unexpected ${statusCode} response: ${body}`
+    );
+
+    throw new Error(errorMessage);
+  });
+
+/**
  * Indexes an index item into the documents index.
  *
  * @param prefixUrl - Open Search endpoint.
@@ -235,3 +286,43 @@ export const putDocumentItem = async (
     resolveBodyOnly: true,
   }
 );
+
+/**
+ * @param prefixUrl
+ * @param index
+ * @returns
+ */
+export const createTermsIndex = (
+  prefixUrl: string,
+  index: string
+): Promise<unknown> => createIndex(prefixUrl, index, {
+  mappings: {
+    properties: {
+      contents: {
+        type: 'text',
+      },
+      query: {
+        type: 'percolator',
+      },
+      title: {
+        type: 'text',
+      },
+      source_terminology: {
+        type: 'keyword',
+      },
+    },
+  },
+});
+
+/**
+ * @param {string} prefixUrl
+ * @param {string} index
+ * @returns {Promise<boolean>}
+ */
+export const indexExists = async (
+  prefixUrl: string,
+  index: string
+): Promise<boolean> => gotEs(prefixUrl).head(index, {
+  resolveBodyOnly: false,
+  throwHttpErrors: false,
+}).then(({ statusCode }) => statusCode === 200);

@@ -1,20 +1,16 @@
 {
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "display": "Node 14",
   "compilerOptions": {
-    "target": "ES2018",
-    "module": "commonjs",
-    "lib": [
-      "es2018"
-    ],
     "allowSyntheticDefaultImports": true,
-    "declaration": true,
-    "inlineSourceMap": true,
-    "inlineSources": true,
-    "experimentalDecorators": true,
-    "strictPropertyInitialization": false,
-    "typeRoots": [
-      "./node_modules/@types"
+    "lib": [
+      "es2020"
     ],
-    "resolveJsonModule": true,
+    "module": "commonjs",
+    "target": "es2020",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
     "strict": true,
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,
@@ -26,9 +22,5 @@
     "noUncheckedIndexedAccess": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true
-  },
-  "exclude": [
-    "node_modules",
-    "cdk.out"
-  ]
+  }
 }
