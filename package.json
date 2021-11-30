@@ -23,7 +23,7 @@
     "test:watch": "jest --watchAll",
     "lint": "npm run lint:tsc && npm run lint:eslint",
     "lint:eslint": "eslint . --ext .js,.jsx,.ts,.tsx",
-    "lint:tsc": "tsc --project tsconfig-lint-cdk.json"
+    "lint:tsc": "tsc -p tsconfig-lint.json"
   },
   "dependencies": {
     "@aws-cdk/aws-apigateway": "^1.132.0",
