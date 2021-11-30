@@ -13,7 +13,7 @@ import {
 
 /**
  * @param prefixUrl
- * @returns {Got}
+ * @returns
  */
 const gotEs = (prefixUrl: string) => got4aws().extend({
   prefixUrl,
@@ -52,10 +52,10 @@ export const openScroll = async (
     size = 500,
   } = options;
 
-  return await got4aws().post(
+  // eslint-disable-next-line no-return-await
+  return await gotEs(prefixUrl).post(
     `${index}/_search`,
     {
-      prefixUrl,
       json: {
         scroll: `${scrollTimeout}m`,
         _source: {
@@ -63,8 +63,6 @@ export const openScroll = async (
         },
         size,
       },
-      responseType: 'json',
-      resolveBodyOnly: true,
     }
   );
 };
@@ -84,16 +82,13 @@ export const nextScroll = async (
   prefixUrl: string,
   scrollId: string,
   scrollTimeout = 60
-): Promise<unknown> => got4aws().post(
+): Promise<unknown> => gotEs(prefixUrl).post(
   '_search/scroll',
   {
-    prefixUrl,
     json: {
       scroll: `${scrollTimeout}m`,
       scroll_id: scrollId,
     },
-    responseType: 'json',
-    resolveBodyOnly: true,
   }
 );
 
@@ -110,15 +105,14 @@ export const nextScroll = async (
 export const closeScroll = (
   prefixUrl: string,
   scrollId: string
-): Promise<CloseScrollResponse> => got4aws()
-  .delete(
-    `_search/scroll/${scrollId}`,
-    {
-      prefixUrl,
-      responseType: 'json',
-      resolveBodyOnly: true,
-    }
-  );
+): Promise<CloseScrollResponse> => got4aws().delete(
+  `_search/scroll/${scrollId}`,
+  {
+    prefixUrl,
+    responseType: 'json',
+    resolveBodyOnly: true,
+  }
+);
 
 /**
  * Deletes items from an Open Search index using the _bulk API.
@@ -143,7 +137,8 @@ export const bulkDelete = async (
     },
   }));
 
-  return got4aws().post(
+  // eslint-disable-next-line no-return-await
+  return await got4aws().post(
     '_bulk',
     {
       prefixUrl,
@@ -326,3 +321,58 @@ export const indexExists = async (
   resolveBodyOnly: false,
   throwHttpErrors: false,
 }).then(({ statusCode }) => statusCode === 200);
+
+/**
+ * @param prefixUrl
+ * @param index
+ * @param doc
+ * @returns
+ */
+export const addDocument = async (
+  prefixUrl: string,
+  index: string,
+  doc: Record<string, any>
+): Promise<unknown> =>
+  gotEs(prefixUrl).post(`${index}/_doc`, { json: doc });
+
+/**
+* @param prefixUrl
+* @param index
+* @param id
+* @returns
+*/
+export const getDocument = async (
+  prefixUrl: string,
+  index: string,
+  id: string
+): Promise<unknown> =>
+  gotEs(prefixUrl).get(`${index}/_doc/${id}`)
+    .catch((error) => {
+      const statusCode = get(error, 'response.statusCode');
+
+      if (statusCode !== 404) throw error;
+    });
+
+/**
+* @param prefixUrl
+* @param index
+* @param query
+* @returns
+*/
+export const deleteByQuery = async (
+  prefixUrl: string,
+  index: string,
+  query: Record<string, any>
+): Promise<unknown> =>
+  gotEs(prefixUrl).post(
+    `${index}/_delete_by_query`,
+    {
+      json: { query },
+    }
+  );
+
+export const refreshIndex = async (
+  prefixUrl: string,
+  index: string
+): Promise<unknown> =>
+  gotEs(prefixUrl).post(`${index}/_refresh`);

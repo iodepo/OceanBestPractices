@@ -22,8 +22,10 @@
     "test": "jest",
     "test:watch": "jest --watchAll",
     "lint": "npm run lint:tsc && npm run lint:eslint",
-    "lint:eslint": "eslint . --ext .js,.jsx,.ts,.tsx",
-    "lint:tsc": "tsc --project tsconfig-lint-cdk.json"
+    "lint:eslint": "./bin/eslint-ratchet.sh",
+    "lint:eslint:ci": "env CI=true npm run lint:eslint",
+    "lint:tsc": "./bin/eslint-ratchet.sh",
+    "lint:tsc:ci": "env CI=true npm run lint:tsc"
   },
   "dependencies": {
     "@aws-cdk/aws-apigateway": "^1.132.0",
@@ -63,8 +65,6 @@
     "lodash": "^4.17.21",
     "p-map": "^4.0.0",
     "p-wait-for": "^3.2.0",
-    "pino-pretty": "^7.2.0",
-    "pino": "^7.2.0",
     "source-map-support": "^0.5.16",
     "type-fest": "^2.5.1",
     "xml2js": "^0.4.23",

@@ -2,6 +2,7 @@
   "recommendations": [
     "davidanson.vscode-markdownlint",
     "dbaeumer.vscode-eslint",
+    "editorconfig.editorconfig",
     "timonwong.shellcheck"
   ]
 }

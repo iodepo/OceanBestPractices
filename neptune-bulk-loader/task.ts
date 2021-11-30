@@ -1,4 +1,3 @@
-import pino from 'pino';
 import { z } from 'zod';
 import { isError } from 'lodash';
 import * as osClient from '../lib/open-search-client';
@@ -40,17 +39,14 @@ export const neptuneBulkLoader = async (): Promise<MainResult> => {
   const esUrl = getStringFromEnv('ES_URL');
   const termsIndex = getStringFromEnv('ES_TERMS_INDEX');
 
-  const logger = pino({ level: 'debug' });
-
   const bulkLoaderClient = new NeptuneBulkLoaderClient({
     neptuneUrl,
     iamRoleArn,
     region,
     insecureHttps,
-    logger,
   });
 
-  logger.info(`Metadata URL: ${metadataUrl}`);
+  console.log(`Metadata URL: ${metadataUrl}`);
 
   const metadataLocation = s3Utils.S3ObjectLocation.fromS3Url(metadataUrl);
 
@@ -58,7 +54,7 @@ export const neptuneBulkLoader = async (): Promise<MainResult> => {
 
   const metadata = metadataSchema.parse(rawMetadata);
 
-  logger.info({ metadata }, 'Metadata');
+  console.log('Metadata:', JSON.stringify(metadata));
 
   const loadId = await bulkLoaderClient.load({
     source: metadata.source,
@@ -66,7 +62,7 @@ export const neptuneBulkLoader = async (): Promise<MainResult> => {
     namedGraphUri: metadata.namedGraphUri,
   });
 
-  logger.info(`loadId: ${loadId}`);
+  console.log(`loadId: ${loadId}`);
 
   await bulkLoaderClient.waitForLoadCompleted(loadId);
 

@@ -14,9 +14,6 @@ export const BulkLoaderDataFormatSchema = z.enum([
 export type BulkLoaderDataFormat = z.infer<typeof BulkLoaderDataFormatSchema>;
 
 interface NeptuneBulkLoaderClientProps {
-  logger: {
-    debug: (msg: string) => void
-  }
   neptuneUrl: string
   iamRoleArn: string
   region: string
@@ -69,13 +66,10 @@ export class NeptuneBulkLoaderClient implements BulkLoaderClient {
 
   private readonly iamRoleArn: string
 
-  private readonly logger: NeptuneBulkLoaderClientProps['logger']
-
   private readonly region: string
 
   constructor(props: NeptuneBulkLoaderClientProps) {
     this.iamRoleArn = props.iamRoleArn;
-    this.logger = props.logger;
     this.region = props.region;
 
     this.got = got.extend({
@@ -147,7 +141,7 @@ export class NeptuneBulkLoaderClient implements BulkLoaderClient {
       async () => {
         const status = await this.getStatus(loadId);
 
-        this.logger.debug(`LoadId ${loadId} status: ${status}`);
+        console.log(`LoadId ${loadId} status: ${status}`);
 
         if (nonTerminalStates.has(status)) return false;
 

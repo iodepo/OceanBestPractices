@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 import nock from 'nock';
 import cryptoRandomString from 'crypto-random-string';
 import { get } from 'lodash';
@@ -383,6 +384,124 @@ describe('open-search-client', () => {
 
         await expect(promisedResult)
           .rejects.toThrow('resource_already_exists_exception');
+      });
+    });
+
+    describe('addDocument()', () => {
+      it('inserts a document', async () => {
+        const indexName = `index-${cryptoRandomString({ length: 6 })}`;
+
+        const doc = { name: 'Lewis' };
+
+        const addDocumentResponse = await osClient.addDocument(
+          esUrl,
+          indexName,
+          doc
+        );
+
+        const getDocumentResponse = await osClient.getDocument(
+          esUrl,
+          indexName,
+          // @ts-expect-error We aren't checking this type
+          addDocumentResponse._id
+        );
+
+        // @ts-expect-error We aren't checking this type
+        expect(getDocumentResponse._source).toEqual(doc);
+      });
+    });
+
+    describe('getDocument()', () => {
+      it('returns the expected document', async () => {
+        const indexName = `index-${cryptoRandomString({ length: 6 })}`;
+
+        const doc = { name: 'Lewis' };
+
+        const addDocumentResponse = await osClient.addDocument(
+          esUrl,
+          indexName,
+          doc
+        );
+
+        const getDocumentResponse = await osClient.getDocument(
+          esUrl,
+          indexName,
+          // @ts-expect-error We aren't checking this type
+          addDocumentResponse._id
+        );
+
+        // @ts-expect-error We aren't checking this type
+        expect(getDocumentResponse._id).toEqual(addDocumentResponse._id);
+        // @ts-expect-error We aren't checking this type
+        expect(getDocumentResponse._source).toEqual(doc);
+      });
+
+      it('returns undefined if the document does not exist', async () => {
+        const indexName = `index-${cryptoRandomString({ length: 6 })}`;
+
+        const getDocumentResponse = await osClient.getDocument(
+          esUrl,
+          indexName,
+          'does-not-exist'
+        );
+
+        expect(getDocumentResponse).toBeUndefined();
+      });
+    });
+
+    describe('deleteByQuery()', () => {
+      it('deletes a document that matches the query', async () => {
+        const indexName = `index-${cryptoRandomString({ length: 6 })}`;
+
+        // @ts-expect-error We aren't checking this type
+        const { _id: maxId } = await osClient.addDocument(
+          esUrl,
+          indexName,
+          { name: 'Max' }
+        );
+
+        await osClient.refreshIndex(esUrl, indexName);
+
+        await osClient.deleteByQuery(esUrl, indexName, {
+          match: {
+            name: 'Max',
+          },
+        });
+
+        const getMaxResult = await osClient.getDocument(
+          esUrl,
+          indexName,
+          maxId
+        );
+
+        expect(getMaxResult).toBeUndefined();
+      });
+
+      it("does not delete a document that doesn't match the query", async () => {
+        const indexName = `index-${cryptoRandomString({ length: 6 })}`;
+
+        // @ts-expect-error We aren't checking this type
+        const { _id: maxId } = await osClient.addDocument(
+          esUrl,
+          indexName,
+          { name: 'Lewis' }
+        );
+
+        await osClient.refreshIndex(esUrl, indexName);
+
+        await osClient.deleteByQuery(esUrl, indexName, {
+          match: {
+            name: 'Max',
+          },
+        });
+
+        const getLewisResult = await osClient.getDocument(
+          esUrl,
+          indexName,
+          maxId
+        );
+
+        expect(getLewisResult).not.toBeUndefined();
       });
     });
   });
