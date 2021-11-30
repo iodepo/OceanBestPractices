@@ -19,10 +19,10 @@ fi
 
 if [ "$PROBLEMS" -lt "$RATCHET" ]; then
   if [ "$CI" = "true" ]; then
-    echo "tsc errors decreased from ${PROBLEMS} to ${RATCHET}, but .tsc-ratchet was not updated." >&2
+    echo "tsc errors decreased from ${RATCHET} to ${PROBLEMS}, but .tsc-ratchet was not updated." >&2
     exit 1
   else
-    echo "tsc errors decreased from ${PROBLEMS} to ${RATCHET}. Ratcheting down."
+    echo "tsc errors decreased from ${RATCHET} to ${PROBLEMS}. Ratcheting down."
     echo "$PROBLEMS" > .tsc-ratchet
   fi
 fi
