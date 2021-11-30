@@ -305,6 +305,9 @@ export const createTermsIndex = (
       source_terminology: {
         type: 'keyword',
       },
+      graphUri: {
+        type: 'keyword',
+      },
     },
   },
 });

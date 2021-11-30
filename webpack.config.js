@@ -4,17 +4,26 @@ const _ = require('lodash');
 const path = require('path');
 const { readdir } = require('fs/promises');
 
+/**
+ * @typedef {import('webpack').Configuration} Configuration
+ */
+
 /** @type {(f: string) => boolean} */
 const isTestFile = (f) => f.endsWith('.test.js') || f.endsWith('.test.ts');
 
 /** @type {(f: string) => boolean} */
 const isNotTestFile = _.negate(isTestFile);
 
+/**
+ * @param {string} entriesPath
+ * @param {string} prefix
+ * @returns {Promise<import('webpack').EntryObject>}
+ */
 const getEntries = async (entriesPath, prefix) => {
   const files = await readdir(entriesPath);
 
   return _(files)
-    .filter(isNotTestFile)    
+    .filter(isNotTestFile)
     .map((f) => {
       const { name } = path.parse(f);
 
@@ -30,8 +39,8 @@ const getEntries = async (entriesPath, prefix) => {
     .value();
 };
 
-/** @type {import('webpack').Configuration} */
-module.exports = async () => {
+/** @type {() => Promise<Configuration>} */
+const config = async () => {
   const apiEntries = await getEntries(path.join('api', 'lambdas'), 'api');
 
   const ingestEntries = await getEntries(
@@ -42,7 +51,7 @@ module.exports = async () => {
   return {
     target: 'node',
     node: { __dirname: true },
-    mode: process.env.NODE_ENV === 'production' ? 'production' : 'development',
+    mode: process.env['NODE_ENV'] === 'production' ? 'production' : 'development',
     entry: {
       ...apiEntries,
       ...ingestEntries,
@@ -80,3 +89,5 @@ module.exports = async () => {
     },
   };
 };
+
+module.exports = config;

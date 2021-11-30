@@ -216,6 +216,9 @@ describe('open-search-client', () => {
                   },
                 },
                 source_terminology: 'Environmental Ontology',
+                graphUri: {
+                  type: 'keyword',
+                },
               },
             },
           ],

@@ -23,6 +23,7 @@ const config = {
         functions: 'never',
       },
     ],
+    'dot-notation': 'off',
     'function-paren-newline': [
       'error',
       'multiline-arguments',
