@@ -8,7 +8,6 @@ module.exports = {
     'airbnb-base',
     'plugin:unicorn/recommended',
     'plugin:promise/recommended',
-    'react-app',
   ],
   rules: {
     'comma-dangle': [
