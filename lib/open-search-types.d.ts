@@ -7,14 +7,34 @@ export interface DocumentItem {
   bitstreams: Bitstream[]
 }
 
-export interface SearchItem {
-  _id: string
-  _source: DocumentItem
+export interface DocumentItemTerm {
+  label: string,
+  uri: string,
+  source_terminology: string
 }
 
-export interface SearchResponse {
+export interface TermItem {
+  query: {
+    multi_match: {
+      query: string
+    }
+  },
+  source_terminology: string,
+}
+
+export interface PutDocumentItemResponse {
+  _index: string,
+  _id: string,
+}
+
+export interface SearchItem<T> {
+  _id: string
+  _source: T
+}
+
+export interface SearchResponse<T> {
   hits: {
-    hits: SearchItem[]
+    hits: SearchItem<T>[]
   }
 }
 
@@ -23,6 +43,12 @@ export interface CloseScrollResponse {
   succeeded: boolean
 }
 
-export interface ScrollResponse extends SearchResponse {
+export interface ScrollResponse<T> extends SearchResponse<T> {
   _scroll_id: string
 }
+
+export type DocumentsScrollResponse = ScrollResponse<DocumentItem>
+
+// export interface PutDocumentResponse {
+
+// }

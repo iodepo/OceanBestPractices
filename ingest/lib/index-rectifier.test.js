@@ -2,6 +2,8 @@
 /* eslint-disable no-underscore-dangle */
 const dspaceClient = require('../../lib/dspace-client');
 const ir = require('./index-rectifier');
+
+// eslint-disable-next-line import/no-unresolved, import/extensions
 const osClient = require('../../lib/open-search-client');
 const utils = require('./ingest-queue');
 

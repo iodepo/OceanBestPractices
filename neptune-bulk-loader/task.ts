@@ -1,7 +1,6 @@
 import pino from 'pino';
 import { z } from 'zod';
 import { isError } from 'lodash';
-// @ts-expect-error This is a JS file so has no types
 import * as osClient from '../lib/open-search-client';
 import * as s3Utils from '../lib/s3-utils';
 import {
