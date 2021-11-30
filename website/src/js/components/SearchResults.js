@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { connect } from 'react-redux';
 import { getLangNameFromCode } from 'language-name-map';
+import ReactTooltip from 'react-tooltip';
 
 import { getSearch } from '../actions/search';
 import { setOption } from '../actions/options';
@@ -13,8 +14,17 @@ import SearchFilter from './SearchFilter';
 import SearchStatus from './SearchStatus';
 import SearchPagination from './SearchPagination';
 import Superlink from './Superlink';
+import { downloadToFile } from '../helpers/downloadToFile';
 
 class SearchResults extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      selectedResults: []
+    }
+
+    this.onSelectOneResult = this.onSelectOneResult.bind(this);
+  }
 
   componentDidMount() {
 
@@ -37,6 +47,132 @@ class SearchResults extends Component {
 
   onResetTerms() {
     this.props.dispatch(resetTerms());
+  }
+
+  /**
+   * handles selection of all results
+   * @param {array} items - array of all result items
+   */
+  onSelectAllResults(items) {
+    const mappedItemIds = items.map(({ id }) => (id));
+
+    this.setState((prevState) => ({
+      ...prevState,
+      selectedResults: mappedItemIds
+    }));
+  }
+
+  /**
+   * handles deselection of all results
+   */
+  onDeselectAllResults() {
+    this.setState((prevState) => ({
+      ...prevState,
+      selectedResults: []
+    }));
+  }
+
+  /**
+   * toggles selection of one result item
+   * @param {string} resultId - id of a single result
+   */
+  onSelectOneResult(resultId) {
+    const { selectedResults } = this.state;
+    const resultIndex = selectedResults.indexOf(resultId);
+
+    if (resultIndex > -1) {
+      selectedResults.splice(resultIndex, 1);
+    } else {
+      selectedResults.push(resultId);
+    }
+
+    this.setState((prevState) => ({
+      ...prevState,
+      selectedResults
+    }));
+  }
+
+  /**
+   * handles download click request for selected result citations
+   */
+  onClickCitationDownload(results) {
+    // gather citations per selected state
+    const data = results.map((result) => {
+      if (
+        result.citation
+        && this.state.selectedResults.includes(result.id)
+      ) {
+        return result.citation;
+      }
+    });
+
+    downloadToFile({
+      data,
+      fileName: `obp-export-citations-${new Date().toISOString()}.txt`,
+      lineBreak: "\n\n"
+    })
+  }
+
+  /**
+   * shows the select/deselect all link
+   * @param {array} results - array of all results
+   * @returns 
+   */
+  renderSelectResultsLink(results) {
+    // everything is selected, then render the deselect all link
+    if (results.length === this.state.selectedResults.length) {
+      return (
+        <li className="crumb-tail">
+          <a href="#" onClick={() => this.onDeselectAllResults()}>
+            Deselect All
+          </a>
+        </li>
+      );
+    }
+
+    // default render the select all link
+    return (
+      <li className="crumb-tail">
+        <a href="#" onClick={() => this.onSelectAllResults(results)}>
+          Select All
+        </a>
+      </li>
+    );
+  }
+
+  /**
+   * shows the download citation button
+   * @param {array} results - array of all results
+   */
+  renderDownloadCitationsButton(results) {
+    const isEnabled = this.state.selectedResults.length > 0;
+    const helpText = "Select the check box from individual results below to download citations as a text file.";
+
+    return (
+      <li className="crumb-tail"
+          data-tip={helpText}
+      >
+        <button
+          className={`result__button result__button-secondary ${isEnabled ? 'is-active': null}`}
+          onClick={() => this.onClickCitationDownload(results)}
+          disabled={!isEnabled}
+        >
+          <span className="result__button-icon"><i className="fa fa-quote-right" aria-hidden="true"></i></span>
+          <span>Download Citations</span>
+        </button>
+        <ReactTooltip
+          place="top"
+          effect="solid"
+          delayShow={300}
+          className="tooltip"
+          type="light"
+          border={true}
+          borderColor="Grey"
+        >
+          {helpText}
+        </ReactTooltip>
+      </li>
+    );
   }
 
   render() {
@@ -103,7 +239,7 @@ class SearchResults extends Component {
 
       resultsItems = results.map((result) => {
 
-        let {
+        const {
           id,
           date,
           language,
@@ -142,6 +278,8 @@ class SearchResults extends Component {
           methodology={methodology}
           uuid={uuid}
           sourceKey={sourceKey}
+          resultSelected={this.state.selectedResults.includes(id)}
+          onCheck={this.onSelectOneResult}
         />
       });
 
@@ -181,23 +319,28 @@ class SearchResults extends Component {
       <section className={containerClassName}>
         {
           // Trigger the display of number of results based on the length of results.
-
           results.length
-          ? (
-            <header className="search-results__header">
-            <span className='search-results__breadcrumbs'>
-              <Superlink to='/' class_name='search-results__breadcrumbs-home' event_category="results" event_action="link" event_label="Home">
-                <li>Home</li>
-              </Superlink>
-              <li><strong>Search OBP</strong></li>
-            </span>
-            <span className="search-results__sort">
-              <span className='search-results__number'><strong>{ this.props.searchReducer.totalResults } result{ results.length > 1 ? 's' : null }</strong></span>
-              <SearchFilter />
-            </span>
-            </header>
-          )
-          : null
+            ? (
+              <header className="search-results__header">
+                <span className='search-results__breadcrumbs'>
+                  <Superlink to='/' class_name='search-results__breadcrumbs-home' event_category="results" event_action="link" event_label="Home">
+                    <li>Home</li>
+                  </Superlink>
+                  <li><strong>Search OBP</strong></li>
+                  {
+                    this.renderSelectResultsLink(results)
+                  }
+                  {
+                    this.renderDownloadCitationsButton(results)
+                  }
+                </span>
+                <span className="search-results__sort">
+                  <span className='search-results__number'><strong>{ this.props.searchReducer.totalResults } result{ results.length > 1 ? 's' : null }</strong></span>
+                  <SearchFilter />
+                </span>
+              </header>
+            )
+            : null
         }
         {searchStatus}
         {
