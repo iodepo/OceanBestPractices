@@ -375,6 +375,9 @@ describe('open-search-client', () => {
             source_terminology: {
               type: 'keyword',
             },
+            graphUri: {
+              type: 'keyword',
+            },
           },
         });
       });
