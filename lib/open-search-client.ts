@@ -2,17 +2,14 @@
 import got4aws from 'got4aws';
 import { get } from 'lodash';
 import {
-  closeScrollResponseSchema,
-  percolateResponseSchema,
-  putDocumentItemResponseSchema,
-} from './schemas';
-
-import type {
   CloseScrollResponse,
   DocumentItem,
   DocumentItemTerm,
   PutDocumentItemResponse,
-} from './schemas';
+  closeScrollResponseSchema,
+  percolateResponseSchema,
+  putDocumentItemResponseSchema,
+} from './open-search-schemas';
 
 const gotEs = (prefixUrl: string) => got4aws().extend({
   prefixUrl,
@@ -191,13 +188,10 @@ export const percolateDocumentFields = async (
     size,
   };
 
-  const rawPercolateResponse = await got4aws().post(
+  const rawPercolateResponse = await gotEs(prefixUrl).post(
     'terms/_search',
     {
-      prefixUrl,
       json: body,
-      responseType: 'json',
-      resolveBodyOnly: true,
     }
   );
 
@@ -274,7 +268,6 @@ export const putDocumentItem = async (
     }
   );
 
-  console.log(`Response: ${rawResponse}`);
   return putDocumentItemResponseSchema.parse(rawResponse);
 };
 

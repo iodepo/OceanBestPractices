@@ -4,7 +4,7 @@ import cryptoRandomString from 'crypto-random-string';
 import { get } from 'lodash';
 
 import * as osClient from './open-search-client';
-import { PutDocumentItemResponse } from './schemas';
+import { PutDocumentItemResponse } from './open-search-schemas';
 
 describe('open-search-client', () => {
   let awsAccessKeyIdBefore: string | undefined;
