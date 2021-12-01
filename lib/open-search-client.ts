@@ -1,20 +1,19 @@
-/* eslint-disable camelcase */
 /* eslint-disable no-underscore-dangle */
 import got4aws from 'got4aws';
 import { get } from 'lodash';
-import { percolateResponseSchema } from './schemas';
-
 import {
+  closeScrollResponseSchema,
+  percolateResponseSchema,
+  putDocumentItemResponseSchema,
+} from './schemas';
+
+import type {
   CloseScrollResponse,
   DocumentItem,
   DocumentItemTerm,
   PutDocumentItemResponse,
-} from './open-search-types';
+} from './schemas';
 
-/**
- * @param prefixUrl
- * @returns
- */
 const gotEs = (prefixUrl: string) => got4aws().extend({
   prefixUrl,
   responseType: 'json',
@@ -102,17 +101,17 @@ export const nextScroll = async (
  *
  * @returns Open Search close scroll response.
  */
-export const closeScroll = (
+export const closeScroll = async (
   prefixUrl: string,
   scrollId: string
-): Promise<CloseScrollResponse> => got4aws().delete(
-  `_search/scroll/${scrollId}`,
-  {
-    prefixUrl,
-    responseType: 'json',
-    resolveBodyOnly: true,
-  }
-);
+): Promise<CloseScrollResponse> => {
+  const rawResponse = await gotEs(prefixUrl)
+    .delete(
+      `_search/scroll/${scrollId}`
+    );
+
+  return closeScrollResponseSchema.parse(rawResponse);
+};
 
 /**
  * Deletes items from an Open Search index using the _bulk API.
@@ -128,7 +127,7 @@ export const bulkDelete = async (
   prefixUrl: string,
   index: string,
   ids: string[]
-): Promise<CloseScrollResponse> => {
+): Promise<unknown> => {
   const bulkData = ids.map((id) => ({
     delete: {
       _index: index,
@@ -185,9 +184,7 @@ export const percolateDocumentFields = async (
     query: {
       percolate: {
         field: 'query',
-        document: {
-          ...fields,
-        },
+        document: fields,
       },
     },
     from,
@@ -225,9 +222,8 @@ export const percolateDocumentFields = async (
 /**
  * @param prefixUrl
  * @param index
- * @returns
  */
-export const getIndex = async (
+export const getIndex = (
   prefixUrl: string,
   index: string
 ): Promise<unknown> => gotEs(prefixUrl).get(index);
@@ -236,7 +232,6 @@ export const getIndex = async (
   * @param prefixUrl
   * @param index
   * @param indexBody
-  * @returns
   */
 export const createIndex = (
   prefixUrl: string,
@@ -263,29 +258,29 @@ export const createIndex = (
   });
 
 /**
- * Indexes an index item into the documents index.
+ * Indexes a document item into the documents index.
  *
  * @param prefixUrl - Open Search endpoint.
  * @param documentItem - Object to index.
- * @returns
  */
 export const putDocumentItem = async (
   prefixUrl: string,
   documentItem: DocumentItem
-): Promise<PutDocumentItemResponse> => got4aws().post(
-  `documents/doc/${documentItem.uuid}`,
-  {
-    prefixUrl,
-    json: documentItem,
-    responseType: 'json',
-    resolveBodyOnly: true,
-  }
-);
+): Promise<PutDocumentItemResponse> => {
+  const rawResponse = await gotEs(prefixUrl).post(
+    `documents/doc/${documentItem.uuid}`,
+    {
+      json: documentItem,
+    }
+  );
+
+  console.log(`Response: ${rawResponse}`);
+  return putDocumentItemResponseSchema.parse(rawResponse);
+};
 
 /**
  * @param prefixUrl
  * @param index
- * @returns
  */
 export const createTermsIndex = (
   prefixUrl: string,
@@ -313,9 +308,8 @@ export const createTermsIndex = (
 });
 
 /**
- * @param {string} prefixUrl
- * @param {string} index
- * @returns {Promise<boolean>}
+ * @param prefixUrl
+ * @param index
  */
 export const indexExists = async (
   prefixUrl: string,
@@ -329,12 +323,11 @@ export const indexExists = async (
  * @param prefixUrl
  * @param index
  * @param doc
- * @returns
  */
 export const addDocument = async (
   prefixUrl: string,
   index: string,
-  doc: Record<string, any>
+  doc: Record<string, unknown>
 ): Promise<unknown> =>
   gotEs(prefixUrl).post(`${index}/_doc`, { json: doc });
 
@@ -342,7 +335,6 @@ export const addDocument = async (
 * @param prefixUrl
 * @param index
 * @param id
-* @returns
 */
 export const getDocument = async (
   prefixUrl: string,
@@ -360,12 +352,11 @@ export const getDocument = async (
 * @param prefixUrl
 * @param index
 * @param query
-* @returns
 */
 export const deleteByQuery = async (
   prefixUrl: string,
   index: string,
-  query: Record<string, any>
+  query: Record<string, unknown>
 ): Promise<unknown> =>
   gotEs(prefixUrl).post(
     `${index}/_delete_by_query`,
@@ -377,5 +368,6 @@ export const deleteByQuery = async (
 export const refreshIndex = async (
   prefixUrl: string,
   index: string
-): Promise<unknown> =>
-  gotEs(prefixUrl).post(`${index}/_refresh`);
+): Promise<void> => {
+  await gotEs(prefixUrl).post(`${index}/_refresh`);
+};

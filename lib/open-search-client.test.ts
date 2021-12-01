@@ -4,6 +4,7 @@ import cryptoRandomString from 'crypto-random-string';
 import { get } from 'lodash';
 
 import * as osClient from './open-search-client';
+import { PutDocumentItemResponse } from './schemas';
 
 describe('open-search-client', () => {
   let awsAccessKeyIdBefore: string | undefined;
@@ -266,7 +267,7 @@ describe('open-search-client', () => {
 
   describe('putDocumentItem', () => {
     test('should add a document item to the documets index', async () => {
-      const mockIndexResponse = {
+      const mockPutDocumentItemResponse: PutDocumentItemResponse = {
         _index: 'documents',
         _type: 'doc',
         _id: '38c7d808-aa26-4ed4-a3e4-3458b989d2d4',
@@ -299,14 +300,14 @@ describe('open-search-client', () => {
 
       nock('https://open-search.example.com')
         .post('/documents/doc/abc', documentItem)
-        .reply(201, mockIndexResponse);
+        .reply(201, mockPutDocumentItemResponse);
 
       const result = await osClient.putDocumentItem(
         'https://open-search.example.com',
         documentItem
       );
 
-      expect(result).toEqual(mockIndexResponse);
+      expect(result).toEqual(mockPutDocumentItemResponse);
     });
   });
 
