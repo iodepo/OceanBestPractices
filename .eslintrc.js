@@ -29,6 +29,8 @@ const config = {
       'multiline-arguments',
     ],
     'implicit-arrow-linebreak': 'off',
+    'import/extensions': 'off',
+    'import/no-unresolved': 'off',
     'import/prefer-default-export': 'off',
     'max-len': [
       'error',

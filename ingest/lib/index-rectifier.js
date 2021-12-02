@@ -8,11 +8,10 @@ const utils = require('./ingest-queue');
 
 /**
  * @typedef {import('../../lib/dspace-types').DSpaceItem} DSpaceItem
- * @typedef {import('../../lib/open-search-types').SearchItem} SearchItem
  */
 
 /**
- * @typedef {import('../../lib/open-search-types').DocumentItem} DocumentItem
+ * @typedef {import('../../lib/open-search-schemas').DocumentItem} DocumentItem
  *
  * @typedef {Object} IsUpdatedIndexItem
  * @property {Pick<DocumentItem, 'lastModified' | 'bitstreams'>} _source
