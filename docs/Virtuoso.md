@@ -202,7 +202,3 @@ SQL> quit;
 > exit
 > logout
 ```
-
-⚠️ **WARNING** ⚠️
-
-Don't forget to run the percolator/create-tag-index.rb script, see [ingest/README.md](../ingest/README.md) file!

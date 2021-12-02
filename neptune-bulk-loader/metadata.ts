@@ -5,7 +5,8 @@ import * as s3Utils from '../lib/s3-utils';
 const metadataSchema = z.object({
   source: z.string().url(),
   format: BulkLoaderDataFormatSchema,
-  namedGraphUri: z.string().url(),
+  ontologyGraphUrl: z.string().url(),
+  ontologyNameSpace: z.string(),
 });
 
 type Metadata = z.infer<typeof metadataSchema>;
