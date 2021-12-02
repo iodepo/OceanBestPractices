@@ -65,7 +65,7 @@ export const neptuneBulkLoader = async (): Promise<MainResult> => {
     elasticsearchUrl: esUrl,
     ontologyNameSpace: metadata.ontologyNameSpace,
     ontologyGraph,
-    terminologyTitle: 'my-terminology-title',
+    terminologyTitle: metadata.terminologyTitle,
     indexName: termsIndex,
     sparqlUrl: `${neptuneUrl}/sparql`,
   });
