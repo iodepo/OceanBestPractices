@@ -50,6 +50,7 @@ export const neptuneBulkLoader = async (): Promise<MainResult> => {
     ontologyNameSpace,
     source,
     namedGraphUri,
+    queryS3Url,
   } = metadata;
 
   const loadId = await bulkLoaderClient.load({
@@ -68,7 +69,7 @@ export const neptuneBulkLoader = async (): Promise<MainResult> => {
     match: { namedGraphUri },
   });
 
-  const sparqlQuery = await s3Utils.getObjectText(metadata.queryS3Url);
+  const sparqlQuery = await s3Utils.getObjectText(queryS3Url);
 
   await indexTerms({
     elasticsearchUrl: esUrl,
