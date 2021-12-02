@@ -43,10 +43,18 @@ export const neptuneBulkLoader = async (): Promise<MainResult> => {
 
   console.log('Metadata:', JSON.stringify(metadata));
 
+  const {
+    format,
+    terminologyTitle,
+    ontologyNameSpace,
+    source,
+    namedGraphUri,
+  } = metadata;
+
   const loadId = await bulkLoaderClient.load({
-    source: metadata.source,
-    format: metadata.format,
-    namedGraphUri: metadata.ontologyGraphUrl,
+    source,
+    format,
+    namedGraphUri,
   });
 
   console.log(`loadId: ${loadId}`);
@@ -55,17 +63,15 @@ export const neptuneBulkLoader = async (): Promise<MainResult> => {
 
   await createTermsIndex(esUrl, termsIndex);
 
-  const ontologyGraph = `<${metadata.ontologyGraphUrl}>`;
-
   await osClient.deleteByQuery(esUrl, termsIndex, {
-    match: { ontologyGraph },
+    match: { namedGraphUri },
   });
 
   await indexTerms({
     elasticsearchUrl: esUrl,
-    ontologyNameSpace: metadata.ontologyNameSpace,
-    ontologyGraph,
-    terminologyTitle: metadata.terminologyTitle,
+    ontologyNameSpace,
+    namedGraphUri,
+    terminologyTitle,
     indexName: termsIndex,
     sparqlUrl: `${neptuneUrl}/sparql`,
   });

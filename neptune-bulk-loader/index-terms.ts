@@ -1,8 +1,7 @@
 import _ from 'lodash';
-import got from 'got';
+import got, { Got } from 'got';
 import { z } from 'zod';
 import got4aws from 'got4aws';
-import { Got } from '../lib/open-search-client';
 import { httpsOptions } from '../lib/got-utils';
 
 const fetchTermsResponseSchema = z.object({
@@ -84,7 +83,7 @@ const indexForTerm = (term: FetchedTerm, indexName: string): unknown => ({
 const queryForTerm = (
   term: FetchedTerm,
   terminologyTitle: string,
-  ontologyGraph: string
+  namedGraphUri: string
 ): unknown => ({
   query: {
     multi_match: {
@@ -94,7 +93,7 @@ const queryForTerm = (
     },
   },
   source_terminology: terminologyTitle,
-  ontologyGraph,
+  namedGraphUri,
 });
 
 interface BulkIndexTermsParams {
@@ -102,7 +101,7 @@ interface BulkIndexTermsParams {
   terms: FetchedTerm[]
   indexName: string
   terminologyTitle: string
-  ontologyGraph: string
+  namedGraphUri: string
 }
 
 const bulkIndexTerms = async (params: BulkIndexTermsParams): Promise<void> => {
@@ -111,13 +110,13 @@ const bulkIndexTerms = async (params: BulkIndexTermsParams): Promise<void> => {
     terms,
     indexName,
     terminologyTitle,
-    ontologyGraph,
+    namedGraphUri,
   } = params;
 
   const esDoc = _(terms)
     .map((term) => [
       indexForTerm(term, indexName),
-      queryForTerm(term, terminologyTitle, ontologyGraph),
+      queryForTerm(term, terminologyTitle, namedGraphUri),
     ])
     .flatten()
     .map((x) => JSON.stringify(x))
@@ -142,7 +141,7 @@ const bulkIndexTerms = async (params: BulkIndexTermsParams): Promise<void> => {
 interface CreateTermIndexParams {
   elasticsearchUrl: string
   ontologyNameSpace: string
-  ontologyGraph: string
+  namedGraphUri: string
   indexName: string
   terminologyTitle: string
   sparqlUrl: string
@@ -153,7 +152,7 @@ export const indexTerms = async (
 ): Promise<void> => {
   const {
     elasticsearchUrl,
-    ontologyGraph,
+    namedGraphUri,
     terminologyTitle,
     indexName,
     sparqlUrl,
@@ -183,10 +182,10 @@ export const indexTerms = async (
       terms,
       indexName,
       terminologyTitle,
-      ontologyGraph,
+      namedGraphUri,
     });
 
-    console.log(`Indexed terms from ${offset} to ${offset + terms.length}`);
+    console.log(`Indexed terms from ${offset} to ${offset + terms.length - 1}`);
 
     offset += terms.length;
   }
