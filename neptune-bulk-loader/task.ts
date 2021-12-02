@@ -1,13 +1,8 @@
-import pino from 'pino';
-import { z } from 'zod';
 import { isError } from 'lodash';
 import * as osClient from '../lib/open-search-client';
-import * as s3Utils from '../lib/s3-utils';
-import {
-  BulkLoaderDataFormatSchema,
-  NeptuneBulkLoaderClient,
-} from './neptune-bulk-loader-client';
+import { NeptuneBulkLoaderClient } from './neptune-bulk-loader-client';
 import { getBoolFromEnv, getStringFromEnv } from '../lib/env-utils';
+import { loadMetadata } from './metadata';
 
 const createTermsIndex = async (
   esUrl: string,
@@ -23,12 +18,6 @@ const createTermsIndex = async (
   }
 };
 
-const metadataSchema = z.object({
-  source: z.string().url(),
-  format: BulkLoaderDataFormatSchema,
-  namedGraphUri: z.string().url(),
-});
-
 type MainResult = Error | undefined;
 
 export const neptuneBulkLoader = async (): Promise<MainResult> => {
@@ -40,25 +29,18 @@ export const neptuneBulkLoader = async (): Promise<MainResult> => {
   const esUrl = getStringFromEnv('ES_URL');
   const termsIndex = getStringFromEnv('ES_TERMS_INDEX');
 
-  const logger = pino({ level: 'debug' });
-
   const bulkLoaderClient = new NeptuneBulkLoaderClient({
     neptuneUrl,
     iamRoleArn,
     region,
     insecureHttps,
-    logger,
   });
 
-  logger.info(`Metadata URL: ${metadataUrl}`);
+  console.log(`Metadata URL: ${metadataUrl}`);
 
-  const metadataLocation = s3Utils.S3ObjectLocation.fromS3Url(metadataUrl);
+  const metadata = await loadMetadata(metadataUrl);
 
-  const rawMetadata = await s3Utils.getObjectJson(metadataLocation);
-
-  const metadata = metadataSchema.parse(rawMetadata);
-
-  logger.info({ metadata }, 'Metadata');
+  console.log('Metadata:', JSON.stringify(metadata));
 
   const loadId = await bulkLoaderClient.load({
     source: metadata.source,
@@ -66,11 +48,17 @@ export const neptuneBulkLoader = async (): Promise<MainResult> => {
     namedGraphUri: metadata.namedGraphUri,
   });
 
-  logger.info(`loadId: ${loadId}`);
+  console.log(`loadId: ${loadId}`);
 
   await bulkLoaderClient.waitForLoadCompleted(loadId);
 
   await createTermsIndex(esUrl, termsIndex);
+
+  await osClient.deleteByQuery(esUrl, termsIndex, {
+    match: {
+      graphUri: metadata.namedGraphUri,
+    },
+  });
 
   return undefined;
 };

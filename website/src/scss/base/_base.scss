@@ -6,19 +6,20 @@ html {
   box-sizing: border-box;
 }
 
-body{
-  font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
-  font-size:15px;
+body {
+  font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+  font-size: 15px;
   line-height: 1.4;
 }
 
-a{
-  color:$primary-blue;
-  text-decoration:none;
-  &:hover{
-    color:$primary-blue-dark;
+a {
+  color: $primary-blue;
+  text-decoration: none;
+  &:hover {
+    color: $primary-blue-dark;
   }
 }
+
 *, *:before, *:after {
   box-sizing: inherit;
 }
@@ -36,6 +37,7 @@ button:focus {
       transform: rotate(360deg);
   }
 }
-.loading-spinner{
+
+.loading-spinner {
   animation: spin infinite 2s linear;
 }

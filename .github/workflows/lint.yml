@@ -9,5 +9,5 @@ jobs:
         with:
           node-version: "14"
       - run: npm install
-      - run: npm run lint
-        continue-on-error: true
+      - run: npm run lint:tsc:ci
+      - run: npm run lint:eslint:ci

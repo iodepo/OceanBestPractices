@@ -1,4 +1,7 @@
-module.exports = {
+// @ts-check
+
+/** @type {import('eslint').Linter.Config} */
+const config = {
   root: true,
   env: {
     node: true,
@@ -20,11 +23,14 @@ module.exports = {
         functions: 'never',
       },
     ],
+    'dot-notation': 'off',
     'function-paren-newline': [
       'error',
       'multiline-arguments',
     ],
     'implicit-arrow-linebreak': 'off',
+    'import/extensions': 'off',
+    'import/no-unresolved': 'off',
     'import/prefer-default-export': 'off',
     'max-len': [
       'error',
@@ -142,3 +148,5 @@ module.exports = {
     },
   ],
 };
+
+module.exports = config;
