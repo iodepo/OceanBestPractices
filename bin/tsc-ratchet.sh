@@ -1,6 +1,6 @@
 #!/bin/sh
 
-set -e
+set -evx
 
 mkdir -p tmp
 
