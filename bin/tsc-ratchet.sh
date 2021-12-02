@@ -5,7 +5,7 @@ set -evx
 mkdir -p tmp
 
 set +e
-npx tsc --noEmit | tee tmp/tsc.log
+npx tsc --noEmit 2>&1 | tee tmp/tsc.log
 set -e
 
 ls -l tmp/tsc.log
