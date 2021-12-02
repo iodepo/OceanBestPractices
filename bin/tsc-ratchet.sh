@@ -4,7 +4,12 @@ set -evx
 
 mkdir -p tmp
 
+set +e
 npx tsc --noEmit | tee tmp/tsc.log
+set -e
+
+ls -l tmp/tsc.log
+tail tmp/tsc.log
 
 echo 'AAA'
 
