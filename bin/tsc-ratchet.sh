@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -evx
+set -e
 
 mkdir -p tmp
 
@@ -8,22 +8,10 @@ set +e
 npx tsc --noEmit > tmp/tsc.log
 set -e
 
-ls -l tmp/tsc.log
-tail tmp/tsc.log
-
-echo 'AAA'
-
-PROBLEMS=$(grep ': error TS' tmp/tsc.log | wc -l | awk '{ print $1 }')
-
-echo 'BBB'
-
-echo "PROBLEMS = ${PROBLEMS}"
-
-echo 'CCC'
+# PROBLEMS=$(grep ': error TS' tmp/tsc.log | wc -l | awk '{ print $1 }')
+PROBLEMS=$(grep -c ': error TS' tmp/tsc.log)
 
 [ -z "$PROBLEMS" ] && exit 0
-
-echo 'DDD'
 
 RATCHET=$(cat .tsc-ratchet)
 
