@@ -293,7 +293,7 @@ export const createTermsIndex = (
       source_terminology: {
         type: 'keyword',
       },
-      ontologyGraph: {
+      namedGraphUri: {
         type: 'keyword',
       },
     },

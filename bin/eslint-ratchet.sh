@@ -19,7 +19,7 @@ fi
 
 if [ "$PROBLEMS" -lt "$RATCHET" ]; then
   if [ "$CI" = "true" ]; then
-    echo "eslint problems decreased from ${RATCHET} to ${PROBLEMS}, but .eslint-ratchet was not updated." >&2
+    echo "eslint problems decreased from ${RATCHET} to ${PROBLEMS}, but .eslint-ratchet has not been updated." >&2
     exit 1
   else
     echo "eslint problems decreased from ${RATCHET} to ${PROBLEMS}. Ratcheting down."

@@ -14,7 +14,7 @@ const s3ObjectUrlSchema = z
 const metadataSchema = z.object({
   source: s3ObjectUrlSchema,
   format: BulkLoaderDataFormatSchema,
-  ontologyGraphUrl: z.string().url(),
+  namedGraphUri: z.string().url(),
   ontologyNameSpace: z.string(),
   terminologyTitle: z.string(),
   queryS3Url: s3ObjectUrlSchema,
