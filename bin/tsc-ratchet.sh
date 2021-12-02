@@ -13,7 +13,7 @@ tail tmp/tsc.log
 
 echo 'AAA'
 
-PROBLEMS=$(grep -c 'error TS\d' tmp/tsc.log)
+PROBLEMS=$(grep ': error TS' tmp/tsc.log | wc -l | awk '{ print $1 }')
 
 echo 'BBB'
 
