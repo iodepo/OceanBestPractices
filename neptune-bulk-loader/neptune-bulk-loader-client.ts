@@ -1,8 +1,10 @@
 import got, { Got } from 'got';
 import { z } from 'zod';
 import pWaitFor from 'p-wait-for';
+import { negate } from 'lodash';
 import { zodTypeGuard } from '../lib/zod-utils';
 import { httpsOptions } from '../lib/got-utils';
+import { S3ObjectLocation } from '../lib/s3-utils';
 
 export const BulkLoaderDataFormatSchema = z.enum([
   'csv',
@@ -14,6 +16,15 @@ export const BulkLoaderDataFormatSchema = z.enum([
 ]);
 export type BulkLoaderDataFormat = z.infer<typeof BulkLoaderDataFormatSchema>;
 
+const isTerminalStatus = (status: string): boolean =>
+  ![
+    'LOAD_NOT_STARTED',
+    'LOAD_IN_PROGRESS',
+    'LOAD_IN_QUEUE',
+  ].includes(status);
+
+const isNonTerminalStatus = negate(isTerminalStatus);
+
 interface NeptuneBulkLoaderClientProps {
   neptuneUrl: string
   iamRoleArn: string
@@ -22,7 +33,7 @@ interface NeptuneBulkLoaderClientProps {
 }
 
 interface LoadParams {
-  source: string
+  source: S3ObjectLocation
   format: BulkLoaderDataFormat
   namedGraphUri: string
 }
@@ -54,15 +65,9 @@ const getStatusOkResponseSchema = z.object({
     }),
   }),
 });
+type GetStatusOkResponse = z.infer<typeof getStatusOkResponseSchema>;
 
-export interface BulkLoaderClient {
-  load(params: LoadParams): Promise<string>
-  getStatus(loadId: string): Promise<string>
-  isLoadCompleted(loadId: string): Promise<boolean>
-  waitForLoadCompleted(loadId: string): Promise<void>
-}
-
-export class NeptuneBulkLoaderClient implements BulkLoaderClient {
+export class NeptuneBulkLoaderClient {
   private readonly got: Got;
 
   private readonly iamRoleArn: string
@@ -88,7 +93,7 @@ export class NeptuneBulkLoaderClient implements BulkLoaderClient {
       'loader',
       {
         json: {
-          source,
+          source: source.url,
           format,
           iamRoleArn: this.iamRoleArn,
           region: this.region,
@@ -110,7 +115,7 @@ export class NeptuneBulkLoaderClient implements BulkLoaderClient {
     throw new Error(loaderResponse.detailedMessage);
   }
 
-  async getStatus(loadId: string): Promise<string> {
+  async getStatus(loadId: string): Promise<GetStatusOkResponse> {
     const { body } = await this.got.get<unknown>(
       'loader',
       {
@@ -120,32 +125,22 @@ export class NeptuneBulkLoaderClient implements BulkLoaderClient {
       }
     );
 
-    const getStatusResponse = getStatusOkResponseSchema.parse(body);
-
-    return getStatusResponse.payload.overallStatus.status;
-  }
-
-  async isLoadCompleted(loadId: string): Promise<boolean> {
-    return (await this.getStatus(loadId)) === 'LOAD_COMPLETED';
+    return getStatusOkResponseSchema.parse(body);
   }
 
   async waitForLoadCompleted(loadId: string): Promise<void> {
-    const nonTerminalStates = new Set([
-      'LOAD_NOT_STARTED',
-      'LOAD_IN_PROGRESS',
-      'LOAD_IN_QUEUE',
-    ]);
-
     await pWaitFor(
       async () => {
-        const status = await this.getStatus(loadId);
+        const statusResponse = await this.getStatus(loadId);
+
+        const { status } = statusResponse.payload.overallStatus;
 
         console.log(`LoadId ${loadId} status: ${status}`);
 
-        if (nonTerminalStates.has(status)) return false;
+        if (isNonTerminalStatus(status)) return false;
 
         if (status !== 'LOAD_COMPLETED') {
-          throw new Error(`Load status: "${status}"`);
+          throw new Error(`Unexpected bulk loader status: ${status}`);
         }
 
         return true;

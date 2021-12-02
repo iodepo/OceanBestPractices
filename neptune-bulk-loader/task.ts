@@ -1,4 +1,5 @@
 import { isError } from 'lodash';
+import * as s3Utils from '../lib/s3-utils';
 import * as osClient from '../lib/open-search-client';
 import { NeptuneBulkLoaderClient } from './neptune-bulk-loader-client';
 import { getBoolFromEnv, getStringFromEnv } from '../lib/env-utils';
@@ -61,6 +62,8 @@ export const neptuneBulkLoader = async (): Promise<MainResult> => {
     match: { ontologyGraph },
   });
 
+  const sparqlQuery = await s3Utils.getObjectText(metadata.queryS3Url);
+
   await indexTerms({
     elasticsearchUrl: esUrl,
     ontologyNameSpace: metadata.ontologyNameSpace,
@@ -68,6 +71,7 @@ export const neptuneBulkLoader = async (): Promise<MainResult> => {
     terminologyTitle: metadata.terminologyTitle,
     indexName: termsIndex,
     sparqlUrl: `${neptuneUrl}/sparql`,
+    sparqlQuery,
   });
 
   return undefined;
@@ -76,5 +80,5 @@ export const neptuneBulkLoader = async (): Promise<MainResult> => {
 if (require.main === module) {
   neptuneBulkLoader()
     .then((r) => console.log('Result:', r))
-    .catch((error) => console.log('Error:', error));
+    .catch((error) => console.log(error));
 }
