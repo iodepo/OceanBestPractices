@@ -5,7 +5,7 @@ export const bitstreamSchema = z.object({
   mimeType: z.string(),
   checkSum: z.object({
     value: z.string(),
-  }).passthrough(),
+  }),
   retrieveLink: z.string(),
 });
 
@@ -54,7 +54,7 @@ export const dspaceItemSchema = z.object({
   name: z.string(),
   handle: z.string(),
   lastModified: z.string(),
-  bitstreams: z.array(bitstreamSchema.passthrough()),
+  bitstreams: z.array(bitstreamSchema),
   metadata: z.array(metadataSchema),
 });
 

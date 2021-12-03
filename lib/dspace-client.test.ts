@@ -64,6 +64,7 @@ This is a new line!
         .reply(200, mockRawRSSFeed);
 
       const feed = await dspaceClient.getFeed('https://repository.oceanbestpractices.org');
+      console.log(`Test Feed: ${JSON.stringify(feed)}`);
       expect(feed).toEqual({
         $: {
           'xmlns:dc': 'http://purl.org/dc/elements/1.1/',

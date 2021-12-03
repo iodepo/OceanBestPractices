@@ -31,7 +31,7 @@ describe('indexer', () => {
             retrieveLink: '/rest/bitstreams/da66b42c-b435-4c47-981c-44da170a1018/retrieve',
             checkSum: {
               value: '6a45c8850908937a88f18e9a87674393',
-              checkSumAlgorithm: 'MD5',
+              // checkSumAlgorithm: 'MD5',
             },
             sequenceId: 5,
             policies: null,
@@ -45,18 +45,15 @@ describe('indexer', () => {
           {
             key: 'dc.date.accessioned',
             value: '2021-07-05T19:56:13Z',
-            language: '',
-            element: 'date',
-            qualifier: 'accessioned',
-            schema: 'dc',
+            // language: '',
+            // element: 'date',
+            // qualifier: 'accessioned',
+            // schema: 'dc',
           },
         ],
       };
 
-      const result = indexer.buildDSpaceFields(
-        existingTarget,
-        dspaceItem
-      );
+      const result = indexer.getDSpaceItemFields();
       expect(result).toEqual({
         foo: 'bar',
         ...dspaceItem,

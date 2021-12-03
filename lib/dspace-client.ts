@@ -2,7 +2,7 @@
 import got, { HTTPError } from 'got';
 import { Parser } from 'xml2js';
 
-import type { DSpaceItem, Metadata, RSSFeed } from './dspace-schemas';
+import { DSpaceItem, Metadata, RSSFeed } from './dspace-schemas';
 
 const headers = {
   Accept: 'application/json',
@@ -43,7 +43,7 @@ export const find = async (
  * @returns Parsed DSpace RSS feed.
  */
 export const getFeed = async (endpoint: string): Promise<RSSFeed> => {
-  const rawFeed = await got(`${endpoint}/feed/rss_2.0/site`, {
+  const rawFeedXML = await got(`${endpoint}/feed/rss_2.0/site`, {
     headers: {
       ...headers,
       Accept: 'application/xml',
@@ -57,7 +57,9 @@ export const getFeed = async (endpoint: string): Promise<RSSFeed> => {
     };
 
     const parser = new Parser(xmlOpts);
-    parser.parseString(rawFeed, (err: Error, result: RSSFeed) => {
+
+    // Don't assume this is an RSS Feed. See comment below.
+    parser.parseString(rawFeedXML, (err: Error, result: RSSFeed) => {
       if (err) {
         reject(err);
       } else {
@@ -65,6 +67,12 @@ export const getFeed = async (endpoint: string): Promise<RSSFeed> => {
       }
     });
   });
+
+  // TODO: Validate our RSS feed with Zod.
+
+  // This doesn't work. Passthrough still strips fields that aren't defined
+  // in the schema and the test fails.
+  // return rssFeedSchema.passthrough().parse(rawFeed);
 };
 
 export interface GetItemsSearchParams {
