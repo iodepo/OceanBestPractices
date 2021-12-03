@@ -33,7 +33,9 @@ export const documentItemSchema = z.object({
   uuid: z.string().uuid(),
   lastModified: z.string(),
   bitstreams: z.array(bitstreamSchema),
-  terms: z.optional(z.array(documentItemTermSchema)),
+  _bitstreamText: z.string().optional(),
+  _terms: z.array(documentItemTermSchema).optional(),
+  _dc_title: z.string(),
 });
 
 export type DocumentItem = z.infer<typeof documentItemSchema>;

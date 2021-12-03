@@ -2,7 +2,7 @@
   "mappings": {
     "doc": {
       "properties": {
-        "_bitstreamSourceKey": {
+        "_bitstreamTextKey": {
           "type": "keyword"
         },
         "_bitstreamText": {
