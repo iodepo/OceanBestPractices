@@ -1,6 +1,5 @@
-// @ts-check
-const nock = require('nock');
-const dspaceClient = require('./dspace-client');
+import nock from 'nock';
+import * as dspaceClient from './dspace-client';
 
 describe('dspace-client', () => {
   describe('find', () => {
@@ -28,22 +27,80 @@ describe('dspace-client', () => {
   });
 
   describe('getFeed', () => {
-    test('it should return a DSpace RSS Feed', async () => {
-      const mockRSSFeed = `
+    test('it should fetch and parse a DSpace RSS feed', async () => {
+      const mockRawRSSFeed = `
       <?xml version="1.0" encoding="UTF-8"?>
       <rss xmlns:dc="http://purl.org/dc/elements/1.1/" version="2.0">
-        <channel>
-          <title>Unesco OBPS</title>
+          <channel>
+              <title>Mock Unesco OBPS</title>
+              <link>https://repository.oceanbestpractices.org:443</link>
+              <description>Mock description.</description>
+              <pubDate xmlns="http://apache.org/cocoon/i18n/2.1">Wed, 10 Nov 2021 18:00:30 GMT</pubDate>
+              <dc:date>2021-11-10T18:00:30Z</dc:date>
+              <item>
+                  <title>Mock Item 1</title>
+                  <link>https://repository.oceanbestpractices.org/handle/11329/1774</link>
+                  <description>Mock Item 1 Description</description>
+                  <pubDate>Fri, 01 Jan 2021 00:00:00 GMT</pubDate>
+                  <guid isPermaLink="false">https://repository.oceanbestpractices.org/handle/11329/1774</guid>
+                  <dc:date>2021-01-01T00:00:00Z</dc:date>
+              </item>
+              <item>
+                  <title>Mock Item 2</title>
+                  <link>https://repository.oceanbestpractices.org/handle/11329/1772</link>
+                  <description>Mock Item 2 Description&#13;
+This is a new line!
+      </description>
+                  <pubDate>Mon, 01 Jan 2007 00:00:00 GMT</pubDate>
+                  <guid isPermaLink="false">https://repository.oceanbestpractices.org/handle/11329/1772</guid>
+                  <dc:date>2007-01-01T00:00:00Z</dc:date>
+              </item>
           </channel>
-        </rss>
+      </rss>
       `;
 
       nock('https://repository.oceanbestpractices.org')
         .get('/feed/rss_2.0/site')
-        .reply(200, mockRSSFeed);
+        .reply(200, mockRawRSSFeed);
 
       const feed = await dspaceClient.getFeed('https://repository.oceanbestpractices.org');
-      expect(feed).toEqual(mockRSSFeed);
+      expect(feed).toEqual({
+        $: {
+          'xmlns:dc': 'http://purl.org/dc/elements/1.1/',
+          version: '2.0',
+        },
+        channel: [{
+          title: ['Mock Unesco OBPS'],
+          link: ['https://repository.oceanbestpractices.org:443'],
+          description: ['Mock description.'],
+          pubDate: [{
+            _: 'Wed, 10 Nov 2021 18:00:30 GMT',
+            $: { xmlns: 'http://apache.org/cocoon/i18n/2.1' },
+          }],
+          'dc:date': ['2021-11-10T18:00:30Z'],
+          item: [{
+            title: ['Mock Item 1'],
+            link: ['https://repository.oceanbestpractices.org/handle/11329/1774'],
+            description: ['Mock Item 1 Description'],
+            pubDate: ['Fri, 01 Jan 2021 00:00:00 GMT'],
+            guid: [{
+              _: 'https://repository.oceanbestpractices.org/handle/11329/1774',
+              $: { isPermaLink: 'false' },
+            }],
+            'dc:date': ['2021-01-01T00:00:00Z'],
+          }, {
+            title: ['Mock Item 2'],
+            link: ['https://repository.oceanbestpractices.org/handle/11329/1772'],
+            description: ['Mock Item 2 Description\r\nThis is a new line!\n      '],
+            pubDate: ['Mon, 01 Jan 2007 00:00:00 GMT'],
+            guid: [{
+              _: 'https://repository.oceanbestpractices.org/handle/11329/1772',
+              $: { isPermaLink: 'false' },
+            }],
+            'dc:date': ['2007-01-01T00:00:00Z'],
+          }],
+        }],
+      });
     });
   });
 
@@ -134,6 +191,22 @@ describe('dspace-client', () => {
       );
 
       expect(item).toBeUndefined();
+    });
+  });
+
+  describe('getBitstream', () => {
+    test('should return the binary bitstream data', async () => {
+      nock('https://repository.oceanbestpractices.org')
+        .get('/rest/bitstreams/61bf8843-f320-4988-b2ef-4f575616bc87/retrieve')
+        .reply(200, Buffer.from('Mock buffer.', 'utf8'));
+
+      const bitsteamBuffer = await dspaceClient.getBitstream(
+        'https://repository.oceanbestpractices.org',
+        '/rest/bitstreams/61bf8843-f320-4988-b2ef-4f575616bc87/retrieve'
+      );
+
+      const bitstream = bitsteamBuffer.toString('utf8');
+      expect(bitstream).toEqual('Mock buffer.');
     });
   });
 });
