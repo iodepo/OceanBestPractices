@@ -1,31 +1,16 @@
 /* eslint-disable unicorn/no-null */
-import { Bitstream, DSpaceItem } from '../../lib/dspace-types';
+import type { Bitstream, DSpaceItem } from '../../lib/dspace-schemas';
 
 import * as indexer from './indexer';
 
-import * as s3Client from '../../lib/s3-client';
-
-jest.mock('../../lib/s3-client', () => ({
-  getStringObject: jest.fn(),
-}));
-
 describe('indexer', () => {
-  describe('buildDSpaceFields', () => {
-    test('should add a DSpace Item to an existing object', () => {
-      const existingTarget = { foo: 'bar' };
-
+  describe('getDSpaceItemFields', () => {
+    test('should return fields for an existing DSpace item', () => {
       const dspaceItem: DSpaceItem = {
         uuid: 'dbe0240b-403e-49f1-8386-17863ba1285b',
         name: 'OceanSITES Data Format Reference Manual NetCDF Conventions and Reference Tables. Version 1.4. July 16, 2020. [GOOS ENDORSED PRACTICE]',
         handle: '11329/874.2',
         type: 'item',
-        expand: [
-          'all',
-        ],
-        lastModified: '2021-11-15 11:30:57.109',
-        parentCollection: null,
-        parentCollectionList: null,
-        parentCommunityList: null,
         bitstreams: [
           {
             uuid: 'da66b42c-b435-4c47-981c-44da170a1018',

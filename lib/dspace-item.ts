@@ -1,4 +1,4 @@
-import { Bitstream, Metadata } from './dspace-types';
+import { Bitstream, Metadata } from './dspace-schemas';
 
 /**
  * Returns an array of metadata items that match the given key.

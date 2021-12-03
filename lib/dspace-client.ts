@@ -2,11 +2,7 @@
 import got, { HTTPError } from 'got';
 import { Parser } from 'xml2js';
 
-import {
-  DSpaceItem,
-  Metadata,
-  RSSFeed,
-} from './dspace-types';
+import type { DSpaceItem, Metadata, RSSFeed } from './dspace-schemas';
 
 const headers = {
   Accept: 'application/json',
