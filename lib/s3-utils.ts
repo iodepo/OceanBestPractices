@@ -63,7 +63,7 @@ const getObjectBody = async (
   }
 };
 
-const getObjectText = (s3Location: S3ObjectLocation): Promise<string> =>
+export const getObjectText = (s3Location: S3ObjectLocation): Promise<string> =>
   getObjectBody(s3Location).then((b) => b.toString());
 
 export const getObjectJson = (s3Location: S3ObjectLocation): Promise<unknown> =>
