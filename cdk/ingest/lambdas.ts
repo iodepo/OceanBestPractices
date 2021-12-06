@@ -15,7 +15,7 @@ const lambdasPath = path.join(__dirname, '..', '..', 'dist', 'ingest');
 interface LambdasProps {
   buckets: IngestBuckets
   elasticsearchDomain: IDomain
-  scheduleInterval: number
+  feedReadInterval: number
   snsTopics: IngestSnsTopics
   textExtractorFunction: IFunction
   stackName: string
@@ -30,7 +30,7 @@ export default class IngestLambdas extends Construct {
 
   public readonly metadataDownloader: Function;
 
-  public readonly scheduler: Function;
+  public readonly feedIngester: Function;
 
   public readonly indexRectifier: Function;
 
@@ -42,11 +42,13 @@ export default class IngestLambdas extends Construct {
     const {
       buckets,
       elasticsearchDomain,
-      scheduleInterval = 300,
+      feedReadInterval = 300,
       snsTopics,
       stackName,
       textExtractorFunction,
     } = props;
+
+    const dspaceEndpoint = 'https://repository.oceanbestpractices.org';
 
     this.indexer = new Function(this, 'Indexer', {
       functionName: `${stackName}-ingest-indexer`,
@@ -74,6 +76,7 @@ export default class IngestLambdas extends Construct {
       timeout: Duration.minutes(5),
       memorySize: 1024,
       environment: {
+        DSPACE_ENDPOINT: dspaceEndpoint,
         DOCUMENT_BINARY_BUCKET: buckets.documentSource.bucketName,
         INDEXER_FUNCTION_NAME: this.indexer.functionName,
       },
@@ -101,27 +104,29 @@ export default class IngestLambdas extends Construct {
       handler: 'lambda.handler',
       runtime: Runtime.NODEJS_14_X,
       code: Code.fromAsset(path.join(lambdasPath, 'metadata-downloader')),
-      description: 'Downloads the metadata for a given document UID from the OBP API',
+      description: 'Downloads the metadata for a given document UUID from DSpace',
       timeout: Duration.minutes(5),
       environment: {
         DOCUMENT_METADATA_BUCKET: buckets.documentMetadata.bucketName,
+        DSPACE_ENDPOINT: dspaceEndpoint,
       },
     });
     buckets.documentMetadata.grantWrite(this.metadataDownloader);
 
-    this.scheduler = new Function(this, 'Scheduler', {
-      functionName: `${stackName}-ingest-scheduler`,
+    this.feedIngester = new Function(this, 'RSSFeedIngester', {
+      functionName: `${stackName}-ingest-feed-ingester`,
       handler: 'lambda.handler',
       runtime: Runtime.NODEJS_14_X,
-      code: Code.fromAsset(path.join(lambdasPath, 'scheduler')),
+      code: Code.fromAsset(path.join(lambdasPath, 'rss-feed-ingester')),
       description: 'Periodically checks the OBP RSS feed for documents that need indexing.',
       timeout: Duration.minutes(1),
       environment: {
-        DOCUMENT_TOPIC_ARN: snsTopics.availableDocument.topicArn,
-        SCHEDULE_INTERVAL: scheduleInterval.toString(),
+        DSPACE_FEED_READ_INTERVAL: feedReadInterval.toString(),
+        DSPACE_ENDPOINT: dspaceEndpoint,
+        INGEST_TOPIC_ARN: snsTopics.availableDocument.topicArn,
       },
     });
-    snsTopics.availableDocument.grantPublish(this.scheduler);
+    snsTopics.availableDocument.grantPublish(this.feedIngester);
 
     this.indexRectifier = new Function(this, 'IndexRectifier', {
       functionName: `${stackName}-index-rectifier`,
@@ -133,7 +138,7 @@ export default class IngestLambdas extends Construct {
       environment: {
         INGEST_TOPIC_ARN: snsTopics.availableDocument.topicArn,
         OPEN_SEARCH_ENDPOINT: elasticsearchDomain.domainEndpoint,
-        DSPACE_ENDPOINT: 'https://repository.oceanbestpractices.org',
+        DSPACE_ENDPOINT: dspaceEndpoint,
       },
     });
     snsTopics.availableDocument.grantPublish(this.indexRectifier);
@@ -146,7 +151,7 @@ export default class IngestLambdas extends Construct {
       description: 'Queues all documents available in DSpace for ingest.',
       timeout: Duration.minutes(15),
       environment: {
-        DSPACE_ENDPOINT: 'https://repository.oceanbestpractices.org',
+        DSPACE_ENDPOINT: dspaceEndpoint,
         INGEST_TOPIC_ARN: snsTopics.availableDocument.topicArn,
       },
     });

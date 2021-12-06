@@ -1,7 +1,4 @@
-import {
-  Construct,
-  Duration,
-} from '@aws-cdk/core';
+import { Construct, Duration } from '@aws-cdk/core';
 import * as events from '@aws-cdk/aws-events';
 import * as eventTargets from '@aws-cdk/aws-events-targets';
 import { LambdaSubscription } from '@aws-cdk/aws-sns-subscriptions';
@@ -19,7 +16,7 @@ import IngestBuckets from './buckets';
 interface IngestProps {
   openSearch: IDomain
   stackName: string
-  scheduleInterval?: number
+  feedReadInterval?: number
   textExtractorFunction: IFunction
   websiteDistribution: IDistribution
 }
@@ -30,7 +27,7 @@ export default class Ingest extends Construct {
 
     const {
       openSearch,
-      scheduleInterval = 300,
+      feedReadInterval = 300,
       stackName,
       textExtractorFunction,
       websiteDistribution,
@@ -46,16 +43,16 @@ export default class Ingest extends Construct {
     const lambdas = new IngestLambdas(this, 'Lambdas', {
       buckets,
       elasticsearchDomain: openSearch,
-      scheduleInterval,
+      feedReadInterval,
       snsTopics,
       stackName,
       textExtractorFunction,
     });
 
     // Invoke the scheduler function every 5 minutes
-    new events.Rule(this, 'SchedulerEventRule', {
-      schedule: events.Schedule.rate(Duration.seconds(scheduleInterval)),
-      targets: [new eventTargets.LambdaFunction(lambdas.scheduler)],
+    new events.Rule(this, 'FeedReadEventRule', {
+      schedule: events.Schedule.rate(Duration.seconds(feedReadInterval)),
+      targets: [new eventTargets.LambdaFunction(lambdas.feedIngester)],
     });
     // Writes events to the "available document" topic
 
