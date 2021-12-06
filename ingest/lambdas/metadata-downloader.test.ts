@@ -26,12 +26,17 @@ describe('metadata-downloader.handler()', () => {
   });
 
   test('should upload a DSpace item to S3 when a UUID is received from SNS', async () => {
+    const mockItem = {
+      uuid: '38c7d808-aa26-4ed4-a3e4-3458b989d2d4',
+      handle: 'abc/123',
+      bitstreams: [],
+      metadata: [],
+      lastModified: '2021-11-15 11:30:57.109',
+    };
+
     nock('https://dspace.test.com')
       .get('/rest/items/38c7d808-aa26-4ed4-a3e4-3458b989d2d4')
-      .reply(200, {
-        uuid: '38c7d808-aa26-4ed4-a3e4-3458b989d2d4',
-        handle: 'abc/123',
-      });
+      .reply(200, mockItem);
 
     const mockEvent = {
       Records: [
@@ -42,8 +47,15 @@ describe('metadata-downloader.handler()', () => {
         },
       ],
     };
-    const result = await handler(mockEvent);
-    expect(result).toEqual('38c7d808-aa26-4ed4-a3e4-3458b989d2d4');
+    await handler(mockEvent);
+
+    // Check that the object was uploaded to S3.
+    const s3Location = new s3Utils.S3ObjectLocation(
+      dspaceItemBucket,
+      '38c7d808-aa26-4ed4-a3e4-3458b989d2d4.json'
+    );
+    const result = await s3Utils.getObjectJson(s3Location);
+    expect(result).toEqual(mockItem);
   });
 
   test('should throw an error when the a DSpace item with UUID from SNS is not found', async () => {
@@ -68,16 +80,17 @@ describe('metadata-downloader.handler()', () => {
   });
 
   test('should throw an error when the DSpace item fails to upload to S3', async () => {
-    // I think because we're using spyOn here that we're actually calling
-    // putJson but still returning an error. That's ok for a test.
-    const mockPutJson = jest.spyOn(s3Utils, 'putJson');
-    mockPutJson.mockRejectedValueOnce(new Error('Mock S3 failure.'));
+    // Uploading to a non-existent bucket will throw an error.
+    process.env['DOCUMENT_METADATA_BUCKET'] = 'invalid-bucket';
 
     nock('https://dspace.test.com')
       .get('/rest/items/38c7d808-aa26-4ed4-a3e4-3458b989d2d4')
       .reply(200, {
         uuid: '38c7d808-aa26-4ed4-a3e4-3458b989d2d4',
         handle: 'abc/123',
+        bitstreams: [],
+        metadata: [],
+        lastModified: '2021-11-15 11:30:57.109',
       });
 
     const mockEvent = {
@@ -93,6 +106,6 @@ describe('metadata-downloader.handler()', () => {
       handler(mockEvent)
     )
       .rejects
-      .toThrow('Mock S3 failure.');
+      .toThrow('The specified bucket does not exist');
   });
 });

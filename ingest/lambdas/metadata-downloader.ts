@@ -37,8 +37,6 @@ export const handler = async (event: unknown) => {
     );
 
     console.log(`INFO: Successfully uploaded metadata for item: ${dspaceItem.uuid}`);
-
-    return uuid;
   } catch (error) {
     console.log(`ERROR: Failed to upload metadata with error: ${error}`);
     throw error;
