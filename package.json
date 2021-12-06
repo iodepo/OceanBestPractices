@@ -24,7 +24,7 @@
     "lint": "npm run lint:tsc && npm run lint:eslint",
     "lint:eslint": "./bin/eslint-ratchet.sh",
     "lint:eslint:ci": "env CI=true npm run lint:eslint",
-    "lint:tsc": "./bin/eslint-ratchet.sh",
+    "lint:tsc": "./bin/tsc-ratchet.sh",
     "lint:tsc:ci": "env CI=true npm run lint:tsc"
   },
   "dependencies": {

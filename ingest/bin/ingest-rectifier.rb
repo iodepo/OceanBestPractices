@@ -9,7 +9,7 @@ require 'open-uri'
 
 options = {}
 OptionParser.new do |opts|
-  opts.banner = "Usage: create-tag-index.rb [options]"
+  opts.banner = "Usage: ingest-rectifier.rb [options]"
 
   opts.on("-h", "--help", "Displays Help") do |h|
     puts opts

@@ -1,8 +1,9 @@
 import got from 'got';
 import type { APIGatewayProxyEventV2, APIGatewayProxyResult } from 'aws-lambda';
-import { URL } from 'url';
 import { pick } from 'lodash';
+import { URL } from 'url';
 import { getStringFromEnv } from '../../lib/env-utils';
+import { httpsOptions } from '../../lib/got-utils';
 
 const defaultHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -55,19 +56,12 @@ export type PostSparqlEvent = Pick<APIGatewayProxyEventV2, 'body'>;
 export const handler = async (
   event: PostSparqlEvent
 ): Promise<APIGatewayProxyResult> => {
-  let sparqlUrlString: string;
+  let sparqlUrl = '';
   try {
-    sparqlUrlString = getStringFromEnv('SPARQL_URL');
+    sparqlUrl = getStringFromEnv('SPARQL_URL');
+    new URL(sparqlUrl); // eslint-disable-line no-new
   } catch {
-    console.log('SPARQL_URL not set');
-    return internalServerErrorResponse;
-  }
-
-  let sparqlUrl: URL;
-  try {
-    sparqlUrl = new URL(sparqlUrlString);
-  } catch {
-    console.log(`Invalid SPARQL_URL: ${sparqlUrlString}`);
+    console.log(`Invalid SPARQL_URL: "${sparqlUrl}"`);
     return internalServerErrorResponse;
   }
 
@@ -82,9 +76,7 @@ export const handler = async (
     {
       form: { query },
       throwHttpErrors: false,
-      https: {
-        rejectUnauthorized: sparqlUrl.hostname !== 'localhost',
-      },
+      https: httpsOptions(sparqlUrl),
     }
   );
 
