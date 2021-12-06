@@ -6,6 +6,8 @@ const metadataSchema = z.object({
   source: z.string().url(),
   format: BulkLoaderDataFormatSchema,
   namedGraphUri: z.string().url(),
+  ontologyNameSpace: z.string(),
+  terminologyTitle: z.string(),
 });
 
 type Metadata = z.infer<typeof metadataSchema>;

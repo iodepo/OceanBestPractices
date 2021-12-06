@@ -3,6 +3,7 @@ import * as osClient from '../lib/open-search-client';
 import { NeptuneBulkLoaderClient } from './neptune-bulk-loader-client';
 import { getBoolFromEnv, getStringFromEnv } from '../lib/env-utils';
 import { loadMetadata } from './metadata';
+import { indexTerms } from './index-terms';
 
 const createTermsIndex = async (
   esUrl: string,
@@ -42,10 +43,18 @@ export const neptuneBulkLoader = async (): Promise<MainResult> => {
 
   console.log('Metadata:', JSON.stringify(metadata));
 
+  const {
+    format,
+    terminologyTitle,
+    ontologyNameSpace,
+    source,
+    namedGraphUri,
+  } = metadata;
+
   const loadId = await bulkLoaderClient.load({
-    source: metadata.source,
-    format: metadata.format,
-    namedGraphUri: metadata.namedGraphUri,
+    source,
+    format,
+    namedGraphUri,
   });
 
   console.log(`loadId: ${loadId}`);
@@ -55,9 +64,16 @@ export const neptuneBulkLoader = async (): Promise<MainResult> => {
   await createTermsIndex(esUrl, termsIndex);
 
   await osClient.deleteByQuery(esUrl, termsIndex, {
-    match: {
-      graphUri: metadata.namedGraphUri,
-    },
+    match: { namedGraphUri },
+  });
+
+  await indexTerms({
+    elasticsearchUrl: esUrl,
+    ontologyNameSpace,
+    namedGraphUri,
+    terminologyTitle,
+    indexName: termsIndex,
+    sparqlUrl: `${neptuneUrl}/sparql`,
   });
 
   return undefined;

@@ -2,6 +2,7 @@ import got, { Got } from 'got';
 import { z } from 'zod';
 import pWaitFor from 'p-wait-for';
 import { zodTypeGuard } from '../lib/zod-utils';
+import { httpsOptions } from '../lib/got-utils';
 
 export const BulkLoaderDataFormatSchema = z.enum([
   'csv',
@@ -76,9 +77,7 @@ export class NeptuneBulkLoaderClient implements BulkLoaderClient {
       prefixUrl: props.neptuneUrl,
       responseType: 'json',
       throwHttpErrors: false,
-      https: {
-        rejectUnauthorized: !(props.insecureHttps ?? false),
-      },
+      https: httpsOptions(props.neptuneUrl),
     });
   }
 
