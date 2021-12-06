@@ -27,24 +27,18 @@ interface FetchedTerm {
 interface FetchTermsParams {
   offset: number
   sparqlUrl: string
+  sparqlQuery: string
 }
 
 const fetchTerms = async (params: FetchTermsParams): Promise<FetchedTerm[]> => {
   const {
     offset,
     sparqlUrl,
+    sparqlQuery,
   } = params;
 
-  // TODO OBP-290 is going to make this dynamic
   const query = `
-SELECT DISTINCT ?s ?label
-FROM <http://purl.unep.org/sdg/sdgio.owl>
-WHERE {
-  ?s a owl:Class .
-  ?s rdfs:label ?label .
-  FILTER regex(str(?s), "SDGIO_")
-}
-ORDER BY ?label
+${sparqlQuery}
 LIMIT 200
 OFFSET ${offset}`;
 
@@ -145,6 +139,7 @@ interface CreateTermIndexParams {
   indexName: string
   terminologyTitle: string
   sparqlUrl: string
+  sparqlQuery: string
 }
 
 export const indexTerms = async (
@@ -156,6 +151,7 @@ export const indexTerms = async (
     terminologyTitle,
     indexName,
     sparqlUrl,
+    sparqlQuery,
   } = params;
 
   const elasticsearchClient = got4aws({
@@ -173,6 +169,7 @@ export const indexTerms = async (
     terms = await fetchTerms({
       offset,
       sparqlUrl,
+      sparqlQuery,
     });
 
     if (terms.length === 0) break;
