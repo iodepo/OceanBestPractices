@@ -3,6 +3,7 @@ import { handler } from './bitstreams-downloader';
 
 import * as dspaceClient from '../../lib/dspace-client';
 import * as s3Utils from '../../lib/s3-utils';
+// @ts-expect-error Import will be fixed when file is converted to Typescript.
 import lambdaClient from '../../lib/lambda-client';
 
 const dspaceItemBucket = `bucket-${cryptoRandomString({ length: 6 })}`;
