@@ -25,7 +25,7 @@ const shouldQueuePublishedDocuments = (publishedDate, feedReadInterval) => {
 
   // Assuming the last time we checked for an updated feed was feedReadInterval
   // seconds ago, if the published date is newer than that we return true.
-  const feedReadIntervalDate = Date.now() - feedReadInterval;
+  const feedReadIntervalDate = new Date(Date.now() - feedReadInterval);
   return publishedDate >= feedReadIntervalDate;
 };
 

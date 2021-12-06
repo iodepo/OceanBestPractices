@@ -18,15 +18,6 @@ export const metadataSchema = z.object({
 
 export type Metadata = z.infer<typeof metadataSchema>;
 
-// export interface Metadata {
-//   key: string,
-//   value: string,
-//   language: string,
-//   element: string,
-//   qualifier: string | null,
-//   schema: string,
-// }
-
 export const dspaceItemSchema = z.object({
   uuid: z.string().uuid(),
   handle: z.string(),
@@ -36,23 +27,6 @@ export const dspaceItemSchema = z.object({
 }).passthrough();
 
 export type DSpaceItem = z.infer<typeof dspaceItemSchema>;
-
-// export interface DSpaceItem {
-//   uuid: string
-//   name: string
-//   handle: string
-//   type: string
-//   expand: string[]
-//   lastModified: string
-//   bitstreams: Bitstream[]
-//   metadata: Metadata[]
-//   parentCollection: unknown
-//   parentCollectionList: unknown
-//   parentCommunityList: unknown
-//   archived: string
-//   withdrawn: string
-//   link: string
-// }
 
 export const rssFeedSchema = z.object({
   channel: z.array(
