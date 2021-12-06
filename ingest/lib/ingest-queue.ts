@@ -14,7 +14,7 @@ import {
  * @returns Returns the resut of the SNS PublishCommand:
  * https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-sns/interfaces/publishcommandoutput.html
  */
-export const queueIngestDocument = async (
+export const queueIngestDocument = (
   uuid: string,
   ingestTopicArn: string,
   region = 'us-east-1'

@@ -5,8 +5,11 @@ describe('dspace-client', () => {
   describe('find', () => {
     test('it should return a DSpace item for a valid metadata field and value', async () => {
       const mockItems = [{
-        uuid: 'testUUID',
+        uuid: '3cb921a7-edb4-43c0-9324-1e8c3470e3fc',
         handle: '11329/1160',
+        lastModified: '2021-11-01 15:10:17.231',
+        bitstreams: [],
+        metadata: [],
       }];
 
       nock('https://repository.oceanbestpractices.org')
@@ -65,39 +68,16 @@ This is a new line!
 
       const feed = await dspaceClient.getFeed('https://repository.oceanbestpractices.org');
       expect(feed).toEqual({
-        $: {
-          'xmlns:dc': 'http://purl.org/dc/elements/1.1/',
-          version: '2.0',
-        },
         channel: [{
-          title: ['Mock Unesco OBPS'],
-          link: ['https://repository.oceanbestpractices.org:443'],
-          description: ['Mock description.'],
           pubDate: [{
             _: 'Wed, 10 Nov 2021 18:00:30 GMT',
-            $: { xmlns: 'http://apache.org/cocoon/i18n/2.1' },
           }],
-          'dc:date': ['2021-11-10T18:00:30Z'],
           item: [{
-            title: ['Mock Item 1'],
             link: ['https://repository.oceanbestpractices.org/handle/11329/1774'],
-            description: ['Mock Item 1 Description'],
             pubDate: ['Fri, 01 Jan 2021 00:00:00 GMT'],
-            guid: [{
-              _: 'https://repository.oceanbestpractices.org/handle/11329/1774',
-              $: { isPermaLink: 'false' },
-            }],
-            'dc:date': ['2021-01-01T00:00:00Z'],
           }, {
-            title: ['Mock Item 2'],
             link: ['https://repository.oceanbestpractices.org/handle/11329/1772'],
-            description: ['Mock Item 2 Description\r\nThis is a new line!\n      '],
             pubDate: ['Mon, 01 Jan 2007 00:00:00 GMT'],
-            guid: [{
-              _: 'https://repository.oceanbestpractices.org/handle/11329/1772',
-              $: { isPermaLink: 'false' },
-            }],
-            'dc:date': ['2007-01-01T00:00:00Z'],
           }],
         }],
       });
@@ -107,8 +87,11 @@ This is a new line!
   describe('getItem', () => {
     test('should return a DSpace item for a valid UUID', async () => {
       const mockItem = {
-        uuid: 'abc123',
+        uuid: '3cb921a7-edb4-43c0-9324-1e8c3470e3fc',
         handle: '11329/1160',
+        lastModified: '2021-11-01 15:10:17.231',
+        bitstreams: [],
+        metadata: [],
       };
 
       nock('https://repository.oceanbestpractices.org')
@@ -138,12 +121,18 @@ This is a new line!
     test('should return a list of DSpace items', async () => {
       const mockItems = [
         {
-          uuid: 'testUUID1',
+          uuid: '3cb921a7-edb4-43c0-9324-1e8c3470e3fc',
           handle: '11329/1160',
+          lastModified: '2021-11-01 15:10:17.231',
+          bitstreams: [],
+          metadata: [],
         },
         {
-          uuid: 'testUUID2',
+          uuid: 'b4cb7684-86f6-469a-8eee-a4ec09007f98',
           handle: '11329/1160',
+          lastModified: '2021-11-01 15:10:17.231',
+          bitstreams: [],
+          metadata: [],
         },
       ];
 
@@ -163,20 +152,20 @@ This is a new line!
 
   describe('getMetadata', () => {
     test('should return the metadata for a valid UUID', async () => {
-      const mockItem = {
-        uuid: 'abc/123',
-        handle: '11329/1160',
-      };
+      const mockItems = [{
+        key: 'mock.metadata.key',
+        value: 'mock.metadata.value',
+      }];
 
       nock('https://repository.oceanbestpractices.org')
-        .get('/rest/items/abc123/metadata')
-        .reply(200, mockItem);
+        .get('/rest/items/3cb921a7-edb4-43c0-9324-1e8c3470e3fc/metadata')
+        .reply(200, mockItems);
 
       const item = await dspaceClient.getMetadata(
         'https://repository.oceanbestpractices.org',
-        'abc123'
+        '3cb921a7-edb4-43c0-9324-1e8c3470e3fc'
       );
-      expect(item).toEqual(mockItem);
+      expect(item).toEqual(mockItems);
     });
 
     test('should return undefined if the item is not found', async () => {
