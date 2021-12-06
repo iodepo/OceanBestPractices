@@ -3,7 +3,6 @@ import { z } from 'zod';
 import { s3 } from '../../lib/aws-clients';
 import * as dspaceClient from '../../lib/dspace-client';
 import { S3ObjectLocation, safeGetObjectJson } from '../../lib/s3-utils';
-// @ts-expect-error Import will be fixed when file is converted to Typescript.
 import lambdaClient from '../../lib/lambda-client';
 import { dspaceItemSchema } from '../../lib/dspace-schemas';
 import { getStringFromEnv } from '../../lib/env-utils';
