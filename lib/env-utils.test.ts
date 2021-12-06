@@ -1,4 +1,9 @@
-import { getBoolFromEnv, getListFromEnv, getStringFromEnv } from './env-utils';
+import {
+  getBoolFromEnv,
+  getIntFromEnv,
+  getListFromEnv,
+  getStringFromEnv,
+} from './env-utils';
 
 const testVar = 'TEST_VAR';
 
@@ -123,6 +128,45 @@ describe('env-utils', () => {
       it('throws an Error if the environment variable is an invalid value', () => {
         process.env[testVar] = 'ASDF';
         expect(() => getBoolFromEnv(testVar)).toThrow(Error);
+      });
+    });
+  });
+
+  describe('getIntFromEnv', () => {
+    describe('without a default', () => {
+      it('returns the value from the environment if set', () => {
+        process.env[testVar] = '10';
+        expect(getIntFromEnv(testVar)).toBe(10);
+      });
+
+      it('throws an error if the environment variable is not set', () => {
+        expect(() => getIntFromEnv(testVar)).toThrow(Error);
+      });
+
+      it('throws an error if the environment variable is an empty string', () => {
+        process.env[testVar] = '';
+        expect(() => getIntFromEnv(testVar)).toThrow(Error);
+      });
+
+      it('throws an error if the environment variable is an invalid value', () => {
+        process.env[testVar] = 'ASDF';
+        expect(() => getIntFromEnv(testVar)).toThrow(TypeError);
+      });
+    });
+
+    describe('with a default value', () => {
+      it('returns the value from the environment variable if set', () => {
+        process.env[testVar] = '10';
+        expect(getIntFromEnv(testVar)).toBe(10);
+      });
+
+      it('returns the default if the environment variable is not set', () => {
+        expect(getIntFromEnv(testVar, 11)).toBe(11);
+      });
+
+      it('throws an Error if the environment variable is an invalid value', () => {
+        process.env[testVar] = 'ASDF';
+        expect(() => getIntFromEnv(testVar, 10)).toThrow(TypeError);
       });
     });
   });

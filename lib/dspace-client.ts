@@ -1,14 +1,21 @@
-// @ts-check
 import got, { HTTPError } from 'got';
 import { Parser } from 'xml2js';
+import { z } from 'zod';
 
-import { DSpaceItem, Metadata, RSSFeed } from './dspace-schemas';
+import {
+  DSpaceItem,
+  dspaceItemSchema,
+  Metadata,
+  metadataSchema,
+  RSSFeed,
+  rssFeedSchema,
+} from './dspace-schemas';
 
 const headers = {
   Accept: 'application/json',
   'Content-Type': 'application/json',
   'User-Agent': 'Mozilla/5.0 (iPhone; U; CPU iPhone OS 4_3_3 like Mac OS X; en-us) AppleWebKit/533.17.9 (KHTML, like Gecko) Version/5.0.2 Mobile/8J2 Safari/6533.18.5',
-};
+} as const;
 
 /**
  * Searches for DSpace items that match the given metadata field and value.
@@ -23,18 +30,25 @@ export const find = async (
   endpoint: string,
   key: string,
   value: string
-): Promise<DSpaceItem[]> => got.post(`${endpoint}/rest/items/find-by-metadata-field`, {
-  json: {
-    key,
-    value,
-  },
-  searchParams: {
-    expand: 'metadata,bitstreams',
-  },
-  responseType: 'json',
-  resolveBodyOnly: true,
-  headers,
-});
+): Promise<DSpaceItem[]> => {
+  const findItems = await got.post(
+    `${endpoint}/rest/items/find-by-metadata-field`,
+    {
+      json: {
+        key,
+        value,
+      },
+      searchParams: {
+        expand: 'metadata,bitstreams',
+      },
+      responseType: 'json',
+      resolveBodyOnly: true,
+      headers,
+    }
+  );
+
+  return z.array(dspaceItemSchema).parse(findItems);
+};
 
 /**
  * Fetches the DSpace RSS feed.
@@ -51,28 +65,10 @@ export const getFeed = async (endpoint: string): Promise<RSSFeed> => {
     resolveBodyOnly: true,
   });
 
-  return new Promise((resolve, reject) => {
-    const xmlOpts = {
-      explicitRoot: false,
-    };
+  const parser = new Parser({ explicitRoot: false });
+  const rawFeed = await parser.parseStringPromise(rawFeedXML);
 
-    const parser = new Parser(xmlOpts);
-
-    // Don't assume this is an RSS Feed. See comment below.
-    parser.parseString(rawFeedXML, (err: Error, result: RSSFeed) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(result);
-      }
-    });
-  });
-
-  // TODO: Validate our RSS feed with Zod.
-
-  // This doesn't work. Passthrough still strips fields that aren't defined
-  // in the schema and the test fails.
-  // return rssFeedSchema.passthrough().parse(rawFeed);
+  return rssFeedSchema.parse(rawFeed);
 };
 
 export interface GetItemsSearchParams {
@@ -100,7 +96,7 @@ export const getItems = async (
     offset = 0,
   } = searchParams;
 
-  return got.get(`${endpoint}/rest/items`, {
+  const getItemsResponse = await got.get(`${endpoint}/rest/items`, {
     headers,
     searchParams: {
       expand,
@@ -110,6 +106,8 @@ export const getItems = async (
     responseType: 'json',
     resolveBodyOnly: true,
   });
+
+  return z.array(dspaceItemSchema).parse(getItemsResponse);
 };
 
 /**
@@ -128,11 +126,13 @@ export const getItem = async (
   uuid: string
 ): Promise<DSpaceItem | undefined> => {
   try {
-    return await got.get(`${endpoint}/rest/items/${uuid}`, {
+    const getItemResponseBody = await got.get(`${endpoint}/rest/items/${uuid}`, {
       ...headers,
       responseType: 'json',
       resolveBodyOnly: true,
     });
+
+    return dspaceItemSchema.parse(getItemResponseBody);
   } catch (error) {
     if (error instanceof HTTPError && error.response.statusCode === 404) {
       return undefined;
@@ -158,11 +158,13 @@ export const getMetadata = async (
   uuid: string
 ): Promise<Metadata[] | undefined> => {
   try {
-    return await got.get(`${endpoint}/rest/items/${uuid}/metadata`, {
+    const getMetadataResponseBody = await got.get(`${endpoint}/rest/items/${uuid}/metadata`, {
       headers,
       responseType: 'json',
       resolveBodyOnly: true,
     });
+
+    return z.array(metadataSchema).parse(getMetadataResponseBody);
   } catch (error) {
     if (error instanceof HTTPError && error.response.statusCode === 404) {
       return undefined;

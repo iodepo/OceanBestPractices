@@ -1,17 +1,12 @@
 /* eslint-disable import/no-unresolved, import/extensions */
-// @ts-check
 const pMap = require('p-map');
 
 const dspaceClient = require('../../lib/dspace-client');
 const ingestQueue = require('../lib/ingest-queue');
-const { getStringFromEnv } = require('../../lib/env-utils');
-
-const dspaceFeedReadInterval = process.env.DSPACE_FEED_READ_INTERVAL
-  ? Number.parseInt(process.env.DSPACE_FEED_READ_INTERVAL)
-  : 300;
+const { getIntFromEnv, getStringFromEnv } = require('../../lib/env-utils');
 
 /**
- * Returns a boolean indiciting whether or not we shoudl publish documents
+ * Returns a boolean indicating whether or not we should publish documents
  * from the RSS feed based on when the RSS feed was published and the
  * last time we checked it. Set the `feedReadInterval` to -1 to always
  * pass this test.
@@ -28,9 +23,9 @@ const shouldQueuePublishedDocuments = (publishedDate, feedReadInterval) => {
     return true;
   }
 
-  const feedReadIntervalDate = new Date();
-  feedReadIntervalDate.setSeconds(feedReadInterval * -1);
-
+  // Assuming the last time we checked for an updated feed was feedReadInterval
+  // seconds ago, if the published date is newer than that we return true.
+  const feedReadIntervalDate = Date.now() - feedReadInterval;
   return publishedDate >= feedReadIntervalDate;
 };
 
@@ -43,6 +38,7 @@ const shouldQueuePublishedDocuments = (publishedDate, feedReadInterval) => {
 const handler = async () => {
   const dspaceEndpoint = getStringFromEnv('DSPACE_ENDPOINT');
   const ingestTopicArn = getStringFromEnv('INGEST_TOPIC_ARN');
+  const dspaceFeedReadInterval = getIntFromEnv('DSPACE_FEED_READ_INTERVAL', 300);
 
   try {
     // Fetch the RSS feed from DSpace.
@@ -86,6 +82,7 @@ const handler = async () => {
     );
   } catch (error) {
     console.log(`ERROR: Failed to fetch or parse DSpace RSS feed with error: ${error}`);
+    throw error;
   }
 };
 
