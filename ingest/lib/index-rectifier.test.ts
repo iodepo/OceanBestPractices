@@ -80,6 +80,7 @@ describe('index-rectifier', () => {
             checkSum: {
               value: 'f91a9870078dc75784288b41be5f1911',
             },
+            retrieveLink: 'retrieveLink',
           },
         ],
       };
@@ -94,6 +95,7 @@ describe('index-rectifier', () => {
               checkSum: {
                 value: 'f91a9870078dc75784288b41be5f1911',
               },
+              retrieveLink: 'retrieveLink',
             },
           ],
         },
@@ -116,6 +118,7 @@ describe('index-rectifier', () => {
               value: 'f91a9870078dc75784288b41be5f1912',
               checkSumAlgorithm: 'MD5',
             },
+            retrieveLink: 'retrieveLink',
           },
         ],
       };
@@ -134,6 +137,7 @@ describe('index-rectifier', () => {
                 value: 'f91a9870078dc75784288b41be5f1911',
                 checkSumAlgorithm: 'MD5',
               },
+              retrieveLink: 'retrieveLink',
             },
           ],
         },
@@ -156,6 +160,7 @@ describe('index-rectifier', () => {
               value: 'f91a9870078dc75784288b41be5f1911',
               checkSumAlgorithm: 'MD5',
             },
+            retrieveLink: 'retrieveLink',
           },
         ],
       };
@@ -174,6 +179,7 @@ describe('index-rectifier', () => {
                 value: 'f91a9870078dc75784288b41be5f1911',
                 checkSumAlgorithm: 'MD5',
               },
+              retrieveLink: 'retrieveLink',
             },
           ],
         },
@@ -188,8 +194,10 @@ describe('index-rectifier', () => {
       const mockIndexItem1 = {
         _id: '1',
         _source: {
-          uuid: 'a',
+          uuid: '3fdfb55d-6ddb-4a1d-b880-fda542c1529b',
           lastModified: '2021-10-25 12:31:38.543',
+          handle: 'handle/123',
+          _dc_title: 'Index Item 1',
           bitstreams: [
             {
               bundleName: 'ORIGINAL',
@@ -199,16 +207,20 @@ describe('index-rectifier', () => {
               checkSum: {
                 value: 'abc',
               },
+              retrieveLink: 'retrieveLink',
             },
           ],
+          metadata: [],
         },
       };
 
       const mockIndexItem2 = {
         _id: '2',
         _source: {
-          uuid: 'b',
+          uuid: '66e3b2a3-fd2f-4300-9d1c-d0836b4e0a8d',
           lastModified: '2021-9-25 12:31:38.543',
+          handle: 'handle/123',
+          _dc_title: 'Index Item 2',
           bitstreams: [
             {
               bundleName: 'ORIGINAL',
@@ -218,16 +230,20 @@ describe('index-rectifier', () => {
               checkSum: {
                 value: 'abc',
               },
+              retrieveLink: 'retrieveLink',
             },
           ],
+          metadata: [],
         },
       };
 
       const mockIndexItem3 = {
         _id: '3',
         _source: {
-          uuid: 'c',
+          uuid: 'd013b8a0-718f-49ea-b30d-6788cba8292b',
           lastModified: '2021-8-25 12:31:38.543',
+          handle: 'handle/123',
+          _dc_title: 'Index Item 3',
           bitstreams: [
             {
               bundleName: 'ORIGINAL',
@@ -237,16 +253,20 @@ describe('index-rectifier', () => {
               checkSum: {
                 value: 'abc',
               },
+              retrieveLink: 'retrieveLink',
             },
           ],
+          metadata: [],
         },
       };
 
       const mockIndexItem4 = {
         _id: '4',
         _source: {
-          uuid: 'd',
+          uuid: 'dea11c14-1e9a-4ba2-8dbe-e6f9b7adeccb',
           lastModified: '2021-8-25 12:31:38.543',
+          handle: 'handle/123',
+          _dc_title: 'Index Item 4',
           bitstreams: [
             {
               bundleName: 'ORIGINAL',
@@ -256,8 +276,10 @@ describe('index-rectifier', () => {
               checkSum: {
                 value: 'abc',
               },
+              retrieveLink: 'retrieveLink',
             },
           ],
+          metadata: [],
         },
       };
 
@@ -294,8 +316,9 @@ describe('index-rectifier', () => {
       }));
 
       const mockDSpaceItem1 = {
-        uuid: 'a',
+        uuid: '3fdfb55d-6ddb-4a1d-b880-fda542c1529b',
         lastModified: '2021-10-27 17:52:15.515', // Updated via lastModified.
+        handle: 'handle/123',
         bitstreams: [
           {
             bundleName: 'ORIGINAL',
@@ -305,13 +328,16 @@ describe('index-rectifier', () => {
             checkSum: {
               value: 'abc',
             },
+            retrieveLink: 'retrieveLink',
           },
         ],
+        metadata: [],
       };
 
       const mockDSpaceItem2 = {
-        uuid: 'b',
+        uuid: '66e3b2a3-fd2f-4300-9d1c-d0836b4e0a8d',
         lastModified: '2021-9-25 12:31:38.543',
+        handle: 'handle/123',
         bitstreams: [
           {
             bundleName: 'ORIGINAL',
@@ -321,14 +347,17 @@ describe('index-rectifier', () => {
             checkSum: {
               value: 'cde', // Updated via PDF bistream checkSum.
             },
+            retrieveLink: 'retrieveLink',
           },
         ],
+        metadata: [],
       };
 
       // Not updated.
       const mockDSpaceItem3 = {
-        uuid: 'c',
+        uuid: 'd013b8a0-718f-49ea-b30d-6788cba8292b',
         lastModified: '2021-8-25 12:31:38.543',
+        handle: 'handle/123',
         bitstreams: [
           {
             bundleName: 'ORIGINAL',
@@ -338,8 +367,10 @@ describe('index-rectifier', () => {
             checkSum: {
               value: 'abc',
             },
+            retrieveLink: 'retrieveLink',
           },
         ],
+        metadata: [],
       };
 
       (dspaceClient.getItem as jest.Mock)
@@ -353,8 +384,8 @@ describe('index-rectifier', () => {
       const result = await ir.diff(mockOpenSearchEndpoint, mockDSpaceEndpoint);
 
       expect(result).toEqual({
-        updated: ['a', 'b'],
-        removed: ['d'],
+        updated: ['3fdfb55d-6ddb-4a1d-b880-fda542c1529b', '66e3b2a3-fd2f-4300-9d1c-d0836b4e0a8d'],
+        removed: ['dea11c14-1e9a-4ba2-8dbe-e6f9b7adeccb'],
       });
 
       expect(osClient.openScroll).toHaveBeenCalledTimes(1);

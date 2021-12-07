@@ -3,10 +3,12 @@
 import pMap from 'p-map';
 
 import * as dspaceClient from '../../lib/dspace-client';
-import { DSpaceItem } from '../../lib/dspace-types';
+import { DSpaceItem } from '../../lib/dspace-schemas';
 import * as osClient from '../../lib/open-search-client';
-import { DocumentItem } from '../../lib/open-search-schemas';
-import { openSearchScrollDocumentsResponseSchema } from '../../lib/schemas';
+import {
+  DocumentItem,
+  openSearchScrollDocumentsResponseSchema,
+} from '../../lib/open-search-schemas';
 import { queueIngestDocument } from './ingest-queue';
 
 /**
