@@ -439,32 +439,6 @@ describe('dspace-item', () => {
     });
   });
 
-  describe('findBitstreamItem', () => {
-    test('should return a bitstream item for the given bundle name and mime type', () => {
-      const bitstreamItem = dspaceItem.findBitstreamItem(
-        dspaceResponseObject.bitstreams,
-        'ORIGINAL',
-        'application/pdf'
-      );
-
-      // Helps typescript know this isn't undefined in the other expects.
-      if (bitstreamItem === undefined) {
-        fail('Bitstream is undefined');
-      }
-      expect(bitstreamItem.retrieveLink).toEqual('/rest/bitstreams/a7df78b6-9d29-4919-a920-c1bddf7be7b0/retrieve');
-    });
-
-    test('should return undefined if no bitstream item is found', () => {
-      const bitstreamItem = dspaceItem.findBitstreamItem(
-        dspaceResponseObject.bitstreams,
-        'WHOOP THERE',
-        'it/is'
-      );
-
-      expect(bitstreamItem).toBeUndefined();
-    });
-  });
-
   describe('thumbnailBitstreamItem', () => {
     test('should return the thumbnail bitstream item', () => {
       const thumbnailBitstreamItem = dspaceItem.findThumbnailBitstreamItem(

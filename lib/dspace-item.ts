@@ -1,3 +1,4 @@
+import { find, filter } from 'lodash/fp';
 import { Bitstream, Metadata } from './dspace-schemas';
 
 /**
@@ -11,26 +12,7 @@ import { Bitstream, Metadata } from './dspace-schemas';
 export const findMetadataItems = (
   metadataItems: Metadata[],
   key: string
-): Metadata[] => metadataItems.filter((m) => m.key === key);
-
-/**
-   * Finds the first bistream item that matches the given bundle name
-   * and mimetype.
-   *
-   * @param bitstreams - List of bitstream items to search.
-   * @param bundleName - The DSpace bitstream bundle name.
-   * @param mimeType - The mimeType of the bitstream item.
-   * @returns The bitstream item that matches the given
-   * bundle name and mime type. Returns undefined if no matching bitstream
-   * is found.
-   */
-export const findBitstreamItem = (
-  bitstreamItems: Bitstream[],
-  bundleName: string,
-  mimeType: string
-): Bitstream | undefined => bitstreamItems.find((b) => (
-  b.bundleName === bundleName && b.mimeType === mimeType
-));
+): Metadata[] => filter({ key }, metadataItems);
 
 /**
    * Bitstream item that represents the thumbnail.
@@ -38,12 +20,11 @@ export const findBitstreamItem = (
    * @returns The bitstream item for the thumbnail or undefined
    * if none is found.
    */
-export const findThumbnailBitstreamItem = (
-  bitstreams: Bitstream[]
-): Bitstream | undefined => findBitstreamItem(
-  bitstreams,
-  'THUMBNAIL',
-  'image/jpeg'
+export const findThumbnailBitstreamItem = find<Bitstream>(
+  {
+    bundleName: 'THUMBNAIL',
+    mimeType: 'image/jpeg',
+  }
 );
 
 /**
@@ -51,10 +32,9 @@ export const findThumbnailBitstreamItem = (
    * @param bitstreams - List of bitstreams to search.
    * @returns The bitstream item for the PDF or undefined if none is found.
    */
-export const findPDFBitstreamItem = (
-  bitstreams: Bitstream[]
-): Bitstream | undefined => findBitstreamItem(
-  bitstreams,
-  'ORIGINAL',
-  'application/pdf'
+export const findPDFBitstreamItem = find<Bitstream>(
+  {
+    bundleName: 'ORIGINAL',
+    mimeType: 'application/pdf',
+  }
 );

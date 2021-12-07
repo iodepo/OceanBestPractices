@@ -1,7 +1,7 @@
-const { LambdaClient, InvokeCommand } = require('@aws-sdk/client-lambda');
-const { mockClient } = require('aws-sdk-client-mock');
-const { TextEncoder } = require('util');
-const lambdaClient = require('./lambda-client');
+import { LambdaClient, InvokeCommand } from '@aws-sdk/client-lambda';
+import { mockClient } from 'aws-sdk-client-mock';
+import { TextEncoder } from 'util';
+import * as lambdaClient from './lambda-client';
 
 const mockLambda = mockClient(LambdaClient);
 
@@ -11,7 +11,7 @@ describe('lambda-client', () => {
       mockLambda.on(
         InvokeCommand
       )
-        .resolves({ status: 'Success' });
+        .resolves({ StatusCode: 200 });
 
       await lambdaClient.invoke('mockFunction', 'Event', { mock: 'payload' });
 

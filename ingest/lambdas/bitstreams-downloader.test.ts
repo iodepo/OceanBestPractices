@@ -3,13 +3,17 @@ import { handler } from './bitstreams-downloader';
 
 import * as dspaceClient from '../../lib/dspace-client';
 import * as s3Utils from '../../lib/s3-utils';
-import lambdaClient from '../../lib/lambda-client';
+import * as lambdaClient from '../../lib/lambda-client';
 
 const dspaceItemBucket = `bucket-${cryptoRandomString({ length: 6 })}`;
 const bitstreamSourceBucket = `bucket-${cryptoRandomString({ length: 6 })}`;
 
 jest.mock('../../lib/dspace-client', () => ({
   getBitstream: jest.fn(),
+}));
+
+jest.mock('../../lib/lambda-client', () => ({
+  invoke: jest.fn(),
 }));
 
 describe('bitstreams-downloader.handler', () => {
@@ -115,8 +119,6 @@ describe('bitstreams-downloader.handler', () => {
         ],
       }
     );
-
-    lambdaClient.invoke = jest.fn();
 
     const mockEvent = {
       Records: [
