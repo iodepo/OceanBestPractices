@@ -70,18 +70,6 @@ PUT terms
 }
 ```
 
-Assuming you have the ontologies and vocabularies configured in Virtuoso (see [Virtuoso.md](./Virtuoso.md) for more instructions) you can use helper scripts to populate the percolator index. The [create-tag-index.rb](./ingest/percolator/create-tag-index.rb) will execute a SPARQL command to fetch relevant terms from a Virtuoso graph and populate the terms index. For example, if you wanted to populate the index with terms from the graph `http://purl.obolibrary.org/obo/envo.owl` you could run:
-
-```
-> ./create-tag-index.rb -n 'ENVO' -t 'Environmental Ontology' -g '<http://purl.obolibrary.org/obo/envo.owl>' -e ../../env.iode.json
-```
-
-If you forget how to run the command you can list the available options by executing:
-
-```
-> ./create-tag-index.rb -h
-```
-
 ### Indexing a Document
 
 #### Manual Document Index

@@ -3,6 +3,8 @@ import type S3 from 'aws-sdk/clients/s3';
 import pMap from 'p-map';
 import { s3 } from './aws-clients';
 
+export const s3ObjectUrlRegex = new RegExp('^s3://([^/]+)/(.*[^/])$');
+
 export class S3ObjectLocation {
   public readonly bucket: string;
 
@@ -25,9 +27,7 @@ export class S3ObjectLocation {
   }
 
   static fromS3Url(url: string) {
-    const s3UrlRegex = new RegExp('^s3://([^/]+)/(.*[^/])$');
-
-    const match = s3UrlRegex.exec(url);
+    const match = s3ObjectUrlRegex.exec(url);
 
     if (match === null) throw new TypeError(`Invalid S3 Object URL: ${url}`);
 

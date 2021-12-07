@@ -2,6 +2,8 @@ import got, { Got } from 'got';
 import { z } from 'zod';
 import pWaitFor from 'p-wait-for';
 import { zodTypeGuard } from '../lib/zod-utils';
+import { httpsOptions } from '../lib/got-utils';
+import { S3ObjectLocation } from '../lib/s3-utils';
 
 export const BulkLoaderDataFormatSchema = z.enum([
   'csv',
@@ -21,7 +23,7 @@ interface NeptuneBulkLoaderClientProps {
 }
 
 interface LoadParams {
-  source: string
+  source: S3ObjectLocation
   format: BulkLoaderDataFormat
   namedGraphUri: string
 }
@@ -76,9 +78,7 @@ export class NeptuneBulkLoaderClient implements BulkLoaderClient {
       prefixUrl: props.neptuneUrl,
       responseType: 'json',
       throwHttpErrors: false,
-      https: {
-        rejectUnauthorized: !(props.insecureHttps ?? false),
-      },
+      https: httpsOptions(props.neptuneUrl),
     });
   }
 
@@ -89,7 +89,7 @@ export class NeptuneBulkLoaderClient implements BulkLoaderClient {
       'loader',
       {
         json: {
-          source,
+          source: source.url,
           format,
           iamRoleArn: this.iamRoleArn,
           region: this.region,

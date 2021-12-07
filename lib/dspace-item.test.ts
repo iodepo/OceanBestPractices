@@ -1,22 +1,7 @@
 /* eslint-disable unicorn/no-null */
-// eslint-disable-next-line import/no-unresolved
-const DSpaceItem = require('./dspace-item');
+import * as dspaceItem from './dspace-item';
 
 const dspaceResponseObject = {
-  uuid: '38c7d808-aa26-4ed4-a3e4-3458b989d2d4',
-  name: 'Long-term intercomparison of two pCO2.',
-  handle: '11329/1766',
-  type: 'item',
-  expand: [
-    'parentCollection',
-    'parentCollectionList',
-    'parentCommunityList',
-    'all',
-  ],
-  lastModified: '2021-11-01 15:10:17.231',
-  parentCollection: null,
-  parentCollectionList: null,
-  parentCommunityList: null,
   bitstreams: [
     {
       uuid: 'a7df78b6-9d29-4919-a920-c1bddf7be7b0',
@@ -144,9 +129,6 @@ const dspaceResponseObject = {
       link: '/rest/bitstreams/5940f3b4-5dd3-4230-ae4e-28b2e2b47339',
     },
   ],
-  archived: 'true',
-  withdrawn: 'false',
-  link: '/rest/items/38c7d808-aa26-4ed4-a3e4-3458b989d2d4',
   metadata: [
     {
       key: 'dc.contributor.author',
@@ -431,63 +413,57 @@ const dspaceResponseObject = {
   ],
 };
 
-describe('DSpaceItem', () => {
-  describe('constructor', () => {
-    test('should assign the given options', () => {
-      const dspaceItem = new DSpaceItem(dspaceResponseObject);
-      expect(dspaceItem.handle).toEqual('11329/1766');
-      expect(dspaceItem.uuid).toEqual('38c7d808-aa26-4ed4-a3e4-3458b989d2d4');
-    });
-  });
-
+describe('dspace-item', () => {
   describe('findMetadataItems', () => {
     test('should return a list matching a single metadata item', () => {
-      const dspaceItem = new DSpaceItem(dspaceResponseObject);
-      const [titleMetadata] = dspaceItem.findMetadataItems('dc.title');
+      const [titleMetadata] = dspaceItem.findMetadataItems(
+        dspaceResponseObject.metadata,
+        'dc.title'
+      );
 
+      // Helps typescript know this isn't undefined in the other expects.
+      if (titleMetadata === undefined) {
+        fail('Title metadata is undefined');
+      }
       expect(titleMetadata.key).toEqual('dc.title');
       expect(titleMetadata.value).toEqual('Long-term intercomparison of two pCO2 instruments.');
     });
 
     test('should return a list matching multiple metadata items', () => {
-      const dspaceItem = new DSpaceItem(dspaceResponseObject);
-      const authors = dspaceItem.findMetadataItems('dc.contributor.author');
+      const authors = dspaceItem.findMetadataItems(
+        dspaceResponseObject.metadata,
+        'dc.contributor.author'
+      );
 
       expect(authors.length).toEqual(5);
     });
   });
 
-  describe('findBitstreamItem', () => {
-    test('should return a bitstream item for the given bundle name and mime type', () => {
-      const dspaceItem = new DSpaceItem(dspaceResponseObject);
-      const bitstreamItem = dspaceItem.findBitstreamItem('ORIGINAL', 'application/pdf');
-
-      expect(bitstreamItem.uuid).toEqual('a7df78b6-9d29-4919-a920-c1bddf7be7b0');
-    });
-
-    test('should return undefined if no bitstream item is found', () => {
-      const dspaceItem = new DSpaceItem(dspaceResponseObject);
-      const bitstreamItem = dspaceItem.findBitstreamItem('WHOOP THERE', 'it/is');
-
-      expect(bitstreamItem).toBeUndefined();
-    });
-  });
-
   describe('thumbnailBitstreamItem', () => {
     test('should return the thumbnail bitstream item', () => {
-      const dspaceItem = new DSpaceItem(dspaceResponseObject);
-      const { thumbnailBitstreamItem } = dspaceItem;
+      const thumbnailBitstreamItem = dspaceItem.findThumbnailBitstreamItem(
+        dspaceResponseObject.bitstreams
+      );
 
-      expect(thumbnailBitstreamItem.uuid).toEqual('5940f3b4-5dd3-4230-ae4e-28b2e2b47339');
+      // Helps typescript know this isn't undefined in the other expects.
+      if (thumbnailBitstreamItem === undefined) {
+        fail('Thumbnail bitstream is undefined');
+      }
+      expect(thumbnailBitstreamItem.retrieveLink).toEqual('/rest/bitstreams/5940f3b4-5dd3-4230-ae4e-28b2e2b47339/retrieve');
     });
   });
 
   describe('pdfBitstreamItem', () => {
     test('should return the pdf bitstream item', () => {
-      const dspaceItem = new DSpaceItem(dspaceResponseObject);
-      const { pdfBitstreamItem } = dspaceItem;
+      const pdfBitstreamItem = dspaceItem.findPDFBitstreamItem(
+        dspaceResponseObject.bitstreams
+      );
 
-      expect(pdfBitstreamItem.uuid).toEqual('a7df78b6-9d29-4919-a920-c1bddf7be7b0');
+      // Helps typescript know this isn't undefined in the other expects.
+      if (pdfBitstreamItem === undefined) {
+        fail('PDF bitstream is undefined');
+      }
+      expect(pdfBitstreamItem.retrieveLink).toEqual('/rest/bitstreams/a7df78b6-9d29-4919-a920-c1bddf7be7b0/retrieve');
     });
   });
 });

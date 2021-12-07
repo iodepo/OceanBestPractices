@@ -52,3 +52,23 @@ export const getBoolFromEnv = (key: string, def?: boolean): boolean => {
 
   throw new TypeError(`Invalid boolean for ${key}: "${value}`);
 };
+
+/**
+ * Get an integer from an environment variable, with an optional default.
+ */
+export const getIntFromEnv = (key: string, def?: number): number => {
+  let valueString: string;
+  try {
+    valueString = getStringFromEnv(key);
+  } catch (error) {
+    if (def !== undefined) return def;
+    throw error;
+  }
+
+  const valueNumber = Number.parseInt(valueString);
+  if (Number.isNaN(valueNumber)) {
+    throw new TypeError(`${key} is not a valid number.`);
+  }
+
+  return valueNumber;
+};

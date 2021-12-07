@@ -48,6 +48,8 @@ export default class IngestLambdas extends Construct {
       textExtractorFunction,
     } = props;
 
+    const dspaceEndpoint = 'https://repository.oceanbestpractices.org';
+
     this.indexer = new Function(this, 'Indexer', {
       functionName: `${stackName}-ingest-indexer`,
       handler: 'lambda.handler',
@@ -74,7 +76,11 @@ export default class IngestLambdas extends Construct {
       timeout: Duration.minutes(5),
       memorySize: 1024,
       environment: {
+<<<<<<< HEAD
         DSPACE_ENDPOINT: 'https://repository.oceanbestpractices.org',
+=======
+        DSPACE_ENDPOINT: dspaceEndpoint,
+>>>>>>> bitstream-downloader-refactor
         DOCUMENT_BINARY_BUCKET: buckets.documentSource.bucketName,
         INDEXER_FUNCTION_NAME: this.indexer.functionName,
       },
@@ -106,7 +112,11 @@ export default class IngestLambdas extends Construct {
       timeout: Duration.minutes(5),
       environment: {
         DOCUMENT_METADATA_BUCKET: buckets.documentMetadata.bucketName,
+<<<<<<< HEAD
         DSPACE_ENDPOINT: 'https://repository.oceanbestpractices.org',
+=======
+        DSPACE_ENDPOINT: dspaceEndpoint,
+>>>>>>> bitstream-downloader-refactor
       },
     });
     buckets.documentMetadata.grantWrite(this.metadataDownloader);
@@ -120,7 +130,11 @@ export default class IngestLambdas extends Construct {
       timeout: Duration.minutes(1),
       environment: {
         DSPACE_FEED_READ_INTERVAL: feedReadInterval.toString(),
+<<<<<<< HEAD
         DSPACE_ENDPOINT: 'https://repository.oceanbestpractices.org',
+=======
+        DSPACE_ENDPOINT: dspaceEndpoint,
+>>>>>>> bitstream-downloader-refactor
         INGEST_TOPIC_ARN: snsTopics.availableDocument.topicArn,
       },
     });
@@ -136,7 +150,7 @@ export default class IngestLambdas extends Construct {
       environment: {
         INGEST_TOPIC_ARN: snsTopics.availableDocument.topicArn,
         OPEN_SEARCH_ENDPOINT: elasticsearchDomain.domainEndpoint,
-        DSPACE_ENDPOINT: 'https://repository.oceanbestpractices.org',
+        DSPACE_ENDPOINT: dspaceEndpoint,
       },
     });
     snsTopics.availableDocument.grantPublish(this.indexRectifier);
@@ -149,7 +163,7 @@ export default class IngestLambdas extends Construct {
       description: 'Queues all documents available in DSpace for ingest.',
       timeout: Duration.minutes(15),
       environment: {
-        DSPACE_ENDPOINT: 'https://repository.oceanbestpractices.org',
+        DSPACE_ENDPOINT: dspaceEndpoint,
         INGEST_TOPIC_ARN: snsTopics.availableDocument.topicArn,
       },
     });
