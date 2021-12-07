@@ -283,9 +283,9 @@ describe('open-search-client', () => {
       };
 
       const documentItem = {
-        uuid: 'abc',
-        contents: 'This is some sample content.',
-        name: 'This is a sample name.',
+        uuid: 'cf05c46d-e1aa-4d95-bf44-4e9c0aaa7a37',
+        bitstreamText: 'This is some sample content.',
+        handle: 'handle/123',
         metadata: [{
           key: 'dc.contributor.author',
           value: 'Macovei, Vlad A.',
@@ -296,10 +296,14 @@ describe('open-search-client', () => {
         }],
         lastModified: '2021-11-01 15:10:17.231',
         bitstreams: [],
+        _dc_title: 'This is a sample name.',
       };
 
       nock('https://open-search.example.com')
-        .post('/documents/doc/abc', documentItem)
+        .post(
+          '/documents/doc/cf05c46d-e1aa-4d95-bf44-4e9c0aaa7a37',
+          documentItem
+        )
         .reply(201, mockPutDocumentItemResponse);
 
       const result = await osClient.putDocumentItem(
