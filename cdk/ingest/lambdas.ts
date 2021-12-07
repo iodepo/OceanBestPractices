@@ -76,11 +76,7 @@ export default class IngestLambdas extends Construct {
       timeout: Duration.minutes(5),
       memorySize: 1024,
       environment: {
-<<<<<<< HEAD
-        DSPACE_ENDPOINT: 'https://repository.oceanbestpractices.org',
-=======
         DSPACE_ENDPOINT: dspaceEndpoint,
->>>>>>> bitstream-downloader-refactor
         DOCUMENT_BINARY_BUCKET: buckets.documentSource.bucketName,
         INDEXER_FUNCTION_NAME: this.indexer.functionName,
       },
@@ -112,11 +108,7 @@ export default class IngestLambdas extends Construct {
       timeout: Duration.minutes(5),
       environment: {
         DOCUMENT_METADATA_BUCKET: buckets.documentMetadata.bucketName,
-<<<<<<< HEAD
-        DSPACE_ENDPOINT: 'https://repository.oceanbestpractices.org',
-=======
         DSPACE_ENDPOINT: dspaceEndpoint,
->>>>>>> bitstream-downloader-refactor
       },
     });
     buckets.documentMetadata.grantWrite(this.metadataDownloader);
@@ -130,11 +122,7 @@ export default class IngestLambdas extends Construct {
       timeout: Duration.minutes(1),
       environment: {
         DSPACE_FEED_READ_INTERVAL: feedReadInterval.toString(),
-<<<<<<< HEAD
-        DSPACE_ENDPOINT: 'https://repository.oceanbestpractices.org',
-=======
         DSPACE_ENDPOINT: dspaceEndpoint,
->>>>>>> bitstream-downloader-refactor
         INGEST_TOPIC_ARN: snsTopics.availableDocument.topicArn,
       },
     });
