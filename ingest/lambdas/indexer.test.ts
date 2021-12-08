@@ -315,7 +315,7 @@ describe('indexer', () => {
                 uuid: 'da66b42c-b435-4c47-981c-44da170a1018',
                 name: 'oceansites_data_format_reference_manual.pdf',
                 bundleName: 'THUMBNAIL',
-                mimeType: 'image/jpg',
+                mimeType: 'image/jpeg',
                 retrieveLink: '/rest/bitstreams/da66b42c-b435-4c47-981c-44da170a1018/retrieve',
                 checkSum: {
                   value: '6a45c8850908937a88f18e9a87674393',
@@ -359,7 +359,7 @@ describe('indexer', () => {
                 uuid: 'da66b42c-b435-4c47-981c-44da170a1018',
                 name: 'oceansites_data_format_reference_manual.pdf',
                 bundleName: 'THUMBNAIL',
-                mimeType: 'image/jpg',
+                mimeType: 'image/jpeg',
                 retrieveLink: '/rest/bitstreams/da66b42c-b435-4c47-981c-44da170a1018/retrieve',
                 checkSum: {
                   value: '6a45c8850908937a88f18e9a87674393',
@@ -393,7 +393,7 @@ describe('indexer', () => {
                 uuid: 'da66b42c-b435-4c47-981c-44da170a1018',
                 name: 'oceansites_data_format_reference_manual.pdf',
                 bundleName: 'THUMBNAIL',
-                mimeType: 'image/jpg',
+                mimeType: 'image/jpeg',
                 retrieveLink: '/rest/bitstreams/da66b42c-b435-4c47-981c-44da170a1018/retrieve',
                 checkSum: {
                   value: '6a45c8850908937a88f18e9a87674393',
@@ -535,7 +535,7 @@ describe('indexer', () => {
                 uuid: 'da66b42c-b435-4c47-981c-44da170a1018',
                 name: 'oceansites_data_format_reference_manual.pdf',
                 bundleName: 'THUMBNAIL',
-                mimeType: 'image/jpg',
+                mimeType: 'image/jpeg',
                 retrieveLink: '/rest/bitstreams/da66b42c-b435-4c47-981c-44da170a1018/retrieve',
                 checkSum: {
                   value: '6a45c8850908937a88f18e9a87674393',
@@ -569,7 +569,7 @@ describe('indexer', () => {
           const result2 = await osClient.getDocument(
             openSearchEndpoint,
             'documents',
-            '2982b980-5bb3-4964-9cdb-ceaf602f3599'
+            '9c404a3c-a09a-44f9-b27b-67c8ec2b95bc'
           ) as { _id: string, _source: Record<string, unknown> };
           expect(result2._id).toEqual('9c404a3c-a09a-44f9-b27b-67c8ec2b95bc');
           expect(result2._source).toEqual({
@@ -591,7 +591,7 @@ describe('indexer', () => {
                 uuid: 'da66b42c-b435-4c47-981c-44da170a1018',
                 name: 'oceansites_data_format_reference_manual.pdf',
                 bundleName: 'THUMBNAIL',
-                mimeType: 'image/jpg',
+                mimeType: 'image/jpeg',
                 retrieveLink: '/rest/bitstreams/da66b42c-b435-4c47-981c-44da170a1018/retrieve',
                 checkSum: {
                   value: '6a45c8850908937a88f18e9a87674393',
@@ -611,7 +611,7 @@ describe('indexer', () => {
             dc_title: 'Hello another document with a PDF!',
             dc_date_accessioned: '2021-07-05T19:56:13Z',
             _bitstreamText: 'Bitstream text for 9c404a3c-a09a-44f9-b27b-67c8ec2b95bc.',
-            _bitstreamTextKey: '01ebed91-218a-4465-8a67-f6712ff3cfb7.txt',
+            _bitstreamTextKey: '9c404a3c-a09a-44f9-b27b-67c8ec2b95bc.txt',
             _terms: [
               {
                 label: 'Hello',
@@ -649,7 +649,7 @@ describe('indexer', () => {
                 uuid: 'da66b42c-b435-4c47-981c-44da170a1018',
                 name: 'oceansites_data_format_reference_manual.pdf',
                 bundleName: 'THUMBNAIL',
-                mimeType: 'image/jpg',
+                mimeType: 'image/jpeg',
                 retrieveLink: '/rest/bitstreams/da66b42c-b435-4c47-981c-44da170a1018/retrieve',
                 checkSum: {
                   value: '6a45c8850908937a88f18e9a87674393',
