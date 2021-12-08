@@ -384,6 +384,9 @@ describe('open-search-client', () => {
             namedGraphUri: {
               type: 'keyword',
             },
+            uri: {
+              type: 'keyword',
+            },
           },
         });
       });

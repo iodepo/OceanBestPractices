@@ -302,6 +302,9 @@ export const createTermsIndex = (
       namedGraphUri: {
         type: 'keyword',
       },
+      uri: {
+        type: 'keyword',
+      },
     },
   },
 });
