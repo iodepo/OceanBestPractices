@@ -189,16 +189,12 @@ export const percolateDocumentFields = async (
     size,
   };
 
-  console.log(`Terms body: ${JSON.stringify(body)}`);
-
   const rawPercolateResponse = await gotEs(prefixUrl).post(
     'terms/_search',
     {
       json: body,
     }
   );
-
-  console.log(`Percolate response: ${JSON.stringify(rawPercolateResponse)}`);
 
   const percolateResponse = percolateResponseSchema
     .safeParse(rawPercolateResponse);
@@ -213,7 +209,7 @@ export const percolateDocumentFields = async (
   const { hits: { hits } } = percolateResponse.data;
   return hits.map((h) => ({
     label: h._source.query.multi_match.query,
-    uri: h._id,
+    uri: h._source.uri,
     source_terminology: h._source.source_terminology,
   }));
 };

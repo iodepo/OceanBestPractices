@@ -448,6 +448,7 @@ describe('indexer', () => {
             },
             source_terminology: 'Test Terminology',
             namedUriGraph: 'https://test-terminology.owl',
+            uri: 'http://test-terminology.owl/1234',
           }
         );
 
@@ -559,7 +560,7 @@ describe('indexer', () => {
               {
                 label: 'Hello',
                 source_terminology: 'Test Terminology',
-                uri: 'QJ3tlX0BJYfKtNy3YNa9',
+                uri: 'http://test-terminology.owl/1234',
               },
             ],
             _thumbnailRetrieveLink: '/rest/bitstreams/da66b42c-b435-4c47-981c-44da170a1018/retrieve',
@@ -615,7 +616,7 @@ describe('indexer', () => {
               {
                 label: 'Hello',
                 source_terminology: 'Test Terminology',
-                uri: 'QJ3tlX0BJYfKtNy3YNa9',
+                uri: 'http://test-terminology.owl/1234',
               },
             ],
             _thumbnailRetrieveLink: '/rest/bitstreams/da66b42c-b435-4c47-981c-44da170a1018/retrieve',
@@ -671,7 +672,7 @@ describe('indexer', () => {
               {
                 label: 'Hello',
                 source_terminology: 'Test Terminology',
-                uri: 'QJ3tlX0BJYfKtNy3YNa9',
+                uri: 'http://test-terminology.owl/1234',
               },
             ],
             _thumbnailRetrieveLink: '/rest/bitstreams/da66b42c-b435-4c47-981c-44da170a1018/retrieve',

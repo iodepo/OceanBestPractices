@@ -184,7 +184,7 @@ describe('open-search-client', () => {
             {
               _index: 'terms',
               _type: 'doc',
-              _id: 'http://purl.obolibrary.org/obo/ENVO_00000016',
+              _id: 'ENVO_00000016',
               _score: 0.287_682_1,
               _source: {
                 query: {
@@ -198,12 +198,13 @@ describe('open-search-client', () => {
                   },
                 },
                 source_terminology: 'Environmental Ontology',
+                uri: 'http://purl.obolibrary.org/obo/ENVO_00000016',
               },
             },
             {
               _index: 'terms',
               _type: 'doc',
-              _id: 'http://purl.obolibrary.org/obo/ENVO_00000015',
+              _id: 'ENVO_00000015',
               _score: 0.287_682_1,
               _source: {
                 query: {
@@ -220,6 +221,7 @@ describe('open-search-client', () => {
                 namedGraphUri: {
                   type: 'keyword',
                 },
+                uri: 'http://purl.obolibrary.org/obo/ENVO_00000015',
               },
             },
           ],
