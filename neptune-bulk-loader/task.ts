@@ -22,6 +22,7 @@ const createTermsIndex = async (
 
 type MainResult = Error | undefined;
 
+// eslint-disable-next-line max-statements
 export const neptuneBulkLoader = async (): Promise<MainResult> => {
   const iamRoleArn = getStringFromEnv('IAM_ROLE_ARN');
   const insecureHttps = getBoolFromEnv('INSECURE_HTTPS', false);

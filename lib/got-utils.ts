@@ -1,4 +1,4 @@
-import { URL } from 'url';
+import { URL } from 'node:url';
 import type { HTTPSOptions } from 'got';
 
 const allowInvalidCerts = (url: string): boolean => {

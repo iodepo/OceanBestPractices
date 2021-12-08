@@ -51,7 +51,9 @@ const config = async () => {
   return {
     target: 'node',
     node: { __dirname: true },
-    mode: process.env['NODE_ENV'] === 'production' ? 'production' : 'development',
+    mode: process.env['NODE_ENV'] === 'production'
+      ? 'production'
+      : 'development',
     entry: {
       ...apiEntries,
       ...ingestEntries,
