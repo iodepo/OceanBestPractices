@@ -377,3 +377,9 @@ export const deleteIndex = async (
 ): Promise<void> => {
   await gotEs(prefixUrl).delete(`${index}`);
 };
+
+export const searchByQuery = async (
+  prefixUrl: string,
+  index: string,
+  query: unknown
+): Promise<unknown> => gotEs(prefixUrl).post(`${index}/_search`, { json: query });
