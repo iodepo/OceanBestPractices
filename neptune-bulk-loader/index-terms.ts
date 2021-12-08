@@ -66,11 +66,10 @@ OFFSET ${offset}`;
   }));
 };
 
-const indexForTerm = (term: FetchedTerm, indexName: string): unknown => ({
+const indexForTerm = (indexName: string): unknown => ({
   index: {
     _index: indexName,
     _type: 'doc',
-    _id: term.uri,
   },
 });
 
@@ -88,6 +87,7 @@ const queryForTerm = (
   },
   source_terminology: terminologyTitle,
   namedGraphUri,
+  uri: term.uri,
 });
 
 interface BulkIndexTermsParams {
@@ -109,7 +109,7 @@ const bulkIndexTerms = async (params: BulkIndexTermsParams): Promise<void> => {
 
   const esDoc = _(terms)
     .map((term) => [
-      indexForTerm(term, indexName),
+      indexForTerm(indexName),
       queryForTerm(term, terminologyTitle, namedGraphUri),
     ])
     .flatten()
