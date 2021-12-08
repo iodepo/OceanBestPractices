@@ -23,7 +23,7 @@ export type DocumentItemTerm = z.infer<typeof documentItemTermSchema>;
 export const documentItemSchema = dspaceItemSchema.extend({
   _bitstreamText: z.string().optional(),
   _terms: z.array(documentItemTermSchema).optional(),
-  _dc_title: z.string(),
+  dc_title: z.string(),
 });
 
 export type DocumentItem = z.infer<typeof documentItemSchema>;

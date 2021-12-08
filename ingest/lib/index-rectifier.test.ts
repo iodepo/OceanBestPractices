@@ -197,7 +197,7 @@ describe('index-rectifier', () => {
           uuid: '3fdfb55d-6ddb-4a1d-b880-fda542c1529b',
           lastModified: '2021-10-25 12:31:38.543',
           handle: 'handle/123',
-          _dc_title: 'Index Item 1',
+          dc_title: 'Index Item 1',
           bitstreams: [
             {
               bundleName: 'ORIGINAL',
@@ -220,7 +220,7 @@ describe('index-rectifier', () => {
           uuid: '66e3b2a3-fd2f-4300-9d1c-d0836b4e0a8d',
           lastModified: '2021-9-25 12:31:38.543',
           handle: 'handle/123',
-          _dc_title: 'Index Item 2',
+          dc_title: 'Index Item 2',
           bitstreams: [
             {
               bundleName: 'ORIGINAL',
@@ -243,7 +243,7 @@ describe('index-rectifier', () => {
           uuid: 'd013b8a0-718f-49ea-b30d-6788cba8292b',
           lastModified: '2021-8-25 12:31:38.543',
           handle: 'handle/123',
-          _dc_title: 'Index Item 3',
+          dc_title: 'Index Item 3',
           bitstreams: [
             {
               bundleName: 'ORIGINAL',
@@ -266,7 +266,7 @@ describe('index-rectifier', () => {
           uuid: 'dea11c14-1e9a-4ba2-8dbe-e6f9b7adeccb',
           lastModified: '2021-8-25 12:31:38.543',
           handle: 'handle/123',
-          _dc_title: 'Index Item 4',
+          dc_title: 'Index Item 4',
           bitstreams: [
             {
               bundleName: 'ORIGINAL',

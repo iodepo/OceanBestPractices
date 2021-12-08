@@ -1,6 +1,8 @@
 /* eslint-disable camelcase */
 /* eslint-disable no-underscore-dangle */
 import { z } from 'zod';
+import _ from 'lodash';
+import pMap from 'p-map';
 import { zodTypeGuard } from '../../lib/zod-utils';
 import { getStringFromEnv } from '../../lib/env-utils';
 import * as osClient from '../../lib/open-search-client';
@@ -10,37 +12,40 @@ import {
   dspaceItemSchema,
   Metadata,
 } from '../../lib/dspace-schemas';
+import {
+  DocumentItem,
+  documentItemSchema,
+} from '../../lib/open-search-schemas';
 
-import { thumbnailBitstreamItem } from '../../lib/dspace-item';
-import * as s3Client from '../../lib/s3-utils';
-import { DocumentItem } from '../../lib/open-search-schemas';
+import { findThumbnailBitstreamItem } from '../../lib/dspace-item';
+import * as s3Utils from '../../lib/s3-utils';
 
 export const getDSpaceItemFields = async (
   dspaceItemBucket: string,
   dspaceItemKey: string
 ): Promise<DSpaceItem> => {
-  const s3Location = new s3Client.S3ObjectLocation(
+  const s3Location = new s3Utils.S3ObjectLocation(
     dspaceItemBucket,
     dspaceItemKey
   );
 
-  return await s3Client.safeGetObjectJson(
+  return await s3Utils.safeGetObjectJson(
     s3Location,
     dspaceItemSchema.passthrough()
   );
 };
 
-export interface BitstreamSource {
+export interface BitstreamTextSource {
   _bitstreamText: string
   _bitstreamTextKey: string
 }
 
-export const getBitstreamSource = async (
+export const getBitstreamTextSource = async (
   bitstreamTextBucket: string,
   bitstreamTextKey: string
-): Promise<BitstreamSource> => {
-  const bitstreamText = await s3Client.getObjectText(
-    new s3Client.S3ObjectLocation(bitstreamTextBucket, bitstreamTextKey)
+): Promise<BitstreamTextSource> => {
+  const bitstreamText = await s3Utils.getObjectText(
+    new s3Utils.S3ObjectLocation(bitstreamTextBucket, bitstreamTextKey)
   );
 
   return {
@@ -48,9 +53,6 @@ export const getBitstreamSource = async (
     _bitstreamTextKey: bitstreamTextKey,
   };
 };
-export interface MetadataSearchFields {
-  _dc_title: string,
-}
 
 export const getMetadataSearchFields = (
   metadata: Metadata[]
@@ -70,6 +72,26 @@ export const getMetadataSearchFields = (
   return searchFields;
 };
 
+const addDocument = async (
+  openSearchEndpoint: string,
+  documentItem: DocumentItem
+): Promise<void> => {
+  // Make sure the documents index exists.
+  const indexExists = await osClient.indexExists(
+    openSearchEndpoint,
+    'documents'
+  );
+
+  console.log(`Index exists: ${indexExists}`);
+  // If it doesn't, create it first.
+  if (!indexExists) {
+    await osClient.createDocumentsIndex(openSearchEndpoint, 'documents');
+  }
+
+  // Index our document item.
+  await osClient.putDocumentItem(openSearchEndpoint, documentItem);
+};
+
 export interface ThumbnailRetrieveLink {
   _thumbnailRetrieveLink: string
 }
@@ -77,7 +99,7 @@ export interface ThumbnailRetrieveLink {
 export const getThumbnailRetrieveLink = (
   bitstreams: Bitstream[]
 ): ThumbnailRetrieveLink | undefined => {
-  const thumbnailBitstream = thumbnailBitstreamItem(bitstreams);
+  const thumbnailBitstream = findThumbnailBitstreamItem(bitstreams);
   if (thumbnailBitstream) {
     return {
       _thumbnailRetrieveLink: thumbnailBitstream.retrieveLink,
@@ -105,17 +127,17 @@ const explicitInvokeEventSchema = z.object({
   uuid: z.string().uuid(),
 });
 
-const snsEventSchema = z.object({
+const textExtractorSnsEventSchema = z.object({
   Records: z.array(
     z.object({
       Sns: z.object({
-        Message: z.string().min(2),
+        Message: z.string().min(1), // This string should be an S3 Record.
       }),
     })
   ).nonempty(),
 });
 
-const s3NotificationSchema = z.object({
+const textExtractorS3RecordSchema = z.object({
   Records: z.array(
     z.object({
       s3: z.object({
@@ -130,42 +152,73 @@ const s3NotificationSchema = z.object({
   ).nonempty(),
 });
 
-const isSnsEventSchema = zodTypeGuard(snsEventSchema);
+const isTextExtractorSnsEventSchema = zodTypeGuard(textExtractorSnsEventSchema);
 
 const isExplicitInvokeEventSchema = zodTypeGuard(explicitInvokeEventSchema);
 
-export const handler = async (event: unknown) => {
-  const dspaceItemBucket = getStringFromEnv('DOCUMENT_METADATA_BUCKET');
-  const openSearchEndpoint = getStringFromEnv('OPEN_SEARCH_ENDPOINT');
+interface IngestRecord {
+  uuid: string
+  bitstreamTextKey?: string
+  bitstreamTextBucket?: string
+}
 
-  let bitstreamTextBucket; let bitstreamTextKey; let uuid;
-  if (isSnsEventSchema(event)) {
-    const messageData = s3NotificationSchema.parse(
-      JSON.parse(event.Records[0].Sns.Message)
+const parseEvent = (event: unknown): IngestRecord[] => {
+  if (isTextExtractorSnsEventSchema(event)) {
+    return _.map(
+      event.Records,
+      (record) => {
+        const messageData = textExtractorS3RecordSchema.parse(
+          JSON.parse(record.Sns.Message)
+        );
+
+        const bitstreamTextBucket = messageData.Records[0].s3.bucket.name;
+        const bitstreamTextKey = messageData.Records[0].s3.object.key;
+        const [uuid] = bitstreamTextKey.split('.');
+
+        if (!uuid) {
+          throw new Error(`Ingest indexer event missing UUID ${JSON.stringify(event)}`);
+        }
+
+        return {
+          bitstreamTextBucket,
+          bitstreamTextKey,
+          uuid,
+        };
+      }
     );
-
-    bitstreamTextBucket = messageData.Records[0].s3.bucket.name;
-    bitstreamTextKey = messageData.Records[0].s3.object.key;
-    [uuid] = bitstreamTextKey.split('.');
-  } else if (isExplicitInvokeEventSchema(event)) {
-    uuid = event.uuid;
-  } else {
-    throw new Error('ERROR: Ingest indexer invoked with unknown event.');
+  } if (isExplicitInvokeEventSchema(event)) {
+    return [{
+      uuid: event.uuid,
+    }];
   }
 
-  console.log(`INFO: Preparing DSpace item ${uuid} for indexing.`);
+  throw new Error(`Ingest indexer invoked with unknown event: ${JSON.stringify(event)}`);
+};
 
-  // Validate that we have a DSpace item because we can't do anything
-  // without it. Let's throw an error here because this really shouldn't happen
-  // and if it does we want to know about it.
+const index = async (
+  ingestRecord: IngestRecord,
+  dspaceItemBucket: string,
+  openSearchEndpoint: string
+): Promise<void> => {
+  // Get the DSpace item that starts this all off.
   const dspaceItem = await getDSpaceItemFields(
     dspaceItemBucket,
-    `${uuid}.json`
+    `${ingestRecord.uuid}.json`
   );
+
+  // Add the PDF source if it exists.
+  let bitstreamSource: BitstreamTextSource | undefined;
+  if (ingestRecord.bitstreamTextBucket && ingestRecord.bitstreamTextKey) {
+    bitstreamSource = await getBitstreamTextSource(
+      ingestRecord.bitstreamTextBucket,
+      ingestRecord.bitstreamTextKey
+    );
+  }
 
   // Promote the metadata fields to make search easier. Since the metadata
   // is dynamic we validate that the dc.title field exists.
-  const metadataSearchFields = z.object({ _dc_title: z.string() })
+  // TODO: As we add explicit search fields we could turn this into a type.
+  const metadataSearchFields = z.object({ dc_title: z.string() })
     .passthrough()
     .parse(getMetadataSearchFields(dspaceItem.metadata));
 
@@ -175,17 +228,8 @@ export const handler = async (event: unknown) => {
     dspaceItem.bitstreams
   );
 
-  // Add the PDF source if it exists.
-  let bitstreamSource: BitstreamSource | undefined;
-  if (bitstreamTextBucket && bitstreamTextKey) {
-    bitstreamSource = await getBitstreamSource(
-      bitstreamTextBucket,
-      bitstreamTextKey
-    );
-  }
-
   // Add terms.
-  const title = metadataSearchFields._dc_title;
+  const title = metadataSearchFields.dc_title;
   const contents = bitstreamSource?._bitstreamText || '';
   const terms = await getTerms(
     openSearchEndpoint,
@@ -195,19 +239,32 @@ export const handler = async (event: unknown) => {
     }
   );
 
-  const documentItem: DocumentItem = {
+  const documentItem = documentItemSchema.parse({
     ...dspaceItem,
     ...bitstreamSource,
     ...metadataSearchFields,
     ...thumbnailRetrieveLink,
     ...terms,
-  };
+  });
 
-  // Index our document item.
-  await osClient.putDocumentItem(
-    openSearchEndpoint,
-    documentItem
-  );
+  await addDocument(openSearchEndpoint, documentItem);
 
   console.log(`INFO: Indexed document item ${documentItem.uuid}`);
+};
+
+export const handler = async (event: unknown) => {
+  const dspaceItemBucket = getStringFromEnv('DOCUMENT_METADATA_BUCKET');
+  const openSearchEndpoint = getStringFromEnv('OPEN_SEARCH_ENDPOINT');
+
+  const ingestRecords = parseEvent(event);
+
+  await pMap(
+    ingestRecords,
+    async (record) => index(
+      record,
+      dspaceItemBucket,
+      openSearchEndpoint
+    ),
+    { concurrency: 1 }
+  );
 };

@@ -269,7 +269,7 @@ describe('open-search-client', () => {
     test('should add a document item to the documets index', async () => {
       const mockPutDocumentItemResponse: PutDocumentItemResponse = {
         _index: 'documents',
-        _type: 'doc',
+        _type: '_doc',
         _id: '38c7d808-aa26-4ed4-a3e4-3458b989d2d4',
         _version: 1,
         result: 'created',
@@ -296,12 +296,12 @@ describe('open-search-client', () => {
         }],
         lastModified: '2021-11-01 15:10:17.231',
         bitstreams: [],
-        _dc_title: 'This is a sample name.',
+        dc_title: 'This is a sample name.',
       };
 
       nock('https://open-search.example.com')
         .post(
-          '/documents/doc/cf05c46d-e1aa-4d95-bf44-4e9c0aaa7a37',
+          '/documents/_doc/cf05c46d-e1aa-4d95-bf44-4e9c0aaa7a37',
           documentItem
         )
         .reply(201, mockPutDocumentItemResponse);
@@ -513,6 +513,21 @@ describe('open-search-client', () => {
         );
 
         expect(getLewisResult).not.toBeUndefined();
+      });
+    });
+
+    describe('deleteIndex', () => {
+      it('deletes an exisitng index', async () => {
+        const indexName = `index-${cryptoRandomString({ length: 6 })}`;
+        await osClient.createIndex(esUrl, indexName);
+
+        let indexExists = await osClient.indexExists(esUrl, indexName);
+        expect(indexExists).toBeTruthy();
+
+        await osClient.deleteIndex(esUrl, indexName);
+
+        indexExists = await osClient.indexExists(esUrl, indexName);
+        expect(indexExists).toBeFalsy();
       });
     });
   });
