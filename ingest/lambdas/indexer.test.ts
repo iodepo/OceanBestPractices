@@ -634,7 +634,7 @@ describe('indexer', () => {
 
           // Fetch the object from OpenSearch.
           const result = await osClient.getDocument(
-            'http://localhost:9200',
+            openSearchEndpoint,
             'documents',
             '2982b980-5bb3-4964-9cdb-ceaf602f3599'
           ) as { _id: string, _source: Record<string, unknown> };
