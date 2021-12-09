@@ -17,7 +17,10 @@ import {
   documentItemSchema,
 } from '../../lib/open-search-schemas';
 
-import { findThumbnailBitstreamItem } from '../../lib/dspace-item';
+import {
+  findMetadataItems,
+  findThumbnailBitstreamItem,
+} from '../../lib/dspace-item';
 import * as s3Utils from '../../lib/s3-utils';
 
 export const getDSpaceItemFields = async (
@@ -70,6 +73,23 @@ export const getMetadataSearchFields = (
   });
 
   return searchFields;
+};
+
+export interface PrimaryAuthor {
+  _primaryAuthor: string
+}
+
+export const getPrimaryAuthor = (
+  metadata: Metadata[]
+): PrimaryAuthor | undefined => {
+  const [primaryAuthor] = findMetadataItems(metadata, 'dc.contributor.author');
+  if (primaryAuthor) {
+    return {
+      _primaryAuthor: primaryAuthor.value,
+    };
+  }
+
+  return undefined;
 };
 
 const addDocument = async (
@@ -222,6 +242,8 @@ const index = async (
     .passthrough()
     .parse(getMetadataSearchFields(dspaceItem.metadata));
 
+  const primaryAuthor = getPrimaryAuthor(dspaceItem.metadata);
+
   // Add the thumbnail retrieve link to make it easier for the UI to render
   // search results.
   const thumbnailRetrieveLink = getThumbnailRetrieveLink(
@@ -243,6 +265,7 @@ const index = async (
     ...dspaceItem,
     ...bitstreamSource,
     ...metadataSearchFields,
+    ...primaryAuthor,
     ...thumbnailRetrieveLink,
     ...terms,
   });
