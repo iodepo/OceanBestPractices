@@ -43,5 +43,15 @@
     "label": "YEAR",
     "direction": "desc",
     "filter": "dc_date_issued:desc"
+  },
+  {
+    "label": "ENDORSED BY",
+    "direction": "asc",
+    "filter": "obps_endorsementExternal_externalEndorsedBy.keyword:asc"
+  },
+  {
+    "label": "ENDORSED BY",
+    "direction": "desc",
+    "filter": "obps_endorsementExternal_externalEndorsedBy.keyword:desc"
   }
 ]
