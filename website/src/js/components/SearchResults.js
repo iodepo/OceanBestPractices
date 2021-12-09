@@ -116,7 +116,7 @@ class SearchResults extends Component {
   /**
    * shows the select/deselect all link
    * @param {array} results - array of all results
-   * @returns 
+   * @returns
    */
   renderSelectResultsLink(results) {
     // everything is selected, then render the deselect all link
@@ -182,23 +182,23 @@ class SearchResults extends Component {
     let results = this.props.searchReducer.items.map((result) => {
       return {
         date: result._source.issued_date,
-        highlight: result.highlight && result.highlight.contents,
+        highlight: result.highlight && result.highlight._bitstreamText,
         id: result._id,
-        language: result._source.language,
-        publisher: result._source.publisher,
-        author: result._source.author,
-        terms: result._source.terms,
-        title: result._source.title,
+        language: result._source.dc_language_iso,
+        publisher: result._source.dc_publisher,
+        author: result._source.dc_contributor_author,
+        terms: result._source._terms,
+        title: result._source.dc_title,
         handle: result._source.handle,
-        thumbnail: result._source.thumbnail,
-        refereed: result._source.refereed,
-        journal_title: result._source.journal_title,
-        citation: result._source.citation,
-        methodology: Array.isArray(result._source.bptype)
-          ? result._source.bptype.join(', ')
-          : result._source.bptype,
+        thumbnail: result._source.thumbnailRetrieveLink,
+        refereed: result._source.dc_description_refereed,
+        journal_title: result._source.dc_bibliographicCitation_title,
+        citation: result._source.dc_identifier_citation,
+        methodology: Array.isArray(result._source.dc_description_bptype)
+          ? result._source.dc_description_bptype.join(', ')
+          : result._source.dc_description_bptype,
         uuid: result._source.uuid,
-        sourceKey: result._source.sourceKey
+        sourceKey: result._source._bitstreamTextKey
       }
     });
 
