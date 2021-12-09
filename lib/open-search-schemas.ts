@@ -8,7 +8,7 @@ export const termsItemSchema = z.object({
     }),
   }),
   source_terminology: z.string(),
-  uri: z.string(),
+  uri: z.string().url(),
 });
 
 export type TermItem = z.infer<typeof termsItemSchema>;

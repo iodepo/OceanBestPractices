@@ -5,6 +5,7 @@ import pMap from 'p-map';
 import * as dspaceClient from '../../lib/dspace-client';
 import { DSpaceItem } from '../../lib/dspace-schemas';
 import * as osClient from '../../lib/open-search-client';
+import { findPDFBitstreamItem } from '../../lib/dspace-item';
 import {
   DocumentItem,
   openSearchScrollDocumentsResponseSchema,
@@ -99,10 +100,13 @@ export const isUpdated = (
 
   if (esLastModified < dspaceLastModified) return true;
 
-  const indexItemPDFBitstream = documentItem._source.bitstreams
-    .find((b) => (b.bundleName === 'ORIGINAL' && b.mimeType === 'application/pdf'));
-  const dspaceItemPDFBitstream = dspaceItem.bitstreams
-    .find((b) => (b.bundleName === 'ORIGINAL' && b.mimeType === 'application/pdf'));
+  const indexItemPDFBitstream = findPDFBitstreamItem(
+    documentItem._source.bitstreams
+  );
+
+  const dspaceItemPDFBitstream = findPDFBitstreamItem(
+    dspaceItem.bitstreams
+  );
 
   if (indexItemPDFBitstream === undefined
     && dspaceItemPDFBitstream === undefined) {
@@ -118,6 +122,11 @@ export const isUpdated = (
     !== dspaceItemPDFBitstream.checkSum.value);
 };
 
+type IndexRectifierDiffResult = {
+  removed: string[],
+  updated: string[]
+}
+
 /**
  *
  * @param openSearchEndpoint - Endpoint for the OpenSearch index from
@@ -130,8 +139,8 @@ export const isUpdated = (
 export const diff = async (
   openSearchEndpoint: string,
   dspaceEndpoint: string
-): Promise<{ removed: string[], updated: string[] }> => {
-  const diffResult: { removed: string[], updated: string[] } = {
+): Promise<IndexRectifierDiffResult> => {
+  const diffResult: IndexRectifierDiffResult = {
     removed: [],
     updated: [],
   };
