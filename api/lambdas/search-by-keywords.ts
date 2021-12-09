@@ -1,12 +1,13 @@
 /* eslint-disable camelcase */
-import { string, z } from 'zod';
-import type { APIGatewayProxyEventV2, APIGatewayProxyResult } from 'aws-lambda';
+import { z } from 'zod';
+import type { APIGatewayProxyResult } from 'aws-lambda';
 
 import pMap from 'p-map';
 import got from 'got/dist/source';
 import { httpsOptions } from '../../lib/got-utils';
 import { getStringFromEnv } from '../../lib/env-utils';
 import * as osClient from '../../lib/open-search-client';
+import { defaultSearchableFields } from '../lib/searchable-fields';
 
 const DEFAULT_FROM = 0;
 const DEFAULT_SIZE = 20;
@@ -35,37 +36,6 @@ export const internalServerErrorResponse: APIGatewayProxyResult = {
   },
   body: 'Internal Server Error',
 };
-
-export const defaultSearchableFields: string[] = [
-  'contents',
-  'title^2',
-  'publisher',
-  'author',
-  'title_alt',
-  'corp_author',
-  'editor',
-  'journal_title',
-  'essential_ocean_variables',
-  'sustainable_development_goals',
-  'refereed',
-  'abstract^2',
-  'publication_status',
-  'current_status',
-  'relation_uri',
-  'language',
-  'bptype',
-  'relation_is_part_of_series',
-  'type',
-  'subjects_other',
-  'subjects_instrument_type',
-  'subjects_parameter_discipline',
-  'subjects_dm_processes',
-  'identifier_orcid',
-  'identifier_doi',
-  'maturity_level',
-  'notes',
-  'coverage_spatial',
-];
 
 const searchByKeywordQueryStringParametersSchema = z.object({
   keywords: z.string(),
@@ -98,6 +68,8 @@ interface OpenSearchQueryOptions {
   refereed: boolean
 }
 
+// TODO: This was updated to remove compile errors but otherwise
+// unchanged. Could use some improving.
 export const parseQueryParams = (
   queryParams: SearchByKeywordsQueryStringParameters
 ): OpenSearchQueryOptions => ({
@@ -450,15 +422,17 @@ export const buildDocumentSearchRequestBody = (
  * the search query.
  */
 export const searchByKeyword = async (
-  options: OpenSearchQueryOptions,
-  openSearchEndpoint: string
+  openSearchEndpoint: string,
+  options: OpenSearchQueryOptions
 ): Promise<unknown> => await osClient.searchByQuery(
   openSearchEndpoint,
   'documents',
   buildDocumentSearchRequestBody(options)
 );
 
-export const handler = async (event: unknown) => {
+export const handler = async (
+  event: unknown
+): Promise<APIGatewayProxyResult> => {
   const openSearchEndpoint = getStringFromEnv('OPEN_SEARCH_ENDPOINT');
   const sparqlUrl = getStringFromEnv('SPARQL_URL');
 
@@ -482,5 +456,10 @@ export const handler = async (event: unknown) => {
     openSearchQueryOptions.keywords = keywords;
   }
 
-  const searchResults = await searchByKeyword(openSearchQueryOptions, openSearchEndpoint);
+  const searchResults = await searchByKeyword(
+    openSearchEndpoint,
+    openSearchQueryOptions
+  );
+
+  return okResponse('application/json', JSON.stringify(searchResults));
 };
