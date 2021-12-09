@@ -13,7 +13,16 @@ const bitstreamTextBucket = `bucket-${cryptoRandomString({ length: 6 })}`;
 const openSearchEndpoint = 'http://localhost:9200';
 
 describe('indexer', () => {
+  let awsAccessKeyIdBefore: string | undefined;
+  let awsSecretAccessKey: string | undefined;
+
   beforeAll(async () => {
+    awsAccessKeyIdBefore = process.env['AWS_ACCESS_KEY_ID'];
+    process.env['AWS_ACCESS_KEY_ID'] = 'test-key-id';
+
+    awsSecretAccessKey = process.env['AWS_SECRET_ACCESS_KEY'];
+    process.env['AWS_SECRET_ACCESS_KEY'] = 'test-access-key';
+
     await s3Utils.createBucket(dspaceItemBucket);
     await s3Utils.createBucket(bitstreamTextBucket);
 
@@ -43,6 +52,9 @@ describe('indexer', () => {
 
     await s3Utils.deleteBucket(dspaceItemBucket, true);
     await s3Utils.deleteBucket(bitstreamTextBucket, true);
+
+    process.env['AWS_ACCESS_KEY_ID'] = awsAccessKeyIdBefore;
+    process.env['AWS_SECRET_ACCESS_KEY'] = awsSecretAccessKey;
   });
 
   describe('getDSpaceItemFields', () => {
