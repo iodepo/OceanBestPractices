@@ -8,6 +8,11 @@ import { httpsOptions } from '../../lib/got-utils';
 import { getStringFromEnv } from '../../lib/env-utils';
 import * as osClient from '../../lib/open-search-client';
 import { defaultSearchableFields } from '../lib/searchable-fields';
+import {
+  DocumentSearchRequestBody,
+  DocumentSearchRequestNestedQuery,
+  DocumentSearchRequestQuery,
+} from '../../lib/open-search-schemas';
 
 const DEFAULT_FROM = 0;
 const DEFAULT_SIZE = 20;
@@ -41,12 +46,12 @@ const searchByKeywordQueryStringParametersSchema = z.object({
   keywords: z.string(),
   term: z.optional(z.string()),
   termURI: z.optional(z.string()),
-  from: z.optional(z.number()),
-  size: z.optional(z.number()),
+  from: z.optional(z.string()),
+  size: z.optional(z.string()),
   sort: z.optional(z.string()),
   fields: z.optional(z.string()),
-  synonyms: z.optional(z.boolean()),
-  refereed: z.optional(z.boolean()),
+  synonyms: z.optional(z.string()),
+  refereed: z.optional(z.string()),
 });
 
 type SearchByKeywordsQueryStringParameters = z
@@ -56,7 +61,7 @@ const apiGatewayProxyEventSchema = z.object({
   queryStringParameters: searchByKeywordQueryStringParametersSchema,
 });
 
-interface OpenSearchQueryOptions {
+interface DocumentSearchRequestQueryOptions {
   keywords: string[]
   terms: string[]
   termURIs: string[]
@@ -69,10 +74,11 @@ interface OpenSearchQueryOptions {
 }
 
 // TODO: This was updated to remove compile errors but otherwise
-// unchanged. Could use some improving.
+// pretty much unchanged. Could use some improving and error handling
+// for bad parameters.
 export const parseQueryParams = (
   queryParams: SearchByKeywordsQueryStringParameters
-): OpenSearchQueryOptions => ({
+): DocumentSearchRequestQueryOptions => ({
   keywords: queryParams.keywords.length > 0
     ? queryParams.keywords.split(',')
     : [],
@@ -84,22 +90,18 @@ export const parseQueryParams = (
     : queryParams.termURI.split(','),
   from: queryParams.from === undefined
     ? DEFAULT_FROM
-    : queryParams.from,
+    : Number.parseInt(queryParams.from),
   size: queryParams.size === undefined
     ? DEFAULT_SIZE
-    : queryParams.size,
+    : Number.parseInt(queryParams.size),
   sort: queryParams.sort === undefined
     ? []
     : queryParams.sort.split(','),
   fields: queryParams.fields === undefined
     ? defaultSearchableFields
     : queryParams.fields.split(','),
-  synonyms: queryParams.synonyms === undefined
-    ? false
-    : queryParams.synonyms,
-  refereed: queryParams.refereed === undefined
-    ? false
-    : queryParams.refereed,
+  synonyms: queryParams.synonyms !== undefined,
+  refereed: queryParams.refereed !== undefined,
 });
 
 // TODO: This will need to be dynamic and fetched from S3.
@@ -155,6 +157,7 @@ interface SynonymsResponseBody {
   }
 }
 
+// TODO: This was relatively unchanged but can use improvement.
 export const parseSynonymsResponse = (body: SynonymsResponseBody) => {
   const results = body.results.bindings;
   const synonyms = [];
@@ -191,49 +194,6 @@ export const getSynonyms = async (
     return parseSynonymsResponse(JSON.parse(sparqlQueryResult.body));
   }
 );
-
-interface DocumentSearchRequestNestedQuery {
-  nested: {
-    path: 'terms',
-    query: {
-      bool: {
-        must: {
-          match_phrase: Record<string, string>
-        }
-      }
-    }
-  }
-}
-
-interface DocumentSearchRequestQuery {
-  bool: {
-    must: {
-      query_string: {
-        fields: string[],
-        query: string
-      }
-    },
-    // DocumentSearchRequestNestedQuery[] | { term: { refereed: 'Refereed' } }?
-    filter?: unknown
-  }
-}
-
-interface DocumentSearchRequestBody {
-  _source: {
-    excludes: string[]
-  }
-  from: number
-  size: number
-  query: DocumentSearchRequestQuery
-  highlight: {
-    fields: {
-      contents: Record<string, unknown>
-    }
-  }
-  // TODO: Figure out how to type the sort field.
-  // See: https://www.elastic.co/guide/en/elasticsearch/reference/current/sort-search-results.html
-  sort: unknown
-}
 
 export const nestedQuery = (
   termPhrase: Record<string, string>
@@ -390,7 +350,7 @@ export const buildDocumentSearchRequestQuery = (
  * Elasticsearch search request.
  */
 export const buildDocumentSearchRequestBody = (
-  options: OpenSearchQueryOptions
+  options: DocumentSearchRequestQueryOptions
 ): DocumentSearchRequestBody => ({
   _source: {
     excludes: ['contents'],
@@ -406,7 +366,7 @@ export const buildDocumentSearchRequestBody = (
   ),
   highlight: {
     fields: {
-      contents: {},
+      _bitstreamText: {},
     },
   },
   sort: buildSort(options.sort),
@@ -423,8 +383,8 @@ export const buildDocumentSearchRequestBody = (
  */
 export const searchByKeyword = async (
   openSearchEndpoint: string,
-  options: OpenSearchQueryOptions
-): Promise<unknown> => await osClient.searchByQuery(
+  options: DocumentSearchRequestQueryOptions
+): Promise<unknown> => await osClient.searchDocumentsByQuery(
   openSearchEndpoint,
   'documents',
   buildDocumentSearchRequestBody(options)

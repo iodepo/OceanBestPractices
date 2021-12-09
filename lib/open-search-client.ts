@@ -9,6 +9,7 @@ import {
   closeScrollResponseSchema,
   percolateResponseSchema,
   putDocumentItemResponseSchema,
+  DocumentSearchRequestBody,
 } from './open-search-schemas';
 import { documentsMapping } from './documents-mapping';
 
@@ -381,8 +382,8 @@ export const deleteIndex = async (
   await gotEs(prefixUrl).delete(`${index}`);
 };
 
-export const searchByQuery = async (
+export const searchDocumentsByQuery = async (
   prefixUrl: string,
   index: string,
-  query: unknown
+  query: DocumentSearchRequestBody
 ): Promise<unknown> => gotEs(prefixUrl).post(`${index}/_search`, { json: query });
