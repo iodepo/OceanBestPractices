@@ -353,7 +353,7 @@ export const buildDocumentSearchRequestBody = (
   options: DocumentSearchRequestQueryOptions
 ): DocumentSearchRequestBody => ({
   _source: {
-    excludes: ['contents'],
+    excludes: ['_bitstreamText'],
   },
   from: options.from,
   size: options.size,
