@@ -27,8 +27,6 @@ export const commitUpdatedItems = async (
   ingestTopicArn: string,
   region = 'us-east-1'
 ): Promise<void> => {
-  if (ids.length === 0) return;
-
   await pMap(
     ids,
     async (id) => {
@@ -182,7 +180,7 @@ export const diff = async (
           // mark it updated. Otherwise consider it unchanged.
           if (dspaceItem === undefined) {
             diffResult.removed.push(indexItem._source.uuid);
-          } else if (module.exports.isUpdated(indexItem, dspaceItem)) {
+          } else if (isUpdated(indexItem, dspaceItem)) {
             diffResult.updated.push(indexItem._source.uuid);
           }
         } catch (error) {
