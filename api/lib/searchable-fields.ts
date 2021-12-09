@@ -27,4 +27,6 @@ export const defaultSearchableFields: string[] = [
   'dc_description_maturitylevel',
   'dc_description_notes',
   'dc_coverage_spatial',
+  'dc_description_ecv',
+  'dc_description_ebv',
 ];
