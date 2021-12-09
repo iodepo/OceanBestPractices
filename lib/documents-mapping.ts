@@ -67,6 +67,12 @@ export const documentsMapping = {
       },
       dc_title: {
         type: 'text',
+        fields: {
+          keyword: {
+            type: 'keyword',
+            ignore_above: 256,
+          },
+        },
       },
       dc_title_alternative: {
         type: 'text',
