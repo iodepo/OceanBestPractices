@@ -1,8 +1,12 @@
 import { z } from 'zod';
+import got from 'got';
+
+import { promisify } from 'util';
+import stream from 'stream';
 
 import pMap from 'p-map';
 import { s3 } from '../../lib/aws-clients';
-import * as dspaceClient from '../../lib/dspace-client';
+// import * as dspaceClient from '../../lib/dspace-client';
 import { S3ObjectLocation, safeGetObjectJson } from '../../lib/s3-utils';
 import * as lambdaClient from '../../lib/lambda-client';
 import { dspaceItemSchema } from '../../lib/dspace-schemas';
@@ -23,6 +27,8 @@ const s3EventSchema = z.object({
     })
   ).nonempty(),
 });
+
+const pipeline = promisify(stream.pipeline);
 
 export const handler = async (event: unknown) => {
   const dspaceEndpoint = getStringFromEnv('DSPACE_ENDPOINT');
@@ -51,18 +57,30 @@ export const handler = async (event: unknown) => {
         if (pdfBitstreamItem !== undefined) {
           console.log(`INFO: Found PDF for DSpace item ${dspaceItem.uuid}. Uploading to S3.`);
 
-          // Get the PDF from DSpace.
-          const pdfBuffer = await dspaceClient.getBitstream(
-            dspaceEndpoint,
-            pdfBitstreamItem.retrieveLink
-          );
+          const pass = new stream.PassThrough();
 
-          // Upload the PDF to S3.
-          await s3().putObject({
+          s3().upload({
             Bucket: bitstreamSourceBucket,
             Key: `${dspaceItem.uuid}.pdf`,
-            Body: pdfBuffer,
-          }).promise();
+            Body: pass,
+          }).send();
+
+          await pipeline(
+            got.stream(`${dspaceEndpoint}${pdfBitstreamItem.retrieveLink}`),
+            pass
+          );
+          // // Get the PDF from DSpace.
+          // const pdfBuffer = await dspaceClient.getBitstream(
+          //   dspaceEndpoint,
+          //   pdfBitstreamItem.retrieveLink
+          // );
+
+          // // Upload the PDF to S3.
+          // await s3().putObject({
+          //   Bucket: bitstreamSourceBucket,
+          //   Key: `${dspaceItem.uuid}.pdf`,
+          //   Body: pdfBuffer,
+          // }).promise();
 
           console.log(`INFO: Uploaded PDF for DSpace item ${dspaceItem.uuid}`);
         } else {
