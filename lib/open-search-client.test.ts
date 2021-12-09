@@ -536,4 +536,8 @@ describe('open-search-client', () => {
       });
     });
   });
+
+  describe('getDocumentByQuery()', () => {
+    test.todo('should query an index and return matched results');
+  });
 });
