@@ -351,6 +351,12 @@ export const getDocument = async (
       if (statusCode !== 404) throw error;
     });
 
+export const getDocumentsByQuery = async (
+  prefixUrl: string,
+  index: string,
+  query: DocumentSearchRequestBody
+): Promise<unknown> => gotEs(prefixUrl).post(`${index}/_search`, { json: query });
+
 /**
 * @param prefixUrl
 * @param index
@@ -381,9 +387,3 @@ export const deleteIndex = async (
 ): Promise<void> => {
   await gotEs(prefixUrl).delete(`${index}`);
 };
-
-export const searchDocumentsByQuery = async (
-  prefixUrl: string,
-  index: string,
-  query: DocumentSearchRequestBody
-): Promise<unknown> => gotEs(prefixUrl).post(`${index}/_search`, { json: query });

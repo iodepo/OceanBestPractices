@@ -36,6 +36,7 @@ export default class Api extends Construct {
 
     const neptuneHostname = neptuneCluster.clusterEndpoint.hostname;
     const neptunePort = Token.asString(neptuneCluster.clusterEndpoint.port);
+    const neptuneSparqlUrl = `https://${neptuneCluster.clusterEndpoint.socketAddress}/sparql`;
 
     const documentPreview = new Function(this, 'DocumentPreview', {
       functionName: `${stackName}-api-document-preview`,
@@ -96,10 +97,8 @@ export default class Api extends Construct {
       description: 'Searches the OBP index for documents matching the given keywords.',
       timeout: Duration.minutes(5),
       environment: {
-        ELASTIC_SEARCH_HOST: openSearch.domainEndpoint,
-        REGION: region,
-        ONTOLOGY_STORE_HOST: neptuneHostname,
-        ONTOLOGY_STORE_PORT: neptunePort,
+        OPEN_SEARCH_ENDPOINT: openSearch.domainEndpoint,
+        SPARQL_URL: neptuneSparqlUrl,
       },
     });
     openSearch.grantReadWrite(searchByKeywords);
@@ -112,7 +111,7 @@ export default class Api extends Construct {
       description: 'Perform a SPARQL query',
       timeout: Duration.minutes(5),
       environment: {
-        SPARQL_URL: `https://${neptuneCluster.clusterEndpoint.socketAddress}/sparql`,
+        SPARQL_URL: neptuneSparqlUrl,
       },
     });
     neptuneCluster.connections.allowDefaultPortFrom(sparqlFunction);
