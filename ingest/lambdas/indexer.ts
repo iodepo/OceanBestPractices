@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 /* eslint-disable no-underscore-dangle */
 import { z } from 'zod';
 import _ from 'lodash';
@@ -11,9 +12,15 @@ import {
   dspaceItemSchema,
   Metadata,
 } from '../../lib/dspace-schemas';
-import { documentItemSchema } from '../../lib/open-search-schemas';
+import {
+  DocumentItem,
+  documentItemSchema,
+} from '../../lib/open-search-schemas';
 
-import { findThumbnailBitstreamItem } from '../../lib/dspace-item';
+import {
+  findMetadataItems,
+  findThumbnailBitstreamItem,
+} from '../../lib/dspace-item';
 import * as s3Utils from '../../lib/s3-utils';
 
 export const getDSpaceItemFields = async (
@@ -31,7 +38,7 @@ export const getDSpaceItemFields = async (
   );
 };
 
-interface BitstreamTextSource {
+export interface BitstreamTextSource {
   _bitstreamText: string
   _bitstreamTextKey: string
 }
@@ -50,26 +57,62 @@ export const getBitstreamTextSource = async (
   };
 };
 
-type MetadataSearchFields = Record<string, string | string[]>;
-
 export const getMetadataSearchFields = (
   metadata: Metadata[]
-): MetadataSearchFields => {
-  const searchFields: MetadataSearchFields = {};
+): Record<string, string | string[]> => {
+  const searchFields: Record<string, string | string[]> = {};
 
-  for (const m of metadata) {
+  // eslint-disable-next-line unicorn/no-array-for-each
+  metadata.forEach((m: Metadata) => {
     const key = m.key.replace(/\./g, '_');
 
     const searchFieldValue = searchFields[key];
     searchFields[key] = searchFieldValue !== undefined
       ? [searchFieldValue, m.value].flat()
       : m.value;
-  }
+  });
 
   return searchFields;
 };
 
-interface ThumbnailRetrieveLink {
+export interface PrimaryAuthor {
+  _primaryAuthor: string
+}
+
+export const getPrimaryAuthor = (
+  metadata: Metadata[]
+): PrimaryAuthor | undefined => {
+  const [primaryAuthor] = findMetadataItems(metadata, 'dc.contributor.author');
+  if (primaryAuthor) {
+    return {
+      _primaryAuthor: primaryAuthor.value,
+    };
+  }
+
+  return undefined;
+};
+
+const addDocument = async (
+  openSearchEndpoint: string,
+  documentItem: DocumentItem
+): Promise<void> => {
+  // Make sure the documents index exists.
+  const indexExists = await osClient.indexExists(
+    openSearchEndpoint,
+    'documents'
+  );
+
+  console.log(`Index exists: ${indexExists}`);
+  // If it doesn't, create it first.
+  if (!indexExists) {
+    await osClient.createDocumentsIndex(openSearchEndpoint, 'documents');
+  }
+
+  // Index our document item.
+  await osClient.putDocumentItem(openSearchEndpoint, documentItem);
+};
+
+export interface ThumbnailRetrieveLink {
   _thumbnailRetrieveLink: string
 }
 
@@ -163,9 +206,7 @@ const parseEvent = (event: unknown): IngestRecord[] => {
         };
       }
     );
-  }
-
-  if (isExplicitInvokeEventSchema(event)) {
+  } if (isExplicitInvokeEventSchema(event)) {
     return [{
       uuid: event.uuid,
     }];
@@ -185,7 +226,7 @@ const index = async (
     `${ingestRecord.uuid}.json`
   );
 
-  // Get the PDF source if it exists.
+  // Add the PDF source if it exists.
   let bitstreamSource: BitstreamTextSource | undefined;
   if (ingestRecord.bitstreamTextBucket && ingestRecord.bitstreamTextKey) {
     bitstreamSource = await getBitstreamTextSource(
@@ -201,13 +242,15 @@ const index = async (
     .passthrough()
     .parse(getMetadataSearchFields(dspaceItem.metadata));
 
-  // Get the thumbnail retrieve link to make it easier for the UI to render
+  const primaryAuthor = getPrimaryAuthor(dspaceItem.metadata);
+
+  // Add the thumbnail retrieve link to make it easier for the UI to render
   // search results.
   const thumbnailRetrieveLink = getThumbnailRetrieveLink(
     dspaceItem.bitstreams
   );
 
-  // Get terms.
+  // Add terms.
   const title = metadataSearchFields.dc_title;
   const contents = bitstreamSource?._bitstreamText || '';
   const terms = await getTerms(
@@ -222,12 +265,12 @@ const index = async (
     ...dspaceItem,
     ...bitstreamSource,
     ...metadataSearchFields,
+    ...primaryAuthor,
     ...thumbnailRetrieveLink,
     ...terms,
   });
 
-  // Index our document item.
-  await osClient.putDocumentItem(openSearchEndpoint, documentItem);
+  await addDocument(openSearchEndpoint, documentItem);
 
   console.log(`INFO: Indexed document item ${documentItem.uuid}`);
 };
@@ -237,23 +280,6 @@ export const handler = async (event: unknown) => {
   const openSearchEndpoint = getStringFromEnv('OPEN_SEARCH_ENDPOINT');
 
   const ingestRecords = parseEvent(event);
-
-  // Make sure the documents index exists.
-  const indexExists = await osClient.indexExists(
-    openSearchEndpoint,
-    'documents'
-  );
-
-  // If it doesn't, create it first. If that fails we need to bail because
-  // we can't do anything without the documents index.
-  if (!indexExists) {
-    try {
-      await osClient.createDocumentsIndex(openSearchEndpoint, 'documents');
-    } catch (error) {
-      console.log(`ERROR: Failed to create documents index: ${error}`);
-      throw error;
-    }
-  }
 
   await pMap(
     ingestRecords,
