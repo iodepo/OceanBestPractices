@@ -22,7 +22,8 @@ const DEFAULT_FROM = 0; const
   DEFAULT_SIZE = 20;
 
 /**
- * This function is responsible for handling a keyword search and returning matching documents.
+ * This function is responsible for handling a keyword search and returning
+ * matching documents.
  */
 exports.handler = (event, context, callback) => {
   const params = event.queryStringParameters;
@@ -63,12 +64,15 @@ exports.handler = (event, context, callback) => {
 };
 
 /**
- * Executes an Elasticsearch query with the given search options and notifies the callback function when
- * it completes. The callback function should be the function that ends this Lambda function, so most likely
- * passed directly from the handler.
+ * Executes an Elasticsearch query with the given search options and notifies
+ * the callback function when it completes. The callback function should be the
+ * function that ends this Lambda function, so most likely passed directly from
+ * the handler.
  *
- * @param {object} options An object defining the search options to use when building the search query.
- * @param {function} callback The function to use as a callback when this asynchronous function finishes.
+ * @param {object} options An object defining the search options to use when
+ * building the search query.
+ * @param {function} callback The function to use as a callback when this
+ * asynchronous function finishes.
  */
 function executeSearch(options, callback) {
   const searchBody = JSON.stringify(getSearchDocument(options));
@@ -110,9 +114,11 @@ function executeSearch(options, callback) {
 }
 
 /**
- * Parses the event parameters to define search related parameters and default values.
+ * Parses the event parameters to define search related parameters and default
+ * values.
  *
- * @param {object} params The parameters provided when invoking the search function.
+ * @param {object} params The parameters provided when invoking the search
+ * function.
  *
  * @returns {object} An object containing the parsed parameters.
  */
@@ -132,7 +138,8 @@ function parseParams(params) {
 
 /**
  * Builds an HTTP request taht can be used in an Elasticsearch query.
- * @param {object} body The body of the HTTP request. Ideally this contains the Elasticsearch search document.
+ * @param {object} body The body of the HTTP request. Ideally this contains the
+ * Elasticsearch search document.
  */
 function getRequest(body) {
   const req = new AWS.HttpRequest(esEndpoint);
@@ -148,15 +155,18 @@ function getRequest(body) {
 }
 
 /**
- * Builds an Elasticsearch search document object that can be used in an Elasctsearch search request. Specifically,
- * this function sets the fields to include, options like from and size, and which fields should provide the highlight
- * information. It also builds the query string value based on keywords provided in the `opts` argument.
+ * Builds an Elasticsearch search document object that can be used in an
+ * Elasctsearch search request. Specifically, this function sets the fields to
+ * include, options like from and size, and which fields should provide the
+ * highlight information. It also builds the query string value based on
+ * keywords provided in the `opts` argument.
  *
- * @param {object} opts Search options to include in the search document. At a minimum this object should contain a
- *                      from, size, keywords, terms | termsURI, fields, and whether or not `refereed` should be
- *                      checked.
+ * @param {object} opts Search options to include in the search document. At a
+ * minimum this object should contain a from, size, keywords, terms | termsURI,
+ * fields, and whether or not `refereed` should be checked.
  *
- * @returns {object} A search document object that can be used directly by an Elasticsearch search request.
+ * @returns {object} A search document object that can be used directly by an
+ * Elasticsearch search request.
  */
 function getSearchDocument(opts) {
   const searchDoc = {
@@ -180,9 +190,9 @@ function getSearchDocument(opts) {
 }
 
 /**
- * This function takes a valid keyword string and formats it specifically for our
- * Elasticsearch query. It's responsible for parsing logical operators and inserting/removing
- * any necessary or unnecessary quotes.
+ * This function takes a valid keyword string and formats it specifically for
+ * our Elasticsearch query. It's responsible for parsing logical operators and
+ * inserting/removing any necessary or unnecessary quotes.
  *
  * e.g. "+ocean current" becomes "AND \"ocean current\""
  * */
@@ -225,15 +235,21 @@ function formatKeyword(k) {
 }
 
 /**
- * Helper function that builds the `query` field of the Elasticsearch search document.
+ * Helper function that builds the `query` field of the Elasticsearch search
+ * document.
  *
  * @param {array} keywords An array of search keywords.
- * @param {array} terms An array of terms that will be used as filters in the query.
- * @param {array} termURIs A list of term URIs (ontology URIs) that can be used as filters in the query.
- * @param {array} fields An array of field names to be searched against by the query.
- * @param {boolean} refereed Whether or not `refereed` should be used as a filter.
+ * @param {array} terms An array of terms that will be used as filters in the
+ * query.
+ * @param {array} termURIs A list of term URIs (ontology URIs) that can be
+ * used as filters in the query.
+ * @param {array} fields An array of field names to be searched against by the
+ * query.
+ * @param {boolean} refereed Whether or not `refereed` should be used as a
+ * filter.
  *
- * @returns {object} The query object that can be used in an Elasticsearch search document `query` field.
+ * @returns {object} The query object that can be used in an Elasticsearch
+ * search document `query` field.
  */
 function buildElasticsearchQuery(keywords, terms, termURIs, fields, refereed) {
   const boolQuery = {
@@ -276,8 +292,9 @@ function buildElasticsearchQuery(keywords, terms, termURIs, fields, refereed) {
 }
 
 /**
- * Returns the list of fields that should be targeted in an Elasticsearch query. All fields
- * are set to the default Elasticsearch boost value unless otherwise denoted by ^n.
+ * Returns the list of fields that should be targeted in an Elasticsearch query.
+ * All fields are set to the default Elasticsearch boost value unless otherwise
+ * denoted by ^n.
  *
  * @returns {array} Array of field names to target in a query
  */
