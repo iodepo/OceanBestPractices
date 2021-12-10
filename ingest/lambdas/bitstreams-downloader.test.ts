@@ -1,16 +1,27 @@
 import cryptoRandomString from 'crypto-random-string';
+import { randomUUID } from 'crypto';
+import nock from 'nock';
 import { handler } from './bitstreams-downloader';
-
-import * as dspaceClient from '../../lib/dspace-client';
 import * as s3Utils from '../../lib/s3-utils';
 import * as lambdaClient from '../../lib/lambda-client';
 
 const dspaceItemBucket = `bucket-${cryptoRandomString({ length: 6 })}`;
 const bitstreamSourceBucket = `bucket-${cryptoRandomString({ length: 6 })}`;
 
-jest.mock('../../lib/dspace-client', () => ({
-  getBitstream: jest.fn(),
-}));
+const s3EventFactory = (bucket: string, key: string) => ({
+  Records: [
+    {
+      s3: {
+        bucket: {
+          name: bucket,
+        },
+        object: {
+          key,
+        },
+      },
+    },
+  ],
+});
 
 jest.mock('../../lib/lambda-client', () => ({
   invoke: jest.fn(),
@@ -18,11 +29,16 @@ jest.mock('../../lib/lambda-client', () => ({
 
 describe('bitstreams-downloader.handler', () => {
   beforeAll(async () => {
+    nock.disableNetConnect();
+    nock.enableNetConnect('localhost');
+
     await s3Utils.createBucket(dspaceItemBucket);
     await s3Utils.createBucket(bitstreamSourceBucket);
   });
 
   beforeEach(() => {
+    nock.cleanAll();
+
     process.env['DSPACE_ENDPOINT'] = 'https://dspace.test.com';
     process.env['DOCUMENT_BINARY_BUCKET'] = bitstreamSourceBucket;
     process.env['INDEXER_FUNCTION_NAME'] = 'obp-test-indexer-function';
@@ -31,16 +47,21 @@ describe('bitstreams-downloader.handler', () => {
   afterAll(async () => {
     await s3Utils.deleteBucket(dspaceItemBucket, true);
     await s3Utils.deleteBucket(bitstreamSourceBucket, true);
+
+    nock.enableNetConnect();
   });
 
   test('should upload the PDF bitstream from a DSpace item to S3', async () => {
+    const uuid = randomUUID();
+
+    nock('https://dspace.test.com')
+      .get('/rest/abc/bitstreams/pdf')
+      .reply(200, 'Mock bitstream.');
+
     await s3Utils.putJson(
-      new s3Utils.S3ObjectLocation(
-        dspaceItemBucket,
-        '5a45f655-2dfe-4032-b39d-92efbe3f0ff8.json'
-      ),
+      new s3Utils.S3ObjectLocation(dspaceItemBucket, `${uuid}.json`),
       {
-        uuid: '5a45f655-2dfe-4032-b39d-92efbe3f0ff8',
+        uuid,
         handle: 'handle/abc',
         lastModified: '2021-11-15 11:30:57.109',
         metadata: [],
@@ -65,45 +86,24 @@ describe('bitstreams-downloader.handler', () => {
       }
     );
 
-    (dspaceClient.getBitstream as jest.Mock).mockImplementationOnce(() => (
-      Buffer.from('Mock bitstream.')
-    ));
+    const event = s3EventFactory(dspaceItemBucket, `${uuid}.json`);
 
-    const mockEvent = {
-      Records: [
-        {
-          s3: {
-            bucket: {
-              name: dspaceItemBucket,
-            },
-            object: {
-              key: '5a45f655-2dfe-4032-b39d-92efbe3f0ff8.json',
-            },
-          },
-        },
-      ],
-    };
-
-    await handler(mockEvent);
+    await handler(event);
 
     const result = await s3Utils.getObjectText(
-      new s3Utils.S3ObjectLocation(
-        bitstreamSourceBucket,
-        '5a45f655-2dfe-4032-b39d-92efbe3f0ff8.pdf'
-      )
+      new s3Utils.S3ObjectLocation(bitstreamSourceBucket, `${uuid}.pdf`)
     );
 
     expect(result).toEqual('Mock bitstream.');
   });
 
   test('should directly invoke indexer function if there is no bitstream PDF', async () => {
+    const uuid = randomUUID();
+
     await s3Utils.putJson(
-      new s3Utils.S3ObjectLocation(
-        dspaceItemBucket,
-        '5a45f655-2dfe-4032-b39d-92efbe3f0ff8.json'
-      ),
+      new s3Utils.S3ObjectLocation(dspaceItemBucket, `${uuid}.json`),
       {
-        uuid: '5a45f655-2dfe-4032-b39d-92efbe3f0ff8',
+        uuid,
         handle: 'handle/abc',
         lastModified: '2021-11-15 11:30:57.109',
         metadata: [],
@@ -120,28 +120,15 @@ describe('bitstreams-downloader.handler', () => {
       }
     );
 
-    const mockEvent = {
-      Records: [
-        {
-          s3: {
-            bucket: {
-              name: dspaceItemBucket,
-            },
-            object: {
-              key: '5a45f655-2dfe-4032-b39d-92efbe3f0ff8.json',
-            },
-          },
-        },
-      ],
-    };
+    const event = s3EventFactory(dspaceItemBucket, `${uuid}.json`);
 
-    await handler(mockEvent);
+    await handler(event);
 
     expect(lambdaClient.invoke).toHaveBeenCalledTimes(1);
     expect(lambdaClient.invoke).toHaveBeenCalledWith(
       'obp-test-indexer-function',
       'Event',
-      { uuid: '5a45f655-2dfe-4032-b39d-92efbe3f0ff8' }
+      { uuid }
     );
   });
 });
