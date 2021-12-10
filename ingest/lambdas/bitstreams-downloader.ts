@@ -1,9 +1,11 @@
 import { z } from 'zod';
-
 import pMap from 'p-map';
-import { s3 } from '../../lib/aws-clients';
-import * as dspaceClient from '../../lib/dspace-client';
-import { S3ObjectLocation, safeGetObjectJson } from '../../lib/s3-utils';
+import got from 'got/dist/source';
+import {
+  S3ObjectLocation,
+  safeGetObjectJson,
+  uploadStream,
+} from '../../lib/s3-utils';
 import * as lambdaClient from '../../lib/lambda-client';
 import { dspaceItemSchema } from '../../lib/dspace-schemas';
 import { getStringFromEnv } from '../../lib/env-utils';
@@ -51,18 +53,11 @@ export const handler = async (event: unknown) => {
         if (pdfBitstreamItem !== undefined) {
           console.log(`INFO: Found PDF for DSpace item ${dspaceItem.uuid}. Uploading to S3.`);
 
-          // Get the PDF from DSpace.
-          const pdfBuffer = await dspaceClient.getBitstream(
-            dspaceEndpoint,
-            pdfBitstreamItem.retrieveLink
+          await uploadStream(
+            bitstreamSourceBucket,
+            `${dspaceItem.uuid}.pdf`,
+            got.stream(`${dspaceEndpoint}${pdfBitstreamItem.retrieveLink}`)
           );
-
-          // Upload the PDF to S3.
-          await s3().putObject({
-            Bucket: bitstreamSourceBucket,
-            Key: `${dspaceItem.uuid}.pdf`,
-            Body: pdfBuffer,
-          }).promise();
 
           console.log(`INFO: Uploaded PDF for DSpace item ${dspaceItem.uuid}`);
         } else {
