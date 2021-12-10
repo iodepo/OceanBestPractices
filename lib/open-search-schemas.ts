@@ -1,4 +1,3 @@
-/* eslint-disable camelcase */
 import { z } from 'zod';
 import { dspaceItemSchema } from './dspace-schemas';
 
@@ -9,7 +8,7 @@ export const termsItemSchema = z.object({
     }),
   }),
   source_terminology: z.string(),
-  uri: z.string(),
+  uri: z.string().url(),
 });
 
 export type TermItem = z.infer<typeof termsItemSchema>;
@@ -78,47 +77,3 @@ export type PutDocumentItemResponse =
   z.infer<typeof putDocumentItemResponseSchema>
 
 export type CloseScrollResponse = z.infer<typeof closeScrollResponseSchema>;
-
-// Document searching.
-export interface DocumentSearchRequestNestedQuery {
-  nested: {
-    path: 'terms',
-    query: {
-      bool: {
-        must: {
-          match_phrase: Record<string, string>
-        }
-      }
-    }
-  }
-}
-
-export interface DocumentSearchRequestQuery {
-  bool: {
-    must: {
-      query_string: {
-        fields: string[],
-        query: string
-      }
-    },
-    // DocumentSearchRequestNestedQuery[] | { term: { refereed: 'Refereed' } }?
-    filter?: unknown
-  }
-}
-
-export interface DocumentSearchRequestBody {
-  _source: {
-    excludes: string[]
-  }
-  from: number
-  size: number
-  query: DocumentSearchRequestQuery
-  highlight: {
-    fields: {
-      _bitstreamText: Record<string, unknown>
-    }
-  }
-  // TODO: Figure out how to type the sort field.
-  // See: https://www.elastic.co/guide/en/elasticsearch/reference/current/sort-search-results.html
-  sort: unknown
-}
