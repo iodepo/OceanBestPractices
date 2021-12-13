@@ -53,8 +53,10 @@ export const openScroll = async (
   return await gotEs(prefixUrl).post(
     `${index}/_search`,
     {
-      json: {
+      searchParams: {
         scroll: `${scrollTimeout}m`,
+      },
+      json: {
         _source: {
           includes,
         },
