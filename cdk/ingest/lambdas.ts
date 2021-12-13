@@ -59,8 +59,7 @@ export default class IngestLambdas extends Construct {
       timeout: Duration.minutes(5),
       environment: {
         DOCUMENT_METADATA_BUCKET: buckets.documentMetadata.bucketName,
-        DOCUMENT_CONTENT_BUCKET: buckets.textExtractorDestination.bucketName,
-        ELASTIC_SEARCH_HOST: elasticsearchDomain.domainEndpoint,
+        OPEN_SEARCH_ENDPOINT: elasticsearchDomain.domainEndpoint,
       },
     });
     buckets.documentMetadata.grantRead(this.indexer);
