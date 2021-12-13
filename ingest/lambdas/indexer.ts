@@ -238,18 +238,12 @@ export const handler = async (event: unknown) => {
 
   const ingestRecords = parseEvent(event);
 
-  // Make sure the documents index exists.
-  const indexExists = await osClient.indexExists(
-    openSearchEndpoint,
-    'documents'
-  );
-
-  // If it doesn't, create it first. If that fails we need to bail because
-  // we can't do anything without the documents index.
-  if (!indexExists) {
-    try {
-      await osClient.createDocumentsIndex(openSearchEndpoint, 'documents');
-    } catch (error) {
+  // Make sure the documents index exists before we create documents. If the
+  // index exists we'll catch the error and move on.
+  try {
+    await osClient.createDocumentsIndex(openSearchEndpoint, 'documents');
+  } catch (error) {
+    if (error !== 'resource_already_exists_exception') {
       console.log(`ERROR: Failed to create documents index: ${error}`);
       throw error;
     }
