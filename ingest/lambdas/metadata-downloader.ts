@@ -21,6 +21,8 @@ export const handler = async (event: unknown) => {
   const dspaceEndpoint = getStringFromEnv('DSPACE_ENDPOINT');
   const dspaceItemBucket = getStringFromEnv('DOCUMENT_METADATA_BUCKET');
 
+  console.log(`INFO: Getting DSpace item with UUID: ${uuid}`);
+
   try {
     const dspaceItem = await dspaceClient.getItem(
       dspaceEndpoint,
@@ -36,9 +38,9 @@ export const handler = async (event: unknown) => {
       dspaceItem
     );
 
-    console.log(`INFO: Successfully uploaded metadata for item: ${dspaceItem.uuid}`);
+    console.log(`INFO: Successfully uploaded DSpace item: ${dspaceItem.uuid}`);
   } catch (error) {
-    console.log(`ERROR: Failed to upload metadata with error: ${error}`);
+    console.log(`ERROR: Failed to upload DSpace item with error: ${error}`);
     throw error;
   }
 };

@@ -36,6 +36,9 @@ describe('metadata-downloader.handler()', () => {
 
     nock('https://dspace.test.com')
       .get('/rest/items/38c7d808-aa26-4ed4-a3e4-3458b989d2d4')
+      .query({
+        expand: 'bitstreams,metadata',
+      })
       .reply(200, mockItem);
 
     const mockEvent = {
@@ -61,6 +64,9 @@ describe('metadata-downloader.handler()', () => {
   test('should throw an error when the a DSpace item with UUID from SNS is not found', async () => {
     nock('https://dspace.test.com')
       .get('/rest/items/38c7d808-aa26-4ed4-a3e4-3458b989d2d4')
+      .query({
+        expand: 'bitstreams,metadata',
+      })
       .reply(404);
 
     const mockEvent = {
@@ -85,6 +91,9 @@ describe('metadata-downloader.handler()', () => {
 
     nock('https://dspace.test.com')
       .get('/rest/items/38c7d808-aa26-4ed4-a3e4-3458b989d2d4')
+      .query({
+        expand: 'bitstreams,metadata',
+      })
       .reply(200, {
         uuid: '38c7d808-aa26-4ed4-a3e4-3458b989d2d4',
         handle: 'abc/123',
