@@ -184,7 +184,7 @@ describe('open-search-client', () => {
             {
               _index: 'terms',
               _type: 'doc',
-              _id: 'http://purl.obolibrary.org/obo/ENVO_00000016',
+              _id: 'ENVO_00000016',
               _score: 0.287_682_1,
               _source: {
                 query: {
@@ -198,12 +198,13 @@ describe('open-search-client', () => {
                   },
                 },
                 source_terminology: 'Environmental Ontology',
+                uri: 'http://purl.obolibrary.org/obo/ENVO_00000016',
               },
             },
             {
               _index: 'terms',
               _type: 'doc',
-              _id: 'http://purl.obolibrary.org/obo/ENVO_00000015',
+              _id: 'ENVO_00000015',
               _score: 0.287_682_1,
               _source: {
                 query: {
@@ -220,6 +221,7 @@ describe('open-search-client', () => {
                 namedGraphUri: {
                   type: 'keyword',
                 },
+                uri: 'http://purl.obolibrary.org/obo/ENVO_00000015',
               },
             },
           ],
@@ -269,7 +271,7 @@ describe('open-search-client', () => {
     test('should add a document item to the documets index', async () => {
       const mockPutDocumentItemResponse: PutDocumentItemResponse = {
         _index: 'documents',
-        _type: 'doc',
+        _type: '_doc',
         _id: '38c7d808-aa26-4ed4-a3e4-3458b989d2d4',
         _version: 1,
         result: 'created',
@@ -283,9 +285,9 @@ describe('open-search-client', () => {
       };
 
       const documentItem = {
-        uuid: 'abc',
-        contents: 'This is some sample content.',
-        name: 'This is a sample name.',
+        uuid: 'cf05c46d-e1aa-4d95-bf44-4e9c0aaa7a37',
+        bitstreamText: 'This is some sample content.',
+        handle: 'handle/123',
         metadata: [{
           key: 'dc.contributor.author',
           value: 'Macovei, Vlad A.',
@@ -296,10 +298,14 @@ describe('open-search-client', () => {
         }],
         lastModified: '2021-11-01 15:10:17.231',
         bitstreams: [],
+        dc_title: 'This is a sample name.',
       };
 
       nock('https://open-search.example.com')
-        .post('/documents/doc/abc', documentItem)
+        .post(
+          '/documents/_doc/cf05c46d-e1aa-4d95-bf44-4e9c0aaa7a37',
+          documentItem
+        )
         .reply(201, mockPutDocumentItemResponse);
 
       const result = await osClient.putDocumentItem(
@@ -512,6 +518,21 @@ describe('open-search-client', () => {
         );
 
         expect(getLewisResult).not.toBeUndefined();
+      });
+    });
+
+    describe('deleteIndex', () => {
+      it('deletes an exisitng index', async () => {
+        const indexName = `index-${cryptoRandomString({ length: 6 })}`;
+        await osClient.createIndex(esUrl, indexName);
+
+        let indexExists = await osClient.indexExists(esUrl, indexName);
+        expect(indexExists).toBeTruthy();
+
+        await osClient.deleteIndex(esUrl, indexName);
+
+        indexExists = await osClient.indexExists(esUrl, indexName);
+        expect(indexExists).toBeFalsy();
       });
     });
   });

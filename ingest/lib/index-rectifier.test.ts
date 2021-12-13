@@ -1,19 +1,32 @@
-// @ts-check
 /* eslint-disable no-underscore-dangle */
-const dspaceClient = require('../../lib/dspace-client');
-const ir = require('./index-rectifier');
+import * as dspaceClient from '../../lib/dspace-client';
+import * as ir from './index-rectifier';
+import { queueIngestDocument } from './ingest-queue';
+import * as osClient from '../../lib/open-search-client';
 
-const osClient = require('../../lib/open-search-client');
-const utils = require('./ingest-queue');
+jest.mock('./ingest-queue');
+
+const mockQueueIngestDocument = queueIngestDocument as jest.MockedFunction<typeof queueIngestDocument>; // eslint-disable-line max-len
+
+jest.mock('../../lib/open-search-client', () => ({
+  bulkDelete: jest.fn(),
+  nextScroll: jest.fn(),
+  openScroll: jest.fn(),
+  closeScroll: jest.fn(),
+}));
+
+jest.mock('../../lib/dspace-client', () => ({
+  getItem: jest.fn(),
+}));
 
 describe('index-rectifier', () => {
   describe('commitUpdatedItems', () => {
     test('should queue updated items for ingest', async () => {
-      utils.queueIngestDocument = jest.fn(async () => ({
+      mockQueueIngestDocument.mockResolvedValue({
         $metadata: {},
         MessageId: 'foo',
         SequenceNumber: '456',
-      }));
+      });
 
       const updatedItems = ['123', '456'];
 
@@ -22,23 +35,23 @@ describe('index-rectifier', () => {
         'arn:ingestTopicArn'
       );
 
-      expect(utils.queueIngestDocument).toBeCalledTimes(2);
-      expect(utils.queueIngestDocument).toBeCalledWith(
+      expect(queueIngestDocument).toBeCalledTimes(2);
+      expect(queueIngestDocument).toBeCalledWith(
         '123',
         'arn:ingestTopicArn',
-        { region: 'us-east-1' }
+        'us-east-1'
       );
-      expect(utils.queueIngestDocument).toBeCalledWith(
+      expect(queueIngestDocument).toBeCalledWith(
         '456',
         'arn:ingestTopicArn',
-        { region: 'us-east-1' }
+        'us-east-1'
       );
     });
   });
 
   describe('commitRemovedItems', () => {
     test('should remove items from the index', async () => {
-      osClient.bulkDelete = jest.fn();
+      (osClient.bulkDelete as jest.Mock).mockImplementation();
 
       const removedItems = ['123', '456'];
 
@@ -67,6 +80,7 @@ describe('index-rectifier', () => {
             checkSum: {
               value: 'f91a9870078dc75784288b41be5f1911',
             },
+            retrieveLink: 'retrieveLink',
           },
         ],
       };
@@ -81,6 +95,7 @@ describe('index-rectifier', () => {
               checkSum: {
                 value: 'f91a9870078dc75784288b41be5f1911',
               },
+              retrieveLink: 'retrieveLink',
             },
           ],
         },
@@ -103,6 +118,7 @@ describe('index-rectifier', () => {
               value: 'f91a9870078dc75784288b41be5f1912',
               checkSumAlgorithm: 'MD5',
             },
+            retrieveLink: 'retrieveLink',
           },
         ],
       };
@@ -121,6 +137,7 @@ describe('index-rectifier', () => {
                 value: 'f91a9870078dc75784288b41be5f1911',
                 checkSumAlgorithm: 'MD5',
               },
+              retrieveLink: 'retrieveLink',
             },
           ],
         },
@@ -143,6 +160,7 @@ describe('index-rectifier', () => {
               value: 'f91a9870078dc75784288b41be5f1911',
               checkSumAlgorithm: 'MD5',
             },
+            retrieveLink: 'retrieveLink',
           },
         ],
       };
@@ -161,6 +179,7 @@ describe('index-rectifier', () => {
                 value: 'f91a9870078dc75784288b41be5f1911',
                 checkSumAlgorithm: 'MD5',
               },
+              retrieveLink: 'retrieveLink',
             },
           ],
         },
@@ -175,8 +194,10 @@ describe('index-rectifier', () => {
       const mockIndexItem1 = {
         _id: '1',
         _source: {
-          uuid: 'a',
+          uuid: '3fdfb55d-6ddb-4a1d-b880-fda542c1529b',
           lastModified: '2021-10-25 12:31:38.543',
+          handle: 'handle/123',
+          dc_title: 'Index Item 1',
           bitstreams: [
             {
               bundleName: 'ORIGINAL',
@@ -186,16 +207,20 @@ describe('index-rectifier', () => {
               checkSum: {
                 value: 'abc',
               },
+              retrieveLink: 'retrieveLink',
             },
           ],
+          metadata: [],
         },
       };
 
       const mockIndexItem2 = {
         _id: '2',
         _source: {
-          uuid: 'b',
+          uuid: '66e3b2a3-fd2f-4300-9d1c-d0836b4e0a8d',
           lastModified: '2021-9-25 12:31:38.543',
+          handle: 'handle/123',
+          dc_title: 'Index Item 2',
           bitstreams: [
             {
               bundleName: 'ORIGINAL',
@@ -205,16 +230,20 @@ describe('index-rectifier', () => {
               checkSum: {
                 value: 'abc',
               },
+              retrieveLink: 'retrieveLink',
             },
           ],
+          metadata: [],
         },
       };
 
       const mockIndexItem3 = {
         _id: '3',
         _source: {
-          uuid: 'c',
+          uuid: 'd013b8a0-718f-49ea-b30d-6788cba8292b',
           lastModified: '2021-8-25 12:31:38.543',
+          handle: 'handle/123',
+          dc_title: 'Index Item 3',
           bitstreams: [
             {
               bundleName: 'ORIGINAL',
@@ -224,16 +253,20 @@ describe('index-rectifier', () => {
               checkSum: {
                 value: 'abc',
               },
+              retrieveLink: 'retrieveLink',
             },
           ],
+          metadata: [],
         },
       };
 
       const mockIndexItem4 = {
         _id: '4',
         _source: {
-          uuid: 'd',
+          uuid: 'dea11c14-1e9a-4ba2-8dbe-e6f9b7adeccb',
           lastModified: '2021-8-25 12:31:38.543',
+          handle: 'handle/123',
+          dc_title: 'Index Item 4',
           bitstreams: [
             {
               bundleName: 'ORIGINAL',
@@ -243,12 +276,14 @@ describe('index-rectifier', () => {
               checkSum: {
                 value: 'abc',
               },
+              retrieveLink: 'retrieveLink',
             },
           ],
+          metadata: [],
         },
       };
 
-      osClient.openScroll = jest.fn().mockImplementation(() => ({
+      (osClient.openScroll as jest.Mock).mockImplementation(() => ({
         _scroll_id: 'mockScrollId1',
         hits: {
           hits: [
@@ -257,8 +292,7 @@ describe('index-rectifier', () => {
         },
       }));
 
-      osClient.nextScroll = jest
-        .fn()
+      (osClient.nextScroll as jest.Mock)
         .mockImplementationOnce(() => ({
           _scroll_id: 'mockScrollId2',
           hits: {
@@ -276,14 +310,15 @@ describe('index-rectifier', () => {
           },
         }));
 
-      osClient.closeScroll = jest.fn().mockImplementation(() => ({
+      (osClient.closeScroll as jest.Mock).mockImplementation(() => ({
         succeeded: true,
         num_freed: 5,
       }));
 
       const mockDSpaceItem1 = {
-        uuid: 'a',
+        uuid: '3fdfb55d-6ddb-4a1d-b880-fda542c1529b',
         lastModified: '2021-10-27 17:52:15.515', // Updated via lastModified.
+        handle: 'handle/123',
         bitstreams: [
           {
             bundleName: 'ORIGINAL',
@@ -293,13 +328,16 @@ describe('index-rectifier', () => {
             checkSum: {
               value: 'abc',
             },
+            retrieveLink: 'retrieveLink',
           },
         ],
+        metadata: [],
       };
 
       const mockDSpaceItem2 = {
-        uuid: 'b',
+        uuid: '66e3b2a3-fd2f-4300-9d1c-d0836b4e0a8d',
         lastModified: '2021-9-25 12:31:38.543',
+        handle: 'handle/123',
         bitstreams: [
           {
             bundleName: 'ORIGINAL',
@@ -309,14 +347,17 @@ describe('index-rectifier', () => {
             checkSum: {
               value: 'cde', // Updated via PDF bistream checkSum.
             },
+            retrieveLink: 'retrieveLink',
           },
         ],
+        metadata: [],
       };
 
       // Not updated.
       const mockDSpaceItem3 = {
-        uuid: 'c',
+        uuid: 'd013b8a0-718f-49ea-b30d-6788cba8292b',
         lastModified: '2021-8-25 12:31:38.543',
+        handle: 'handle/123',
         bitstreams: [
           {
             bundleName: 'ORIGINAL',
@@ -326,12 +367,13 @@ describe('index-rectifier', () => {
             checkSum: {
               value: 'abc',
             },
+            retrieveLink: 'retrieveLink',
           },
         ],
+        metadata: [],
       };
 
-      dspaceClient.getItem = jest
-        .fn()
+      (dspaceClient.getItem as jest.Mock)
         .mockImplementationOnce(() => (mockDSpaceItem1))
         .mockImplementationOnce(() => (mockDSpaceItem2))
         .mockImplementationOnce(() => (mockDSpaceItem3))
@@ -342,8 +384,8 @@ describe('index-rectifier', () => {
       const result = await ir.diff(mockOpenSearchEndpoint, mockDSpaceEndpoint);
 
       expect(result).toEqual({
-        updated: ['a', 'b'],
-        removed: ['d'],
+        updated: ['3fdfb55d-6ddb-4a1d-b880-fda542c1529b', '66e3b2a3-fd2f-4300-9d1c-d0836b4e0a8d'],
+        removed: ['dea11c14-1e9a-4ba2-8dbe-e6f9b7adeccb'],
       });
 
       expect(osClient.openScroll).toHaveBeenCalledTimes(1);

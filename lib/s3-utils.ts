@@ -112,6 +112,17 @@ export const deleteBucket = async (
   await s3().deleteBucket({ Bucket: bucket }).promise();
 };
 
+export const putText = async (
+  s3Location: S3ObjectLocation,
+  body: string
+): Promise<void> => {
+  await s3().putObject({
+    Bucket: s3Location.bucket,
+    Key: s3Location.key,
+    Body: body,
+  }).promise();
+};
+
 export const putJson = async (
   s3Location: S3ObjectLocation,
   body: unknown

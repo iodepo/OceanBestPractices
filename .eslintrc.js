@@ -58,6 +58,7 @@ const config = {
         message: '`with` is disallowed in strict mode because it makes code impossible to predict and optimize.',
       },
     ],
+    'no-return-await': 'off',
     'object-property-newline': [
       'error',
       { allowAllPropertiesOnSameLine: false },

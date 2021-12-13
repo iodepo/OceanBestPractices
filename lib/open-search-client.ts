@@ -10,6 +10,7 @@ import {
   percolateResponseSchema,
   putDocumentItemResponseSchema,
 } from './open-search-schemas';
+import { documentsMapping } from './documents-mapping';
 
 const gotEs = (prefixUrl: string) => got4aws().extend({
   prefixUrl,
@@ -208,7 +209,7 @@ export const percolateDocumentFields = async (
   const { hits: { hits } } = percolateResponse.data;
   return hits.map((h) => ({
     label: h._source.query.multi_match.query,
-    uri: h._id,
+    uri: h._source.uri,
     source_terminology: h._source.source_terminology,
   }));
 };
@@ -262,7 +263,7 @@ export const putDocumentItem = async (
   documentItem: DocumentItem
 ): Promise<PutDocumentItemResponse> => {
   const rawResponse = await gotEs(prefixUrl).post(
-    `documents/doc/${documentItem.uuid}`,
+    `documents/_doc/${documentItem.uuid}`,
     {
       json: documentItem,
     }
@@ -270,6 +271,11 @@ export const putDocumentItem = async (
 
   return putDocumentItemResponseSchema.parse(rawResponse);
 };
+
+export const createDocumentsIndex = (
+  prefixUrl: string,
+  index: string
+): Promise<unknown> => createIndex(prefixUrl, index, documentsMapping);
 
 /**
  * @param prefixUrl
@@ -366,4 +372,11 @@ export const refreshIndex = async (
   index: string
 ): Promise<void> => {
   await gotEs(prefixUrl).post(`${index}/_refresh`);
+};
+
+export const deleteIndex = async (
+  prefixUrl: string,
+  index: string
+): Promise<void> => {
+  await gotEs(prefixUrl).delete(`${index}`);
 };

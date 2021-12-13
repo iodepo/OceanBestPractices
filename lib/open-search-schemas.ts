@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { dspaceItemSchema } from './dspace-schemas';
 
 export const termsItemSchema = z.object({
   query: z.object({
@@ -7,19 +8,10 @@ export const termsItemSchema = z.object({
     }),
   }),
   source_terminology: z.string(),
+  uri: z.string().url(),
 });
 
 export type TermItem = z.infer<typeof termsItemSchema>;
-
-export const bitstreamSchema = z.object({
-  bundleName: z.string(),
-  mimeType: z.string(),
-  checkSum: z.object({
-    value: z.string(),
-  }),
-});
-
-export type Bitstream = z.infer<typeof bitstreamSchema>;
 
 export const documentItemTermSchema = z.object({
   label: z.string(),
@@ -29,11 +21,10 @@ export const documentItemTermSchema = z.object({
 
 export type DocumentItemTerm = z.infer<typeof documentItemTermSchema>;
 
-export const documentItemSchema = z.object({
-  uuid: z.string().uuid(),
-  lastModified: z.string(),
-  bitstreams: z.array(bitstreamSchema),
-  terms: z.optional(z.array(documentItemTermSchema)),
+export const documentItemSchema = dspaceItemSchema.extend({
+  _bitstreamText: z.string().optional(),
+  _terms: z.array(documentItemTermSchema).optional(),
+  dc_title: z.string(),
 });
 
 export type DocumentItem = z.infer<typeof documentItemSchema>;
