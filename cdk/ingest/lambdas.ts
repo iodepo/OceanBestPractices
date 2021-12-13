@@ -81,6 +81,7 @@ export default class IngestLambdas extends Construct {
         INDEXER_FUNCTION_NAME: this.indexer.functionName,
       },
     });
+    buckets.documentMetadata.grantRead(this.bitstreamsDownloader);
     buckets.documentSource.grantWrite(this.bitstreamsDownloader);
     this.indexer.grantInvoke(this.bitstreamsDownloader);
 
