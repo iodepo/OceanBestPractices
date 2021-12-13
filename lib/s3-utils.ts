@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import type S3 from 'aws-sdk/clients/s3';
 import pMap from 'p-map';
+import { Readable } from 'stream';
 import { s3 } from './aws-clients';
 
 export const s3ObjectUrlRegex = new RegExp('^s3://([^/]+)/(.*[^/])$');
@@ -119,5 +120,17 @@ export const putJson = async (
     Bucket: s3Location.bucket,
     Key: s3Location.key,
     Body: JSON.stringify(body),
+  }).promise();
+};
+
+export const uploadStream = async (
+  bucket: string,
+  key: string,
+  stream: Readable
+): Promise<void> => {
+  await s3().upload({
+    Bucket: bucket,
+    Key: key,
+    Body: stream,
   }).promise();
 };
