@@ -91,7 +91,7 @@ export const getItems = async (
   searchParams: GetItemsSearchParams = {}
 ): Promise<DSpaceItem[]> => {
   const {
-    expand = 'none',
+    expand = 'bitstreams,metadata',
     limit = 50,
     offset = 0,
   } = searchParams;
@@ -128,6 +128,9 @@ export const getItem = async (
   try {
     const getItemResponseBody = await got.get(`${endpoint}/rest/items/${uuid}`, {
       ...headers,
+      searchParams: {
+        expand: 'bitstreams,metadata',
+      },
       responseType: 'json',
       resolveBodyOnly: true,
     });
