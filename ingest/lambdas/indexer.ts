@@ -243,7 +243,8 @@ export const handler = async (event: unknown) => {
   try {
     await osClient.createDocumentsIndex(openSearchEndpoint, 'documents');
   } catch (error) {
-    if (error !== 'resource_already_exists_exception') {
+    if (error instanceof Error
+      && error.message !== 'resource_already_exists_exception') {
       console.log(`ERROR: Failed to create documents index: ${error}`);
       throw error;
     }
