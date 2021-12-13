@@ -200,6 +200,74 @@ describe('indexer', () => {
     });
   });
 
+  describe('getPrimaryAuthor', () => {
+    test('should return the first author listed in the DSpace item metadata', () => {
+      const metadata = [
+        {
+          key: 'dc.date.accessioned',
+          value: '2021-07-05T19:56:13Z',
+          language: '',
+          element: 'date',
+          qualifier: 'accessioned',
+          schema: 'dc',
+        },
+        {
+          key: 'dc.date.available',
+          value: '2019-03-08T14:46:45Z',
+          language: '',
+          element: 'date',
+          qualifier: 'available',
+          schema: 'dc',
+        },
+        {
+          key: 'dc.contributor.author',
+          value: 'Paul Pilone',
+          language: '',
+          element: 'text',
+          qualifier: 'available',
+          schema: 'dc',
+        },
+        {
+          key: 'dc.contributor.author',
+          value: 'Marc Huffnagle',
+          language: '',
+          element: 'text',
+          qualifier: 'available',
+          schema: 'dc',
+        },
+      ];
+
+      const result = indexer.getPrimaryAuthor(metadata);
+      expect(result).toEqual({
+        _primaryAuthor: 'Paul Pilone',
+      });
+    });
+
+    test('should return undefined if no author is found in the DSpace item metadata', () => {
+      const metadata = [
+        {
+          key: 'dc.date.accessioned',
+          value: '2021-07-05T19:56:13Z',
+          language: '',
+          element: 'date',
+          qualifier: 'accessioned',
+          schema: 'dc',
+        },
+        {
+          key: 'dc.date.available',
+          value: '2019-03-08T14:46:45Z',
+          language: '',
+          element: 'date',
+          qualifier: 'available',
+          schema: 'dc',
+        },
+      ];
+
+      const result = indexer.getPrimaryAuthor(metadata);
+      expect(result).toBeUndefined();
+    });
+  });
+
   describe('getThumbnailRetrieveLink', () => {
     test('should return the thumbnail retrieve link', () => {
       const bitstreams = [
@@ -342,6 +410,14 @@ describe('indexer', () => {
               {
                 key: 'dc.title',
                 value: 'Hello document with a PDF!',
+              },
+              {
+                key: 'dc.contributor.author',
+                value: 'Paul Pilone',
+              },
+              {
+                key: 'dc.contributor.author',
+                value: 'Marc Huffnagle',
               },
             ],
           }
@@ -563,11 +639,21 @@ describe('indexer', () => {
                 key: 'dc.title',
                 value: 'Hello document with a PDF!',
               },
+              {
+                key: 'dc.contributor.author',
+                value: 'Paul Pilone',
+              },
+              {
+                key: 'dc.contributor.author',
+                value: 'Marc Huffnagle',
+              },
             ],
             dc_title: 'Hello document with a PDF!',
             dc_date_accessioned: '2021-07-05T19:56:13Z',
+            dc_contributor_author: ['Paul Pilone', 'Marc Huffnagle'],
             _bitstreamText: 'Bitstream text for 01ebed91-218a-4465-8a67-f6712ff3cfb7.',
             _bitstreamTextKey: '01ebed91-218a-4465-8a67-f6712ff3cfb7.txt',
+            _primaryAuthor: 'Paul Pilone',
             _terms: [
               {
                 label: 'Hello',
