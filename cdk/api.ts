@@ -19,6 +19,7 @@ interface ApiProps {
   openSearch: IDomain
   region: string
   stackName: string
+  vpc: ec2.IVpc
   websiteDistribution: IDistribution
 }
 
@@ -31,6 +32,7 @@ export default class Api extends Construct {
       openSearch,
       region,
       stackName,
+      vpc,
       websiteDistribution,
     } = props;
 
@@ -105,6 +107,7 @@ export default class Api extends Construct {
     openSearch.grantReadWrite(searchByKeywords);
 
     const sparqlFunction = new Function(this, 'SparqlFunction', {
+      allowPublicSubnet: true,
       functionName: `${stackName}-api-sparql`,
       handler: 'sparql.handler',
       runtime: Runtime.NODEJS_14_X,
@@ -114,6 +117,7 @@ export default class Api extends Construct {
       environment: {
         SPARQL_URL: `https://${neptuneCluster.clusterEndpoint.socketAddress}/sparql`,
       },
+      vpc,
     });
     neptuneCluster.connections.allowDefaultPortFrom(sparqlFunction);
 

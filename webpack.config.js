@@ -14,6 +14,9 @@ const isTestFile = (f) => f.endsWith('.test.js') || f.endsWith('.test.ts');
 /** @type {(f: string) => boolean} */
 const isNotTestFile = _.negate(isTestFile);
 
+/** @type {(f: string) => boolean} */
+const isSourceFile = (f) => f.endsWith('.js') || f.endsWith('.ts');
+
 /**
  * @param {string} entriesPath
  * @param {string} prefix
@@ -23,7 +26,8 @@ const getEntries = async (entriesPath, prefix) => {
   const files = await readdir(entriesPath);
 
   return _(files)
-    .filter(isNotTestFile)
+    .filter((f) => isNotTestFile(f))
+    .filter((f) => isSourceFile(f))
     .map((f) => {
       const { name } = path.parse(f);
 

@@ -81,6 +81,7 @@ export default class ObpStack extends Stack {
       region: this.region,
       neptuneCluster: neptune.neptuneCluster,
       openSearch: openSearch.domain,
+      vpc,
       websiteDistribution: website.cloudfrontDistribution,
     });
   }
