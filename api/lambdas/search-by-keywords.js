@@ -18,8 +18,8 @@ const ontOpts = {
   path: '/sparql',
 };
 
-const DEFAULT_FROM = 0; const
-  DEFAULT_SIZE = 20;
+const DEFAULT_FROM = 0;
+const DEFAULT_SIZE = 20;
 
 /**
  * This function is responsible for handling a keyword search and returning
