@@ -7,41 +7,41 @@
   {
     "label": "AUTHOR",
     "direction": "asc",
-    "filter": "author.raw:asc"
+    "filter": "dc_contributor_author.keyword:asc"
   },
   {
     "label": "AUTHOR",
     "direction": "desc",
-    "filter": "author.raw:desc"
+    "filter": "dc_contributor_author.keyword:desc"
   },
   {
     "label": "PUBLISHER",
     "direction": "asc",
-    "filter": "publisher.raw:asc"
+    "filter": "dc_publisher.keyword:asc"
   },
   {
     "label": "PUBLISHER",
     "direction": "desc",
-    "filter": "publisher.raw:desc"
+    "filter": "dc_publisher.keyword:desc"
   },
   {
     "label": "TITLE",
     "direction": "asc",
-    "filter": "title.raw:asc"
+    "filter": "dc_title.keyword:asc"
   },
   {
     "label": "TITLE",
     "direction": "desc",
-    "filter": "title.raw:desc"
+    "filter": "dc_title.keyword:desc"
   },
   {
     "label": "YEAR",
     "direction": "asc",
-    "filter": "issued_date:asc"
+    "filter": "dc_date_issued:asc"
   },
   {
     "label": "YEAR",
     "direction": "desc",
-    "filter": "issued_date:desc"
+    "filter": "dc_date_issued:desc"
   }
 ]

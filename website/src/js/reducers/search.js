@@ -13,7 +13,7 @@ import {
 const initialState = {
   search: '',
   activeSearch: [],
-  sort: 'issued_date:desc',
+  sort: 'dc_date_issued:desc',
   activePage: undefined,
   activeFilters: {},
   hasErrored: false,
