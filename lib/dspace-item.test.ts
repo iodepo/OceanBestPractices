@@ -4,14 +4,14 @@ import * as dspaceItem from './dspace-item';
 const dspaceResponseObject = {
   bitstreams: [
     {
-      uuid: 'a7df78b6-9d29-4919-a920-c1bddf7be7b0',
       bundleName: 'ORIGINAL',
       mimeType: 'application/pdf',
+      retrieveLink: '/rest/bitstreams/a7df78b6-9d29-4919-a920-c1bddf7be7b0/retrieve',
     },
     {
-      uuid: '5940f3b4-5dd3-4230-ae4e-28b2e2b47339',
       bundleName: 'THUMBNAIL',
       mimeType: 'image/jpeg',
+      retrieveLink: '/rest/bitstreams/5940f3b4-5dd3-4230-ae4e-28b2e2b47339/retrieve',
     },
   ],
   metadata: [
