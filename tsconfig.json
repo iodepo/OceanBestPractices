@@ -28,6 +28,7 @@
     "cdk.out",
     "coverage",
     "dist",
+    "neptune-bulk-loader/docker/dist",
     "oop-web",
     "tmp",
     "website"
