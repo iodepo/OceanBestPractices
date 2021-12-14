@@ -47,6 +47,7 @@ export default class ObpStack extends Stack {
         bastion.privateIp,
         bastion.publicIp,
       ],
+      vpc,
     });
 
     const neptune = new Neptune(this, 'Neptune', {

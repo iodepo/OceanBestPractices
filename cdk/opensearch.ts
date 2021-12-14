@@ -1,12 +1,14 @@
 import { Construct, RemovalPolicy } from '@aws-cdk/core';
 import { Domain, EngineVersion } from '@aws-cdk/aws-opensearchservice';
 import { AnyPrincipal, Effect, PolicyStatement } from '@aws-cdk/aws-iam';
+import * as ec2 from '@aws-cdk/aws-ec2';
 
 interface OpenSearchProps {
   deletionProtection: boolean
-  stackName: string
+  stackName?: string
   allowFromIps?: string[]
-  searchNodeType?: string
+  searchNodeType?: string,
+  vpc: ec2.IVpc
 }
 
 export default class OpenSearch extends Construct {
@@ -17,9 +19,9 @@ export default class OpenSearch extends Construct {
 
     const {
       deletionProtection,
-      stackName,
       allowFromIps = [],
       searchNodeType = 't3.small.search',
+      vpc,
     } = props;
 
     const accessPolicies: PolicyStatement[] = [];
@@ -44,7 +46,6 @@ export default class OpenSearch extends Construct {
       : RemovalPolicy.DESTROY;
 
     this.domain = new Domain(this, 'OpenSearch', {
-      domainName: stackName,
       version: EngineVersion.ELASTICSEARCH_7_10,
       capacity: {
         dataNodeInstanceType: searchNodeType,
@@ -53,6 +54,8 @@ export default class OpenSearch extends Construct {
       advancedOptions: { 'rest.action.multi.allow_explicit_index': 'true' },
       accessPolicies,
       removalPolicy,
+      vpc,
+      vpcSubnets: [{ subnetType: ec2.SubnetType.PUBLIC }],
     });
   }
 }
