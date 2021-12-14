@@ -535,5 +535,17 @@ describe('open-search-client', () => {
         expect(indexExists).toBeFalsy();
       });
     });
+
+    describe('getCount', () => {
+      it.only('returns the number of documents in an index', async () => {
+        const indexName = `index-${cryptoRandomString({ length: 6 })}`;
+        await osClient.addDocument(esUrl, indexName, { foo: 'bar' });
+
+        const count = await osClient.getCount(esUrl, indexName);
+        expect(count).toEqual(1);
+
+        await osClient.deleteIndex(esUrl, indexName);
+      });
+    });
   });
 });
