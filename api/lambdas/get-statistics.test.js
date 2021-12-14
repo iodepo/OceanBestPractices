@@ -5,7 +5,19 @@ const osClient = require('../../lib/open-search-client');
 const openSearchEndpoint = 'http://localhost:9200';
 
 describe('get-statistics.handler', () => {
+  /** @type {string | undefined} */
+  let awsAccessKeyIdBefore;
+
+  /** @type {string | undefined} */
+  let awsSecretAccessKey;
+
   beforeAll(async () => {
+    awsAccessKeyIdBefore = process.env['AWS_ACCESS_KEY_ID'];
+    process.env['AWS_ACCESS_KEY_ID'] = 'test-key-id';
+
+    awsSecretAccessKey = process.env['AWS_SECRET_ACCESS_KEY'];
+    process.env['AWS_SECRET_ACCESS_KEY'] = 'test-access-key';
+
     process.env['OPEN_SEARCH_ENDPOINT'] = openSearchEndpoint;
 
     nock.disableNetConnect();
@@ -31,6 +43,9 @@ describe('get-statistics.handler', () => {
     await osClient.deleteIndex(openSearchEndpoint, 'terms');
 
     nock.enableNetConnect();
+
+    process.env['AWS_ACCESS_KEY_ID'] = awsAccessKeyIdBefore;
+    process.env['AWS_SECRET_ACCESS_KEY'] = awsSecretAccessKey;
   });
 
   test('should return a successful response', async () => {
