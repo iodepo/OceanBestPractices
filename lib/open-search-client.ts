@@ -7,6 +7,7 @@ import {
   DocumentItemTerm,
   PutDocumentItemResponse,
   closeScrollResponseSchema,
+  countResponseSchema,
   percolateResponseSchema,
   putDocumentItemResponseSchema,
 } from './open-search-schemas';
@@ -381,4 +382,14 @@ export const deleteIndex = async (
   index: string
 ): Promise<void> => {
   await gotEs(prefixUrl).delete(`${index}`);
+};
+
+export const getCount = async (
+  prefixUrl: string,
+  index: string
+): Promise<number> => {
+  const rawResult = await gotEs(prefixUrl).get(`${index}/_count`);
+  const result = countResponseSchema.parse(rawResult);
+
+  return result.count;
 };
