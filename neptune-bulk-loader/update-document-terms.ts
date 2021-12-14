@@ -29,9 +29,9 @@ const updateDocumentTerms = async (
 ): Promise<void> => {
   const hit = hitSchema.parse(rawHit);
 
-  if (hit._source._bitstreamText === undefined) return;
+  const title = hit._source.dc_title;
 
-  const { dc_title: title, _bitstreamText: contents } = hit._source;
+  const contents = hit._source._bitstreamText ?? title;
 
   const terms = await getTerms(esUrl, title, contents);
 
