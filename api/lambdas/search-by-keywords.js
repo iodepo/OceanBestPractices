@@ -3,7 +3,7 @@ const AWS = require('aws-sdk');
 const creds = new AWS.EnvironmentCredentials('AWS');
 const region = process.env.REGION || 'us-east-1';
 
-const http = require('http');
+const https = require('https');
 
 const esOpts = {
   host: process.env.ELASTIC_SEARCH_HOST,
@@ -418,7 +418,7 @@ function getSynonyms(keywords) {
   const promises = [];
   for (const k of keywords) {
     const queryPromise = new Promise((resolve, reject) => {
-      http.get(buildSynonymsQueryOpts(buildSynonymsQuery(k)), (res) => {
+      https.get(buildSynonymsQueryOpts(buildSynonymsQuery(k)), (res) => {
         let body = '';
 
         res.on('data', (chunk) => {
