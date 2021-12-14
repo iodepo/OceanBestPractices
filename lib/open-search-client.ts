@@ -1,6 +1,8 @@
 /* eslint-disable no-underscore-dangle */
 import got4aws from 'got4aws';
 import { get } from 'lodash';
+import pMap from 'p-map';
+import { z } from 'zod';
 import {
   CloseScrollResponse,
   DocumentItem,
@@ -381,4 +383,69 @@ export const deleteIndex = async (
   index: string
 ): Promise<void> => {
   await gotEs(prefixUrl).delete(`${index}`);
+};
+
+const scrollResponseSchema = z.object({
+  _scroll_id: z.string(),
+  hits: z.object({
+    hits: z.array(z.unknown()),
+  }),
+});
+
+/**
+ * Iterate over ElasticSearch Scroll API hits, applying `f` to each hit.
+ */
+export const scrollMap = async (params: {
+  esUrl: string,
+  index: string,
+  handler: (i: unknown) => Promise<void>,
+  pMapOptions?: pMap.Options,
+  scrollOptions?: OpenScrollOptions
+}): Promise<void> => {
+  const {
+    esUrl,
+    index,
+    handler: f,
+    pMapOptions,
+    scrollOptions,
+  } = params;
+
+  const rawOpenScrollResponse = await openScroll(esUrl, index, scrollOptions);
+
+  const openScrollResponse = scrollResponseSchema.parse(rawOpenScrollResponse);
+
+  const scrollId = openScrollResponse._scroll_id;
+
+  let { hits } = openScrollResponse.hits;
+
+  let ctr = 0;
+
+  try {
+    /* eslint-disable no-await-in-loop */
+    while (hits.length > 0 && ctr < 2) {
+      await pMap(hits, f, pMapOptions);
+
+      const nextScrollResponse = scrollResponseSchema.parse(
+        await nextScroll(esUrl, scrollId)
+      );
+
+      hits = nextScrollResponse.hits.hits;
+
+      ctr += 1;
+    }
+    /* eslint-enable no-await-in-loop */
+  } finally {
+    await closeScroll(esUrl, scrollId);
+  }
+};
+
+export const updateDocument = async (
+  esUrl: string,
+  index: string,
+  id: string,
+  doc?: unknown
+): Promise<void> => {
+  const json = { doc };
+
+  await gotEs(esUrl).post(`${index}/_update/${id}`, { json });
 };

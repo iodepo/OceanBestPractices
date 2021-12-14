@@ -97,6 +97,7 @@ export default class Neptune extends Construct {
         NEPTUNE_URL: neptuneUrl,
         ES_URL: openSearch.domainEndpoint,
         ES_TERMS_INDEX: 'terms',
+        ES_DOCUMENTS_INDEX: 'documents',
       },
       logging: ecs.LogDriver.awsLogs({
         streamPrefix: `${stackName}-neptune-bulk-loader`,
