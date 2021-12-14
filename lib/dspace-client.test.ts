@@ -96,6 +96,9 @@ This is a new line!
 
       nock('https://repository.oceanbestpractices.org')
         .get('/rest/items/abc123')
+        .query({
+          expand: 'bitstreams,metadata',
+        })
         .reply(200, mockItem);
 
       const item = await dspaceClient.getItem('https://repository.oceanbestpractices.org', 'abc123');
@@ -105,6 +108,9 @@ This is a new line!
     test('should return undefined if the item is not found', async () => {
       nock('https://repository.oceanbestpractices.org')
         .get('/rest/items/b5789ae4-611a-4c6e-8b23-67e29cf01e31')
+        .query({
+          expand: 'bitstreams,metadata',
+        })
         .reply(404);
 
       // This is a valid format for a UUID but the item doesn't exist.
@@ -139,7 +145,7 @@ This is a new line!
       nock('https://repository.oceanbestpractices.org')
         .get('/rest/items')
         .query({
-          expand: 'none',
+          expand: 'bitstreams,metadata',
           limit: 50,
           offset: 0,
         })

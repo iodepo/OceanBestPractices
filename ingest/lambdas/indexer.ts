@@ -199,6 +199,8 @@ const index = async (
   dspaceItemBucket: string,
   openSearchEndpoint: string
 ): Promise<void> => {
+  console.log(`INFO: Indexing from ingest record: ${JSON.stringify(ingestRecord)}`);
+
   // Get the DSpace item that starts this all off.
   const dspaceItem = await getDSpaceItemFields(
     dspaceItemBucket,
@@ -271,6 +273,20 @@ export const handler = async (event: unknown) => {
       console.log(`ERROR: Failed to create documents index: ${error}`);
       throw error;
     }
+
+    console.log('INFO: Documents index already exists. Didn\'t need to create it.');
+  }
+
+  try {
+    await osClient.createTermsIndex(openSearchEndpoint, 'terms');
+  } catch (error) {
+    if (error instanceof Error
+      && error.message !== 'resource_already_exists_exception') {
+      console.log(`ERROR: Failed to create terms index: ${error}`);
+      throw error;
+    }
+
+    console.log('INFO: Terms index already exists. Didn\'t need to create it.');
   }
 
   await pMap(
