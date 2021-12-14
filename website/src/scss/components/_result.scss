@@ -101,6 +101,7 @@
   display: inline;
   height: 1.5rem;
   margin-right: .5em;
+  margin-top: .5rem;
   border-radius: 4px;
   cursor: pointer;
   padding: .25rem .5rem;
@@ -160,6 +161,21 @@
       font-size: 0.85rem;
       margin-left: -5px;
       margin-right: 5px;
+    }
+  }
+
+  &.inverted {
+    padding: 0.19rem 1rem;
+    background-color: white;
+    border: solid 1px $primary-blue;
+
+    span {
+      color: $primary-blue
+    }
+
+    &:hover, &:focus {
+      background-color: white;
+      color: $primary-blue-dark !important;
     }
   }
 }

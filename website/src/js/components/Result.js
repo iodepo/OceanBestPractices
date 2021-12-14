@@ -14,10 +14,33 @@ class Result extends Component {
       id: props.id,
       showCitation: false,
       showDocument: false,
-      resultSelected: props.resultSelected || false
+      resultSelected: props.resultSelected || false,
+      statisticsUrl: null
     }
 
     this.handleResultCheck = this.handleResultCheck.bind(this);
+  }
+
+  componentDidMount() {
+    const { handle } = this.props;
+
+    if (handle) {
+      const statisticsUrl = this.formatStatisticsUrl(handle);
+
+      this.setState((prevState) => ({
+        ...prevState,
+        statisticsUrl
+      }));
+    }
+  }
+
+  /**
+   * formats handle from metadata to full url
+   * @param {string} handle - handle from search result metadata
+   * @returns {string}
+   */
+  formatStatisticsUrl(handle) {
+    return `https://repository.oceanbestpractices.org/handle/${handle}/statistics`
   }
   
   hashLinkScroll() {
@@ -147,6 +170,25 @@ class Result extends Component {
       )
     }
 
+    // Don't show statistics button if no handle exists in the metadata
+    let statistics_button = null;
+    if (this.state.statisticsUrl) {
+      statistics_button = (
+        <a
+          className="result__button inverted"
+          href={this.state.statisticsUrl}
+          target="_blank"
+        >
+          <span className="result__button-icon">
+            <i className="fa fa-bar-chart-o"/>
+          </span>
+          <span>
+            View Statistics
+          </span>
+        </a>
+      )
+    }
+
     return (
 
         <article className="result">
@@ -188,8 +230,11 @@ class Result extends Component {
                   <span className={toggleLabelClassName}></span>
                 </a>
               </Superlink>
+
               {document_button}
               {citation_button}
+              {statistics_button}
+
               <span className="result__publisher-data">{this.props.publisher}</span>
             </div>
             { showCitation
