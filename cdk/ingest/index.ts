@@ -9,16 +9,18 @@ import {
 import { IFunction } from '@aws-cdk/aws-lambda';
 import { IDistribution } from '@aws-cdk/aws-cloudfront';
 import { IDomain } from '@aws-cdk/aws-opensearchservice';
+import { IConnectable, IVpc } from '@aws-cdk/aws-ec2';
 import IngestLambdas from './lambdas';
 import IngestSnsTopics from './sns-topics';
 import IngestBuckets from './buckets';
 
 interface IngestProps {
-  openSearch: IDomain
+  openSearch: IDomain & IConnectable
   stackName: string
   feedReadInterval?: number
   textExtractorFunction: IFunction
   websiteDistribution: IDistribution
+  vpc: IVpc
 }
 
 export default class Ingest extends Construct {
@@ -31,6 +33,7 @@ export default class Ingest extends Construct {
       stackName,
       textExtractorFunction,
       websiteDistribution,
+      vpc,
     } = props;
 
     const buckets = new IngestBuckets(this, 'Buckets', {
@@ -47,6 +50,7 @@ export default class Ingest extends Construct {
       snsTopics,
       stackName,
       textExtractorFunction,
+      vpc,
     });
 
     // Invoke the scheduler function every 5 minutes

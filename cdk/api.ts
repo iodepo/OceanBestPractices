@@ -40,6 +40,7 @@ export default class Api extends Construct {
     const neptunePort = Token.asString(neptuneCluster.clusterEndpoint.port);
 
     const documentPreview = new Function(this, 'DocumentPreview', {
+      allowPublicSubnet: true,
       functionName: `${stackName}-api-document-preview`,
       handler: 'lambda.handler',
       runtime: Runtime.NODEJS_14_X,
@@ -47,7 +48,9 @@ export default class Api extends Construct {
       description: 'Returns the result of running our Ontology term tagging routine against the given document body and title.',
       timeout: Duration.seconds(100),
       environment: { ELASTIC_SEARCH_HOST: openSearch.domainEndpoint },
+      vpc,
     });
+    openSearch.connections.allowFrom(documentPreview, ec2.Port.tcp(443));
     openSearch.grantRead(documentPreview);
 
     const getStatistics = new Function(this, 'GetStatistics', {
@@ -115,6 +118,7 @@ export default class Api extends Construct {
       vpc,
     });
     neptuneCluster.connections.allowDefaultPortFrom(searchByKeywords);
+    openSearch.connections.allowFrom(searchByKeywords, ec2.Port.tcp(443));
     openSearch.grantReadWrite(searchByKeywords);
 
     const sparqlFunction = new Function(this, 'SparqlFunction', {

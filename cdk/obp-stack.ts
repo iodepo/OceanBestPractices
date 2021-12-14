@@ -73,6 +73,7 @@ export default class ObpStack extends Stack {
       stackName: this.stackName,
       textExtractorFunction,
       websiteDistribution: website.cloudfrontDistribution,
+      vpc,
     });
 
     new Api(this, 'Api', {
