@@ -1348,6 +1348,7 @@ html {
   display: inline;
   height: 1.5rem;
   margin-right: .5em;
+  margin-top: .5rem;
   border-radius: 4px;
   cursor: pointer;
   padding: .25rem .5rem;
@@ -1388,6 +1389,15 @@ html {
         font-size: 0.85rem;
         margin-left: -5px;
         margin-right: 5px; } }
+  .result__button.inverted {
+    padding: 0.19rem 1rem;
+    background-color: white;
+    border: solid 1px #0068B3; }
+    .result__button.inverted span {
+      color: #0068B3; }
+    .result__button.inverted:hover, .result__button.inverted:focus {
+      background-color: white;
+      color: #005897 !important; }
 
 .result__tag-button--is-active {
   background-color: white;
