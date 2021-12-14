@@ -57,9 +57,7 @@ export default class Api extends Construct {
       code: Code.fromAsset(path.join(lambdasPath, 'get-statistics')),
       description: 'Returns general statistics about the OBP index size and ontology count.',
       environment: {
-        ELASTIC_SEARCH_HOST: openSearch.domainEndpoint,
-        ONTOLOGY_STORE_HOST: neptuneHostname,
-        ONTOLOGY_STORE_PORT: neptunePort,
+        OPEN_SEARCH_ENDPOINT: openSearch.domainEndpoint,
       },
     });
     openSearch.grantRead(getStatistics);
