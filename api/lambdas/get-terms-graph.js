@@ -7,7 +7,7 @@
 
 const AWS = require('aws-sdk');
 
-const http = require('http');
+const https = require('https');
 
 const ontology = {
   host: process.env.ONTOLOGY_STORE_HOST,
@@ -125,7 +125,7 @@ function queryOpts(query) {
  * neighborhood query.
  */
 function executeQuery(query, callback) {
-  http.get(queryOpts(query), (res) => {
+  https.get(queryOpts(query), (res) => {
     let body = '';
 
     res.on('data', (chunk) => {
