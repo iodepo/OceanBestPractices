@@ -540,6 +540,7 @@ describe('open-search-client', () => {
       it.only('returns the number of documents in an index', async () => {
         const indexName = `index-${cryptoRandomString({ length: 6 })}`;
         await osClient.addDocument(esUrl, indexName, { foo: 'bar' });
+        await osClient.refreshIndex(esUrl, indexName);
 
         const count = await osClient.getCount(esUrl, indexName);
         expect(count).toEqual(1);
