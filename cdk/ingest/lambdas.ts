@@ -49,6 +49,7 @@ export default class IngestLambdas extends Construct {
     } = props;
 
     const dspaceEndpoint = 'https://repository.oceanbestpractices.org';
+    const openSearchEndpoint = `https://${elasticsearchDomain.domainEndpoint}`;
 
     this.indexer = new Function(this, 'Indexer', {
       functionName: `${stackName}-ingest-indexer`,
@@ -59,7 +60,7 @@ export default class IngestLambdas extends Construct {
       timeout: Duration.minutes(5),
       environment: {
         DOCUMENT_METADATA_BUCKET: buckets.documentMetadata.bucketName,
-        OPEN_SEARCH_ENDPOINT: elasticsearchDomain.domainEndpoint,
+        OPEN_SEARCH_ENDPOINT: openSearchEndpoint,
       },
     });
     buckets.documentMetadata.grantRead(this.indexer);
@@ -137,7 +138,7 @@ export default class IngestLambdas extends Construct {
       timeout: Duration.minutes(15),
       environment: {
         INGEST_TOPIC_ARN: snsTopics.availableDocument.topicArn,
-        OPEN_SEARCH_ENDPOINT: elasticsearchDomain.domainEndpoint,
+        OPEN_SEARCH_ENDPOINT: openSearchEndpoint,
         DSPACE_ENDPOINT: dspaceEndpoint,
       },
     });
