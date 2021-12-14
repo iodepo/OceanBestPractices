@@ -2,13 +2,24 @@
 import nock from 'nock';
 import cryptoRandomString from 'crypto-random-string';
 import { get } from 'lodash';
-
+import { toMatchZodSchema } from './jest-matchers';
 import * as osClient from './open-search-client';
-import { PutDocumentItemResponse } from './open-search-schemas';
+import {
+  closeScrollResponseSchema,
+  openSearchScrollDocumentsResponseSchema,
+  PutDocumentItemResponse,
+} from './open-search-schemas';
+
+expect.extend({ toMatchZodSchema });
+
+const esUrl = 'http://localhost:9200';
+
+const randomIndexName = () => `index-${cryptoRandomString({ length: 6 })}`;
 
 describe('open-search-client', () => {
   let awsAccessKeyIdBefore: string | undefined;
   let awsSecretAccessKey: string | undefined;
+  let index: string;
 
   beforeAll(() => {
     awsAccessKeyIdBefore = process.env['AWS_ACCESS_KEY_ID'];
@@ -19,18 +30,19 @@ describe('open-search-client', () => {
 
     nock.disableNetConnect();
 
-    nock.enableNetConnect((host) => {
-      const [hostname, port] = host.split(':');
-
-      if (port === undefined) throw new Error('Expected a local stack or ES port.');
-
-      return hostname === 'localhost'
-        && ['4566', '9200'].includes(port);
-    });
+    nock.enableNetConnect('localhost');
   });
 
-  afterEach(() => {
+  beforeEach(async () => {
+    index = randomIndexName();
+
+    await osClient.createIndex(esUrl, index);
+  });
+
+  afterEach(async () => {
     nock.cleanAll();
+
+    await osClient.deleteIndex(esUrl, index);
   });
 
   afterAll(() => {
@@ -42,70 +54,40 @@ describe('open-search-client', () => {
 
   describe('openScroll', () => {
     test('should return scrolled search results', async () => {
-      nock('https://open-search.example.com')
-        .post('/documents/_search')
-        .reply(200, {
-          _scroll_id: 'mockScrollId1',
-          hits: {
-            hits: [], // We don't actually care about faking hits.
-          },
-        });
-      const result = await osClient.openScroll(
-        'https://open-search.example.com',
-        'documents',
-        { size: 2 }
-      );
+      const response = await osClient.openScroll(esUrl, index, { size: 2 });
 
-      expect(result).toEqual({
-        _scroll_id: 'mockScrollId1',
-        hits: {
-          hits: [], // We don't actually care about faking hits.
-        },
-      });
+      expect(response)
+        .toMatchZodSchema(openSearchScrollDocumentsResponseSchema);
     });
   });
 
   describe('nextScroll', () => {
     test('should return scrolled results for an existing scroll', async () => {
-      nock('https://open-search.example.com')
-        .post('/_search/scroll')
-        .reply(200, {
-          _scroll_id: 'mockScrollId1',
-          hits: {
-            hits: [], // We don't actually care about faking hits.
-          },
-        });
+      const openScrollResponse = openSearchScrollDocumentsResponseSchema.parse(
+        await osClient.openScroll(esUrl, index)
+      );
 
       const result = await osClient.nextScroll(
-        'https://open-search.example.com',
-        'mockScrollId1'
+        esUrl,
+        openScrollResponse._scroll_id
       );
-      expect(result).toEqual({
-        _scroll_id: 'mockScrollId1',
-        hits: {
-          hits: [], // We don't actually care about faking hits.
-        },
-      });
+
+      expect(result).toMatchZodSchema(openSearchScrollDocumentsResponseSchema);
     });
   });
 
   describe('closeScroll', () => {
     test('should close an open scroll', async () => {
-      nock('https://open-search.example.com')
-        .delete('/_search/scroll/mockScrollId1')
-        .reply(200, {
-          succeeded: true,
-          num_freed: 5,
-        });
-
-      const result = await osClient.closeScroll(
-        'https://open-search.example.com',
-        'mockScrollId1'
+      const openScrollResponse = openSearchScrollDocumentsResponseSchema.parse(
+        await osClient.openScroll(esUrl, index)
       );
-      expect(result).toEqual({
-        succeeded: true,
-        num_freed: 5,
-      });
+
+      const response = await osClient.closeScroll(
+        esUrl,
+        openScrollResponse._scroll_id
+      );
+
+      expect(response).toMatchZodSchema(closeScrollResponseSchema);
     });
   });
 
@@ -317,223 +299,194 @@ describe('open-search-client', () => {
     });
   });
 
-  describe('using localstack', () => {
-    const esUrl = 'http://localhost:9200';
-
-    describe('indexExists()', () => {
-      it('returns true if the index exists', async () => {
-        const indexName = `index-${cryptoRandomString({ length: 6 })}`;
-
-        await osClient.createIndex(esUrl, indexName);
-
-        expect(await osClient.indexExists(esUrl, indexName)).toBe(true);
-      });
-
-      it('returns false if the index does not exist', async () => {
-        const indexName = `index-${cryptoRandomString({ length: 6 })}`;
-
-        expect(await osClient.indexExists(esUrl, indexName)).toBe(false);
-      });
+  describe('indexExists()', () => {
+    it('returns true if the index exists', async () => {
+      expect(await osClient.indexExists(esUrl, index)).toBe(true);
     });
 
-    describe('createIndex()', () => {
-      it('creates the requested index', async () => {
-        const indexName = `index-${cryptoRandomString({ length: 6 })}`;
+    it('returns false if the index does not exist', async () => {
+      expect(await osClient.indexExists(esUrl, 'does-not-exist')).toBe(false);
+    });
+  });
 
-        await osClient.createIndex(esUrl, indexName);
+  describe('createIndex()', () => {
+    it('creates the requested index', async () => {
+      const indexName = randomIndexName();
 
-        expect(await osClient.indexExists(esUrl, indexName)).toBe(true);
-      });
+      await osClient.createIndex(esUrl, indexName);
 
-      it('throws an Error if the index already exists', async () => {
-        const indexName = `index-${cryptoRandomString({ length: 6 })}`;
-
-        await osClient.createIndex(esUrl, indexName);
-
-        const promisedResult = osClient.createIndex(esUrl, indexName);
-
-        await expect(promisedResult)
-          .rejects.toThrow('resource_already_exists_exception');
-      });
+      expect(await osClient.indexExists(esUrl, indexName)).toBe(true);
     });
 
-    describe('createTermsIndex()', () => {
-      it('creates the expected index mappings', async () => {
-        const indexName = `index-${cryptoRandomString({ length: 6 })}`;
+    it('throws an Error if the index already exists', async () => {
+      const promisedResult = osClient.createIndex(esUrl, index);
 
-        await osClient.createTermsIndex(esUrl, indexName);
+      await expect(promisedResult)
+        .rejects.toThrow('resource_already_exists_exception');
+    });
+  });
 
-        const createdIndex = await osClient.getIndex(esUrl, indexName);
+  describe('createTermsIndex()', () => {
+    it('creates the expected index mappings', async () => {
+      const indexName = randomIndexName();
 
-        const createdMappings = get(createdIndex, [indexName, 'mappings']);
+      await osClient.createTermsIndex(esUrl, indexName);
 
-        expect(createdMappings).toEqual({
-          properties: {
-            contents: {
-              type: 'text',
-            },
-            query: {
-              type: 'percolator',
-            },
-            title: {
-              type: 'text',
-            },
-            source_terminology: {
-              type: 'keyword',
-            },
-            namedGraphUri: {
-              type: 'keyword',
-            },
-            uri: {
-              type: 'keyword',
-            },
+      const createdIndex = await osClient.getIndex(esUrl, indexName);
+
+      const createdMappings = get(createdIndex, [indexName, 'mappings']);
+
+      expect(createdMappings).toEqual({
+        properties: {
+          contents: {
+            type: 'text',
           },
-        });
-      });
-
-      it('throws an Error if the index already exists', async () => {
-        const indexName = `index-${cryptoRandomString({ length: 6 })}`;
-
-        await osClient.createTermsIndex(esUrl, indexName);
-
-        const promisedResult = osClient.createIndex(esUrl, indexName);
-
-        await expect(promisedResult)
-          .rejects.toThrow('resource_already_exists_exception');
-      });
-    });
-
-    describe('addDocument()', () => {
-      it('inserts a document', async () => {
-        const indexName = `index-${cryptoRandomString({ length: 6 })}`;
-
-        const doc = { name: 'Lewis' };
-
-        const addDocumentResponse = await osClient.addDocument(
-          esUrl,
-          indexName,
-          doc
-        );
-
-        const getDocumentResponse = await osClient.getDocument(
-          esUrl,
-          indexName,
-          // @ts-expect-error We aren't checking this type
-          addDocumentResponse._id
-        );
-
-        // @ts-expect-error We aren't checking this type
-        expect(getDocumentResponse._source).toEqual(doc);
-      });
-    });
-
-    describe('getDocument()', () => {
-      it('returns the expected document', async () => {
-        const indexName = `index-${cryptoRandomString({ length: 6 })}`;
-
-        const doc = { name: 'Lewis' };
-
-        const addDocumentResponse = await osClient.addDocument(
-          esUrl,
-          indexName,
-          doc
-        );
-
-        const getDocumentResponse = await osClient.getDocument(
-          esUrl,
-          indexName,
-          // @ts-expect-error We aren't checking this type
-          addDocumentResponse._id
-        );
-
-        // @ts-expect-error We aren't checking this type
-        expect(getDocumentResponse._id).toEqual(addDocumentResponse._id);
-        // @ts-expect-error We aren't checking this type
-        expect(getDocumentResponse._source).toEqual(doc);
-      });
-
-      it('returns undefined if the document does not exist', async () => {
-        const indexName = `index-${cryptoRandomString({ length: 6 })}`;
-
-        const getDocumentResponse = await osClient.getDocument(
-          esUrl,
-          indexName,
-          'does-not-exist'
-        );
-
-        expect(getDocumentResponse).toBeUndefined();
-      });
-    });
-
-    describe('deleteByQuery()', () => {
-      it('deletes a document that matches the query', async () => {
-        const indexName = `index-${cryptoRandomString({ length: 6 })}`;
-
-        // @ts-expect-error We aren't checking this type
-        const { _id: maxId } = await osClient.addDocument(
-          esUrl,
-          indexName,
-          { name: 'Max' }
-        );
-
-        await osClient.refreshIndex(esUrl, indexName);
-
-        await osClient.deleteByQuery(esUrl, indexName, {
-          match: {
-            name: 'Max',
+          query: {
+            type: 'percolator',
           },
-        });
-
-        const getMaxResult = await osClient.getDocument(
-          esUrl,
-          indexName,
-          maxId
-        );
-
-        expect(getMaxResult).toBeUndefined();
-      });
-
-      it("does not delete a document that doesn't match the query", async () => {
-        const indexName = `index-${cryptoRandomString({ length: 6 })}`;
-
-        // @ts-expect-error We aren't checking this type
-        const { _id: maxId } = await osClient.addDocument(
-          esUrl,
-          indexName,
-          { name: 'Lewis' }
-        );
-
-        await osClient.refreshIndex(esUrl, indexName);
-
-        await osClient.deleteByQuery(esUrl, indexName, {
-          match: {
-            name: 'Max',
+          title: {
+            type: 'text',
           },
-        });
-
-        const getLewisResult = await osClient.getDocument(
-          esUrl,
-          indexName,
-          maxId
-        );
-
-        expect(getLewisResult).not.toBeUndefined();
+          source_terminology: {
+            type: 'keyword',
+          },
+          namedGraphUri: {
+            type: 'keyword',
+          },
+          uri: {
+            type: 'keyword',
+          },
+        },
       });
     });
 
-    describe('deleteIndex', () => {
-      it('deletes an exisitng index', async () => {
-        const indexName = `index-${cryptoRandomString({ length: 6 })}`;
-        await osClient.createIndex(esUrl, indexName);
+    it('throws an Error if the index already exists', async () => {
+      const promisedResult = osClient.createTermsIndex(esUrl, index);
 
-        let indexExists = await osClient.indexExists(esUrl, indexName);
-        expect(indexExists).toBeTruthy();
+      await expect(promisedResult)
+        .rejects.toThrow('resource_already_exists_exception');
+    });
+  });
 
-        await osClient.deleteIndex(esUrl, indexName);
+  describe('addDocument()', () => {
+    it('inserts a document', async () => {
+      const doc = { name: 'Lewis' };
 
-        indexExists = await osClient.indexExists(esUrl, indexName);
-        expect(indexExists).toBeFalsy();
+      const addDocumentResponse = await osClient.addDocument(
+        esUrl,
+        index,
+        doc
+      );
+
+      const getDocumentResponse = await osClient.getDocument(
+        esUrl,
+        index,
+        // @ts-expect-error We aren't checking this type
+        addDocumentResponse._id
+      );
+
+      // @ts-expect-error We aren't checking this type
+      expect(getDocumentResponse._source).toEqual(doc);
+    });
+  });
+
+  describe('getDocument()', () => {
+    it('returns the expected document', async () => {
+      const doc = { name: 'Lewis' };
+
+      const addDocumentResponse = await osClient.addDocument(
+        esUrl,
+        index,
+        doc
+      );
+
+      const getDocumentResponse = await osClient.getDocument(
+        esUrl,
+        index,
+        // @ts-expect-error We aren't checking this type
+        addDocumentResponse._id
+      );
+
+      // @ts-expect-error We aren't checking this type
+      expect(getDocumentResponse._id).toEqual(addDocumentResponse._id);
+      // @ts-expect-error We aren't checking this type
+      expect(getDocumentResponse._source).toEqual(doc);
+    });
+
+    it('returns undefined if the document does not exist', async () => {
+      const getDocumentResponse = await osClient.getDocument(
+        esUrl,
+        index,
+        'does-not-exist'
+      );
+
+      expect(getDocumentResponse).toBeUndefined();
+    });
+  });
+
+  describe('deleteByQuery()', () => {
+    it('deletes a document that matches the query', async () => {
+      // @ts-expect-error We aren't checking this type
+      const { _id: maxId } = await osClient.addDocument(
+        esUrl,
+        index,
+        { name: 'Max' }
+      );
+
+      await osClient.refreshIndex(esUrl, index);
+
+      await osClient.deleteByQuery(esUrl, index, {
+        match: {
+          name: 'Max',
+        },
       });
+
+      const getMaxResult = await osClient.getDocument(
+        esUrl,
+        index,
+        maxId
+      );
+
+      expect(getMaxResult).toBeUndefined();
+    });
+
+    it("does not delete a document that doesn't match the query", async () => {
+      // @ts-expect-error We aren't checking this type
+      const { _id: maxId } = await osClient.addDocument(
+        esUrl,
+        index,
+        { name: 'Lewis' }
+      );
+
+      await osClient.refreshIndex(esUrl, index);
+
+      await osClient.deleteByQuery(esUrl, index, {
+        match: {
+          name: 'Max',
+        },
+      });
+
+      const getLewisResult = await osClient.getDocument(
+        esUrl,
+        index,
+        maxId
+      );
+
+      expect(getLewisResult).not.toBeUndefined();
+    });
+  });
+
+  describe('deleteIndex', () => {
+    it('deletes an exisitng index', async () => {
+      const indexName = randomIndexName();
+
+      await osClient.createIndex(esUrl, indexName);
+
+      await expect(osClient.indexExists(esUrl, indexName)).resolves.toBe(true);
+
+      await osClient.deleteIndex(esUrl, indexName);
+
+      await expect(osClient.indexExists(esUrl, indexName)).resolves.toBe(false);
     });
 
     describe('getCount', () => {

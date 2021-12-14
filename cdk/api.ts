@@ -16,7 +16,7 @@ const lambdasPath = path.join(__dirname, '..', 'dist', 'api');
 
 interface ApiProps {
   neptuneCluster: neptune.IDatabaseCluster & ec2.IConnectable
-  openSearch: IDomain
+  openSearch: IDomain & ec2.IConnectable
   region: string
   stackName: string
   vpc: ec2.IVpc
@@ -51,6 +51,7 @@ export default class Api extends Construct {
     openSearch.grantRead(documentPreview);
 
     const getStatistics = new Function(this, 'GetStatistics', {
+      allowPublicSubnet: true,
       functionName: `${stackName}-api-get-statistics`,
       handler: 'lambda.handler',
       runtime: Runtime.NODEJS_14_X,
@@ -59,10 +60,14 @@ export default class Api extends Construct {
       environment: {
         OPEN_SEARCH_ENDPOINT: openSearch.domainEndpoint,
       },
+      vpc,
     });
+    neptuneCluster.connections.allowDefaultPortFrom(getStatistics);
+    openSearch.connections.allowFrom(getStatistics, ec2.Port.tcp(443));
     openSearch.grantRead(getStatistics);
 
     const getTermsGraph = new Function(this, 'GetTermsGraph', {
+      allowPublicSubnet: true,
       functionName: `${stackName}-api-get-terms-graph`,
       handler: 'lambda.handler',
       runtime: Runtime.NODEJS_14_X,
@@ -73,9 +78,12 @@ export default class Api extends Construct {
         ONTOLOGY_STORE_HOST: neptuneHostname,
         ONTOLOGY_STORE_PORT: neptunePort,
       },
+      vpc,
     });
+    neptuneCluster.connections.allowDefaultPortFrom(getTermsGraph);
 
     const searchAutocomplete = new Function(this, 'SearchAutocomplete', {
+      allowPublicSubnet: true,
       functionName: `${stackName}-api-search-autocomplete`,
       handler: 'lambda.handler',
       runtime: Runtime.NODEJS_14_X,
@@ -86,9 +94,12 @@ export default class Api extends Construct {
         ONTOLOGY_STORE_HOST: neptuneHostname,
         ONTOLOGY_STORE_PORT: neptunePort,
       },
+      vpc,
     });
+    neptuneCluster.connections.allowDefaultPortFrom(searchAutocomplete);
 
     const searchByKeywords = new Function(this, 'SearchByKeywords', {
+      allowPublicSubnet: true,
       functionName: `${stackName}-api-search-by-keywords`,
       handler: 'lambda.handler',
       runtime: Runtime.NODEJS_14_X,
@@ -101,7 +112,9 @@ export default class Api extends Construct {
         ONTOLOGY_STORE_HOST: neptuneHostname,
         ONTOLOGY_STORE_PORT: neptunePort,
       },
+      vpc,
     });
+    neptuneCluster.connections.allowDefaultPortFrom(searchByKeywords);
     openSearch.grantReadWrite(searchByKeywords);
 
     const sparqlFunction = new Function(this, 'SparqlFunction', {
