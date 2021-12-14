@@ -1,6 +1,6 @@
 const AWS = require('aws-sdk');
 
-const http = require('http');
+const https = require('https');
 
 const ontology = {
   host: process.env.ONTOLOGY_STORE_HOST,
@@ -121,7 +121,7 @@ function getFuzzySemanticTerms(params, callback) {
     },
   };
 
-  http.get(opts, (res) => {
+  https.get(opts, (res) => {
     let body = '';
 
     res.on('data', (chunk) => {
