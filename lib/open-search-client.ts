@@ -418,11 +418,9 @@ export const scrollMap = async (params: {
 
   let { hits } = openScrollResponse.hits;
 
-  let ctr = 0;
-
   try {
     /* eslint-disable no-await-in-loop */
-    while (hits.length > 0 && ctr < 2) {
+    while (hits.length > 0) {
       await pMap(hits, f, pMapOptions);
 
       const nextScrollResponse = scrollResponseSchema.parse(
@@ -430,8 +428,6 @@ export const scrollMap = async (params: {
       );
 
       hits = nextScrollResponse.hits.hits;
-
-      ctr += 1;
     }
     /* eslint-enable no-await-in-loop */
   } finally {
