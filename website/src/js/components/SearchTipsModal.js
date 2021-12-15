@@ -22,14 +22,14 @@ class SearchTipsModal extends Component {
   }
 
   render() {
-    
+
     const opts = {
       playerVars: { // https://developers.google.com/youtube/player_parameters
         autoplay: 0,
         controls: 1
       }
     };
-    
+
     //add the youtube video ID to render the youtube video (will not work locally without changing to https due to how youtube handles it's embedded elements)
     let youtubeVideoID = '';
     let youtubeTutorial = youtubeVideoID ?
@@ -44,7 +44,7 @@ class SearchTipsModal extends Component {
               videoID={youtubeVideoID}
               opts={opts}
             />
-          
+
         </div>
       </div>
     )
@@ -57,7 +57,7 @@ class SearchTipsModal extends Component {
     };
 
     return (
-    <FullScreenModal 
+    <FullScreenModal
       modalCTA={this.call}
       modalTitle='Search Tips'
       modalClass='tip'
@@ -84,8 +84,8 @@ class SearchTipsModal extends Component {
 
             <p>When your results are displayed, the search bar will still be present at the top of the page. You can enter more terms or phrases into the
 bar to refine your search. You can change how new terms or phrases relate to your original query using logical operators <strong><i>(see Tip 3)</i></strong>.</p>
-      
-              
+
+
             </div>
         </div>
         <div className="row" id="UsingTags">
@@ -107,10 +107,35 @@ bar to refine your search. You can change how new terms or phrases relate to you
                 <img src={MetadataFilters} alt='Metadata Filters Screenshot' />
               </div>
           </div>
-          <div className="row" id="LogicalOperators">
+          <div className="row" id="Scoring">
             <div className="col-8">
               <SearchTipsModalItem
                 number='3'
+                header='Scoring search results'
+                content='The scoring of a search result is determined based on the field matches from the query you specified and any additional configurations
+                you apply to the search.'
+              />
+                <p>By default, we sort matching search results by relevance score, which measures how well each document matches a query. When
+                searching with a keyword a <i>query clause</i> is constructed and used to find matching documents. A <i>query caluse</i> asks the question
+                <i>How well does this document match the query clause?</i>. Besides deciding whether or not the document matches, the query clause also
+                calculates a relevance score.
+                </p>
+                <p>When searching by a specific term - selected from the list of terms found in a document or related to a selected term - a filter clause
+                is used to further narrow the search results. A filter context asks the simple question <i>Does this document match the filter?</i>. The answer
+                is a simple Yes or No and no relevance score is calculated.
+                </p>
+                <p>In order to produce better search results fields such as the <i>title (dc.title)</i> and <i>abstract (dc.description.abstract)</i> are
+                boosted. Boosting a field means that the field counts more toward the relevance score. Currently the title and abstract fields are boosted
+                at double the other searchable fields.
+                </p>
+                <p>All searches are performed against Elasticsearch. More information about Elasticsearch relevance scoring can be
+                found at <a href='https://www.elastic.co/guide/en/elasticsearch/reference/7.16/query-filter-context.html'>Query and filter context</a></p>
+              </div>
+          </div>
+          <div className="row" id="LogicalOperators">
+            <div className="col-8">
+              <SearchTipsModalItem
+                number='4'
                 header='Logical operators'
                 content='Logical operators give you more control over how multiple search queries are handled.
                 By default, terms or phrases entered into the search bar are used to expand your initial
@@ -138,7 +163,7 @@ mention the term “ocean” from your results.</p>
           <div className="row" id="AdvancedSearch">
             <div className="col-8">
               <SearchTipsModalItem
-                number='4'
+                number='5'
                 header='Advanced search options &amp; filters'
                 content='The “Advanced” dropdown menu on the right of the search bar allows you access additional functions to enhance your search.'
               />
@@ -152,7 +177,7 @@ they do, those synonyms will be added to the query to broaden your search.
 mount”. Allowing the system to search for these variants increases the likelihood of retrieving more,
 relevant results.
 </p>
-                
+
               <h4>Refereed</h4>
               <p>If you would like your search to only return results that have been refereed, you can toggle this option on by clicking the OFF switch to
 ON inside the Advanced dropdown.</p>
@@ -165,7 +190,7 @@ ON inside the Advanced dropdown.</p>
           <div className="row" id="AdvancedSearch">
             <div className="col-12">
               <SearchTipsModalItem
-                number='5'
+                number='6'
                 header='Interacting with your search results'
                 content=''
               />
@@ -185,7 +210,7 @@ XML.</p>
           <div className="row" id="AdvancedSearch">
             <div className="col-8">
               <SearchTipsModalItem
-                number='6'
+                number='7'
                 header='Viewing and downloading documents'
                 content='Clicking the “Explore Document” button below each
                 search result will launch a light-weight PDF viewer in
@@ -213,7 +238,7 @@ XML.</p>
           <div className="row" id="AdvancedSearch">
             <div className="col-8">
               <SearchTipsModalItem
-                number='7'
+                number='8'
                 header='Using tags'
                 content='Based on their textual content, each document in the ocean best practices repository has been "tagged" with terms from controlled vocabularies and/or ontologies. You can see which tags are associated with each document by clicking on "View Tags" in any search result.'
               />
@@ -223,7 +248,7 @@ XML.</p>
                 them) or all together by clicking on “Highlight All
                 Terms”.</p>
                 <p>You can click on any one of these tags to discover related keywords, categorized by how they are related to the original tag. By clicking the checkbox next to any tag, you can add it to your search, restricting results to documents that mention it.</p>
-              
+
             </div>
             <div className="col-4 tip__modal-item-screenshot">
               <img src={Tags1} alt='Screenshot tags used in search' />
