@@ -38,6 +38,7 @@ export default class Api extends Construct {
 
     const neptuneHostname = neptuneCluster.clusterEndpoint.hostname;
     const neptunePort = Token.asString(neptuneCluster.clusterEndpoint.port);
+    const sparqlUrl = `https://${neptuneCluster.clusterEndpoint.socketAddress}/sparql`;
 
     const documentPreview = new Function(this, 'DocumentPreview', {
       allowPublicSubnet: true,
@@ -62,6 +63,7 @@ export default class Api extends Construct {
       description: 'Returns general statistics about the OBP index size and ontology count.',
       environment: {
         OPEN_SEARCH_ENDPOINT: openSearch.domainEndpoint,
+        SPARQL_URL: sparqlUrl,
       },
       vpc,
     });
@@ -130,7 +132,7 @@ export default class Api extends Construct {
       description: 'Perform a SPARQL query',
       timeout: Duration.minutes(5),
       environment: {
-        SPARQL_URL: `https://${neptuneCluster.clusterEndpoint.socketAddress}/sparql`,
+        SPARQL_URL: sparqlUrl,
       },
       vpc,
     });
