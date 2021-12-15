@@ -36,6 +36,7 @@ export default class Api extends Construct {
       websiteDistribution,
     } = props;
 
+    const openSearchEndpoint = `https://${openSearch.domainEndpoint}`;
     const neptuneHostname = neptuneCluster.clusterEndpoint.hostname;
     const neptunePort = Token.asString(neptuneCluster.clusterEndpoint.port);
     const sparqlUrl = `https://${neptuneCluster.clusterEndpoint.socketAddress}/sparql`;
@@ -61,8 +62,9 @@ export default class Api extends Construct {
       runtime: Runtime.NODEJS_14_X,
       code: Code.fromAsset(path.join(lambdasPath, 'get-statistics')),
       description: 'Returns general statistics about the OBP index size and ontology count.',
+      timeout: Duration.seconds(10),
       environment: {
-        OPEN_SEARCH_ENDPOINT: openSearch.domainEndpoint,
+        OPEN_SEARCH_ENDPOINT: openSearchEndpoint,
         SPARQL_URL: sparqlUrl,
       },
       vpc,
