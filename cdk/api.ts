@@ -64,6 +64,8 @@ export default class Api extends Construct {
       description: 'Returns general statistics about the OBP index size and ontology count.',
       timeout: Duration.seconds(10),
       environment: {
+        DOCUMENTS_INDEX_NAME: 'documents',
+        TERMS_INDEX_NAME: 'terms',
         OPEN_SEARCH_ENDPOINT: openSearchEndpoint,
         SPARQL_URL: sparqlUrl,
       },

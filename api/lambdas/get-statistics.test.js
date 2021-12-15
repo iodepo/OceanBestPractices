@@ -1,4 +1,5 @@
 const nock = require('nock');
+const cryptoRandomString = require('crypto-random-string');
 const { handler } = require('./get-statistics');
 const osClient = require('../../lib/open-search-client');
 
@@ -12,6 +13,9 @@ describe('get-statistics.handler', () => {
   /** @type {string | undefined} */
   let awsSecretAccessKey;
 
+  const documentsIndexName = `index-${cryptoRandomString({ length: 6 })}`;
+  const termsIndexName = `index-${cryptoRandomString({ length: 6 })}`;
+
   beforeAll(async () => {
     awsAccessKeyIdBefore = process.env['AWS_ACCESS_KEY_ID'];
     process.env['AWS_ACCESS_KEY_ID'] = 'test-key-id';
@@ -19,6 +23,8 @@ describe('get-statistics.handler', () => {
     awsSecretAccessKey = process.env['AWS_SECRET_ACCESS_KEY'];
     process.env['AWS_SECRET_ACCESS_KEY'] = 'test-access-key';
 
+    process.env['DOCUMENTS_INDEX_NAME'] = documentsIndexName;
+    process.env['TERMS_INDEX_NAME'] = termsIndexName;
     process.env['OPEN_SEARCH_ENDPOINT'] = openSearchEndpoint;
     process.env['SPARQL_URL'] = sparqlUrl;
 
@@ -26,14 +32,14 @@ describe('get-statistics.handler', () => {
 
     nock.enableNetConnect('localhost');
 
-    await osClient.createDocumentsIndex(openSearchEndpoint, 'documents');
-    await osClient.createTermsIndex(openSearchEndpoint, 'terms');
+    await osClient.createDocumentsIndex(openSearchEndpoint, documentsIndexName);
+    await osClient.createTermsIndex(openSearchEndpoint, termsIndexName);
 
-    await osClient.addDocument(openSearchEndpoint, 'documents', { foo: 'bar' });
-    await osClient.addDocument(openSearchEndpoint, 'terms', { foo: 'bar' });
+    await osClient.addDocument(openSearchEndpoint, documentsIndexName, { foo: 'bar' });
+    await osClient.addDocument(openSearchEndpoint, termsIndexName, { foo: 'bar' });
 
-    await osClient.refreshIndex(openSearchEndpoint, 'documents');
-    await osClient.refreshIndex(openSearchEndpoint, 'terms');
+    await osClient.refreshIndex(openSearchEndpoint, documentsIndexName);
+    await osClient.refreshIndex(openSearchEndpoint, termsIndexName);
   });
 
   beforeEach(() => {
@@ -64,8 +70,8 @@ describe('get-statistics.handler', () => {
   });
 
   afterAll(async () => {
-    await osClient.deleteIndex(openSearchEndpoint, 'documents');
-    await osClient.deleteIndex(openSearchEndpoint, 'terms');
+    await osClient.deleteIndex(openSearchEndpoint, documentsIndexName);
+    await osClient.deleteIndex(openSearchEndpoint, termsIndexName);
 
     nock.enableNetConnect();
 
