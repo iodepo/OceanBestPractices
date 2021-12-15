@@ -3,6 +3,7 @@ const { handler } = require('./get-statistics');
 const osClient = require('../../lib/open-search-client');
 
 const openSearchEndpoint = 'http://localhost:9200';
+const sparqlUrl = 'http://neptune.com/sparql';
 
 describe('get-statistics.handler', () => {
   /** @type {string | undefined} */
@@ -19,6 +20,7 @@ describe('get-statistics.handler', () => {
     process.env['AWS_SECRET_ACCESS_KEY'] = 'test-access-key';
 
     process.env['OPEN_SEARCH_ENDPOINT'] = openSearchEndpoint;
+    process.env['SPARQL_URL'] = sparqlUrl;
 
     nock.disableNetConnect();
 
@@ -32,6 +34,29 @@ describe('get-statistics.handler', () => {
 
     await osClient.refreshIndex(openSearchEndpoint, 'documents');
     await osClient.refreshIndex(openSearchEndpoint, 'terms');
+  });
+
+  beforeEach(() => {
+    nock('http://neptune.com')
+      .post('/sparql')
+      .reply(200, {
+        head: {
+          vars: ['g'],
+        },
+        results: {
+          bindings: [{
+            g: {
+              type: 'uri',
+              value: 'http://purl.unep.org/sdg/sdgio.owl',
+            },
+          }, {
+            g: {
+              type: 'uri',
+              value: 'http://vocab.nerc.ac.uk/collection/L05/current/',
+            },
+          }],
+        },
+      });
   });
 
   afterEach(() => {
@@ -65,5 +90,9 @@ describe('get-statistics.handler', () => {
     expect(body.ontologies.terms.count).toEqual(1);
   });
 
-  test.todo('should return the count of graphs in Neptune');
+  test('should return the count of graphs in Neptune', async () => {
+    const result = await handler();
+    const body = JSON.parse(result.body);
+    expect(body.ontologies.count).toEqual(2);
+  });
 });
