@@ -162,6 +162,6 @@ export default class IngestLambdas extends Construct {
         INGEST_TOPIC_ARN: snsTopics.availableDocument.topicArn,
       },
     });
-    snsTopics.availableDocument.grantPublish(this.indexRectifier);
+    snsTopics.availableDocument.grantPublish(this.bulkIngester);
   }
 }

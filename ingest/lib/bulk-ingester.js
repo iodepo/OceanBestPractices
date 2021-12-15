@@ -5,19 +5,34 @@ const dspaceClient = require('../../lib/dspace-client');
 const utils = require('./ingest-queue');
 
 /**
+ * @typedef BulkIngesterResult
+ * @property {{ count: number, ids: string[] }} success
+ * @property {{ count: number, ids: string[] }} error
+ * @property {number} total
+ */
+
+/**
  * Fetches all available items from DSpace and queues them for ingest.
  *
  * @param {string} dspaceEndpoint The DSpace endpoint from which to fetch items.
  * @param {string} ingestTopicArn SNS Topic ARN where ingest items are queued.
  *
- * @returns {Promise<{ success: string[], error: string[]}>} Result of ingest
- * queueing. Includes the UUIDs of successful and failed item queues.
+ * @returns {Promise<BulkIngesterResult>}
+ * Result of ingest queueing. Includes the UUIDs of successful and failed item
+ * queues.
  */
 const bulkIngester = async (dspaceEndpoint, ingestTopicArn) => {
-  /** @type {{ success: string[], error: string[] }} */
+  /** @type BulkIngesterResult */
   const result = {
-    success: [],
-    error: [],
+    success: {
+      count: 0,
+      ids: [],
+    },
+    error: {
+      count: 0,
+      ids: [],
+    },
+    total: 0,
   };
 
   let dspaceItems = await dspaceClient.getItems(dspaceEndpoint, { limit: 100 });
@@ -30,7 +45,8 @@ const bulkIngester = async (dspaceEndpoint, ingestTopicArn) => {
       dspaceItems,
       async (dspaceItem) => {
         try {
-          console.log(`INFO: Queuing ${dspaceItem.uuid} for ingest.`);
+          result.total += 1;
+          console.log(`INFO: Queuing ${dspaceItem.uuid} (${result.total}) for ingest.`);
 
           // Queue the DSpace item for ingest.
           await utils.queueIngestDocument(
@@ -38,10 +54,12 @@ const bulkIngester = async (dspaceEndpoint, ingestTopicArn) => {
             ingestTopicArn
           );
 
-          result.success.push(dspaceItem.uuid);
+          result.success.ids.push(dspaceItem.uuid);
+          result.success.count += 1;
         } catch (error) {
           console.log(`ERROR: Failed to queue item with ${dspaceItem.uuid} with error: ${error}`);
-          result.error.push(dspaceItem.uuid);
+          result.error.ids.push(dspaceItem.uuid);
+          result.error.count += 1;
         }
       },
       { concurrency: 5 }
