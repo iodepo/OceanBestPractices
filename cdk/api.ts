@@ -124,7 +124,7 @@ export default class Api extends Construct {
     const sparqlFunction = new Function(this, 'SparqlFunction', {
       allowPublicSubnet: true,
       functionName: `${stackName}-api-sparql`,
-      handler: 'sparql.handler',
+      handler: 'lambda.handler',
       runtime: Runtime.NODEJS_14_X,
       code: Code.fromAsset(path.join(lambdasPath, 'sparql')),
       description: 'Perform a SPARQL query',
