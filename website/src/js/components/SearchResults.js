@@ -181,7 +181,7 @@ class SearchResults extends Component {
 
     let results = this.props.searchReducer.items.map((result) => {
       return {
-        date: result._source.issued_date,
+        date: result._source.dc_date_issued,
         highlight: result.highlight && result.highlight._bitstreamText,
         id: result._id,
         language: result._source.dc_language_iso,
