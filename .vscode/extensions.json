@@ -3,6 +3,7 @@
     "davidanson.vscode-markdownlint",
     "dbaeumer.vscode-eslint",
     "editorconfig.editorconfig",
-    "timonwong.shellcheck"
+    "timonwong.shellcheck",
+    "orta.vscode-jest"
   ]
 }
