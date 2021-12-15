@@ -7,6 +7,7 @@ import {
 } from '@aws-cdk/aws-lambda';
 import { Construct, Duration } from '@aws-cdk/core';
 import { IDomain } from '@aws-cdk/aws-opensearchservice';
+import { IConnectable, IVpc, Port } from '@aws-cdk/aws-ec2';
 import IngestBuckets from './buckets';
 import IngestSnsTopics from './sns-topics';
 
@@ -14,11 +15,12 @@ const lambdasPath = path.join(__dirname, '..', '..', 'dist', 'ingest');
 
 interface LambdasProps {
   buckets: IngestBuckets
-  elasticsearchDomain: IDomain
+  elasticsearchDomain: IDomain & IConnectable
   feedReadInterval: number
   snsTopics: IngestSnsTopics
   textExtractorFunction: IFunction
-  stackName: string
+  stackName: string,
+  vpc: IVpc
 }
 
 export default class IngestLambdas extends Construct {
@@ -46,12 +48,14 @@ export default class IngestLambdas extends Construct {
       snsTopics,
       stackName,
       textExtractorFunction,
+      vpc,
     } = props;
 
     const dspaceEndpoint = 'https://repository.oceanbestpractices.org';
     const openSearchEndpoint = `https://${elasticsearchDomain.domainEndpoint}`;
 
     this.indexer = new Function(this, 'Indexer', {
+      allowPublicSubnet: true,
       functionName: `${stackName}-ingest-indexer`,
       handler: 'lambda.handler',
       runtime: Runtime.NODEJS_14_X,
@@ -62,9 +66,11 @@ export default class IngestLambdas extends Construct {
         DOCUMENT_METADATA_BUCKET: buckets.documentMetadata.bucketName,
         OPEN_SEARCH_ENDPOINT: openSearchEndpoint,
       },
+      vpc,
     });
     buckets.documentMetadata.grantRead(this.indexer);
     buckets.textExtractorDestination.grantRead(this.indexer);
+    elasticsearchDomain.connections.allowFrom(this.indexer, Port.tcp(443));
     elasticsearchDomain.grantWrite(this.indexer);
 
     this.bitstreamsDownloader = new Function(this, 'BitstreamsDownloader', {

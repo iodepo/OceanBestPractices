@@ -9,6 +9,7 @@ import {
   DocumentItemTerm,
   PutDocumentItemResponse,
   closeScrollResponseSchema,
+  countResponseSchema,
   percolateResponseSchema,
   putDocumentItemResponseSchema,
 } from './open-search-schemas';
@@ -444,4 +445,14 @@ export const updateDocument = async (
   const json = { doc };
 
   await gotEs(esUrl).post(`${index}/_update/${id}`, { json });
+};
+
+export const getCount = async (
+  prefixUrl: string,
+  index: string
+): Promise<number> => {
+  const rawResult = await gotEs(prefixUrl).get(`${index}/_count`);
+  const result = countResponseSchema.parse(rawResult);
+
+  return result.count;
 };

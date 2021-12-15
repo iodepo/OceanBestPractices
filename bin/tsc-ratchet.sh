@@ -8,6 +8,8 @@ set +e
 npx tsc --noEmit > tmp/tsc.log
 set -e
 
+cat tmp/tsc.log
+
 PROBLEMS=$(grep -c ': error TS' tmp/tsc.log)
 
 [ -z "$PROBLEMS" ] && exit 0

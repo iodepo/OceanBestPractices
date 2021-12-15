@@ -55,7 +55,7 @@ export default (state = initialState, action) => {
         ...state,
         items: action.response.hits.hits,
         activePage: action.response.activePage,
-        totalResults: action.response.hits.total
+        totalResults: action.response.hits.total.value
       };
     case SEARCH_HAS_ERRORED:
       return {

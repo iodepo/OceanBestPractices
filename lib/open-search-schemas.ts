@@ -77,3 +77,7 @@ export type PutDocumentItemResponse =
   z.infer<typeof putDocumentItemResponseSchema>
 
 export type CloseScrollResponse = z.infer<typeof closeScrollResponseSchema>;
+
+export const countResponseSchema = z.object({
+  count: z.number(),
+});

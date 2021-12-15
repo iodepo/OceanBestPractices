@@ -1,4 +1,4 @@
-import { Vpc } from '@aws-cdk/aws-ec2';
+import { Port, Vpc } from '@aws-cdk/aws-ec2';
 import { Construct, Stack, StackProps } from '@aws-cdk/core';
 import { Function } from '@aws-cdk/aws-lambda';
 import OpenSearch from './opensearch';
@@ -43,10 +43,7 @@ export default class ObpStack extends Stack {
       deletionProtection,
       stackName: this.stackName,
       searchNodeType,
-      allowFromIps: [
-        bastion.privateIp,
-        bastion.publicIp,
-      ],
+      vpc,
     });
 
     const neptune = new Neptune(this, 'Neptune', {
@@ -56,6 +53,8 @@ export default class ObpStack extends Stack {
       openSearch: openSearch.domain,
       vpc,
     });
+
+    openSearch.domain.connections.allowFrom(bastion.instance, Port.tcp(443));
 
     const website = new Website(this, 'Website', {
       deletionProtection,
@@ -74,6 +73,7 @@ export default class ObpStack extends Stack {
       stackName: this.stackName,
       textExtractorFunction,
       websiteDistribution: website.cloudfrontDistribution,
+      vpc,
     });
 
     new Api(this, 'Api', {

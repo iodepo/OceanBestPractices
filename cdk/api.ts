@@ -16,7 +16,7 @@ const lambdasPath = path.join(__dirname, '..', 'dist', 'api');
 
 interface ApiProps {
   neptuneCluster: neptune.IDatabaseCluster & ec2.IConnectable
-  openSearch: IDomain
+  openSearch: IDomain & ec2.IConnectable
   region: string
   stackName: string
   vpc: ec2.IVpc
@@ -40,6 +40,7 @@ export default class Api extends Construct {
     const neptunePort = Token.asString(neptuneCluster.clusterEndpoint.port);
 
     const documentPreview = new Function(this, 'DocumentPreview', {
+      allowPublicSubnet: true,
       functionName: `${stackName}-api-document-preview`,
       handler: 'lambda.handler',
       runtime: Runtime.NODEJS_14_X,
@@ -47,24 +48,29 @@ export default class Api extends Construct {
       description: 'Returns the result of running our Ontology term tagging routine against the given document body and title.',
       timeout: Duration.seconds(100),
       environment: { ELASTIC_SEARCH_HOST: openSearch.domainEndpoint },
+      vpc,
     });
+    openSearch.connections.allowFrom(documentPreview, ec2.Port.tcp(443));
     openSearch.grantRead(documentPreview);
 
     const getStatistics = new Function(this, 'GetStatistics', {
+      allowPublicSubnet: true,
       functionName: `${stackName}-api-get-statistics`,
       handler: 'lambda.handler',
       runtime: Runtime.NODEJS_14_X,
       code: Code.fromAsset(path.join(lambdasPath, 'get-statistics')),
       description: 'Returns general statistics about the OBP index size and ontology count.',
       environment: {
-        ELASTIC_SEARCH_HOST: openSearch.domainEndpoint,
-        ONTOLOGY_STORE_HOST: neptuneHostname,
-        ONTOLOGY_STORE_PORT: neptunePort,
+        OPEN_SEARCH_ENDPOINT: openSearch.domainEndpoint,
       },
+      vpc,
     });
+    neptuneCluster.connections.allowDefaultPortFrom(getStatistics);
+    openSearch.connections.allowFrom(getStatistics, ec2.Port.tcp(443));
     openSearch.grantRead(getStatistics);
 
     const getTermsGraph = new Function(this, 'GetTermsGraph', {
+      allowPublicSubnet: true,
       functionName: `${stackName}-api-get-terms-graph`,
       handler: 'lambda.handler',
       runtime: Runtime.NODEJS_14_X,
@@ -75,9 +81,12 @@ export default class Api extends Construct {
         ONTOLOGY_STORE_HOST: neptuneHostname,
         ONTOLOGY_STORE_PORT: neptunePort,
       },
+      vpc,
     });
+    neptuneCluster.connections.allowDefaultPortFrom(getTermsGraph);
 
     const searchAutocomplete = new Function(this, 'SearchAutocomplete', {
+      allowPublicSubnet: true,
       functionName: `${stackName}-api-search-autocomplete`,
       handler: 'lambda.handler',
       runtime: Runtime.NODEJS_14_X,
@@ -88,9 +97,12 @@ export default class Api extends Construct {
         ONTOLOGY_STORE_HOST: neptuneHostname,
         ONTOLOGY_STORE_PORT: neptunePort,
       },
+      vpc,
     });
+    neptuneCluster.connections.allowDefaultPortFrom(searchAutocomplete);
 
     const searchByKeywords = new Function(this, 'SearchByKeywords', {
+      allowPublicSubnet: true,
       functionName: `${stackName}-api-search-by-keywords`,
       handler: 'lambda.handler',
       runtime: Runtime.NODEJS_14_X,
@@ -103,13 +115,16 @@ export default class Api extends Construct {
         ONTOLOGY_STORE_HOST: neptuneHostname,
         ONTOLOGY_STORE_PORT: neptunePort,
       },
+      vpc,
     });
+    neptuneCluster.connections.allowDefaultPortFrom(searchByKeywords);
+    openSearch.connections.allowFrom(searchByKeywords, ec2.Port.tcp(443));
     openSearch.grantReadWrite(searchByKeywords);
 
     const sparqlFunction = new Function(this, 'SparqlFunction', {
       allowPublicSubnet: true,
       functionName: `${stackName}-api-sparql`,
-      handler: 'sparql.handler',
+      handler: 'lambda.handler',
       runtime: Runtime.NODEJS_14_X,
       code: Code.fromAsset(path.join(lambdasPath, 'sparql')),
       description: 'Perform a SPARQL query',

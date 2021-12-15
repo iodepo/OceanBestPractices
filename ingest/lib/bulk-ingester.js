@@ -10,10 +10,11 @@ const utils = require('./ingest-queue');
  * @param {string} dspaceEndpoint The DSpace endpoint from which to fetch items.
  * @param {string} ingestTopicArn SNS Topic ARN where ingest items are queued.
  *
- * @returns {Promise<Object>} Result of ingest queueing. Includes the UUIDs of
- * successful and failed item queues.
+ * @returns {Promise<{ success: string[], error: string[]}>} Result of ingest
+ * queueing. Includes the UUIDs of successful and failed item queues.
  */
 const bulkIngester = async (dspaceEndpoint, ingestTopicArn) => {
+  /** @type {{ success: string[], error: string[] }} */
   const result = {
     success: [],
     error: [],
