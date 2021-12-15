@@ -152,7 +152,7 @@ export default class IngestLambdas extends Construct {
 
     this.bulkIngester = new Function(this, 'BulkIngester', {
       functionName: `${stackName}-bulk-ingester`,
-      handler: 'handler.handler',
+      handler: 'lambda.handler',
       runtime: Runtime.NODEJS_14_X,
       code: Code.fromAsset(path.join(lambdasPath, 'bulk-ingester')),
       description: 'Queues all documents available in DSpace for ingest.',

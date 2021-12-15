@@ -30,6 +30,8 @@ const bulkIngester = async (dspaceEndpoint, ingestTopicArn) => {
       dspaceItems,
       async (dspaceItem) => {
         try {
+          console.log(`INFO: Queuing ${dspaceItem.uuid} for ingest.`);
+
           // Queue the DSpace item for ingest.
           await utils.queueIngestDocument(
             dspaceItem.uuid,
@@ -38,7 +40,7 @@ const bulkIngester = async (dspaceEndpoint, ingestTopicArn) => {
 
           result.success.push(dspaceItem.uuid);
         } catch (error) {
-          console.log(`ERROR: Failed to queue item with UUID: ${dspaceItem.uuid} with error: ${error}`);
+          console.log(`ERROR: Failed to queue item with ${dspaceItem.uuid} with error: ${error}`);
           result.error.push(dspaceItem.uuid);
         }
       },
