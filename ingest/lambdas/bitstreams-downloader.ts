@@ -6,10 +6,10 @@ import {
   safeGetObjectJson,
   uploadStream,
 } from '../../lib/s3-utils';
-import * as lambdaClient from '../../lib/lambda-client';
 import { dspaceItemSchema } from '../../lib/dspace-schemas';
 import { getStringFromEnv } from '../../lib/env-utils';
 import { findPDFBitstreamItem } from '../../lib/dspace-item';
+import { sqs } from '../../lib/aws-clients';
 
 const s3EventSchema = z.object({
   Records: z.array(
@@ -29,7 +29,7 @@ const s3EventSchema = z.object({
 export const handler = async (event: unknown) => {
   const dspaceEndpoint = getStringFromEnv('DSPACE_ENDPOINT');
   const bitstreamSourceBucket = getStringFromEnv('DOCUMENT_BINARY_BUCKET');
-  const indexerFunction = getStringFromEnv('INDEXER_FUNCTION_NAME');
+  const indexerQueueUrl = getStringFromEnv('INDEXER_QUEUE_URL');
 
   const s3Event = s3EventSchema.parse(event);
 
@@ -62,13 +62,13 @@ export const handler = async (event: unknown) => {
           console.log(`INFO: Uploaded PDF for DSpace item ${dspaceItem.uuid}`);
         } else {
           // No PDF so just invoke the indexer.
-          console.log(`INFO: DSpace item ${dspaceItem.uuid} has no PDF. Skipping upload and invoking the indexer.`);
+          console.log(`INFO: DSpace item ${dspaceItem.uuid} has no PDF. Skipping upload and queuing it for indexing.`);
 
-          await lambdaClient.invoke(
-            indexerFunction,
-            'Event',
-            { uuid: dspaceItem.uuid }
-          );
+          // Write to SQS.
+          await sqs().sendMessage({
+            MessageBody: JSON.stringify({ uuid: dspaceItem.uuid }),
+            QueueUrl: indexerQueueUrl,
+          }).promise();
         }
       } catch (error) {
         console.log(`ERROR: Failed to process DSpace item bitstream with error: ${error}`);

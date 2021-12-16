@@ -10,6 +10,7 @@ import { IDomain } from '@aws-cdk/aws-opensearchservice';
 import { IConnectable, IVpc, Port } from '@aws-cdk/aws-ec2';
 import IngestBuckets from './buckets';
 import IngestSnsTopics from './sns-topics';
+import IngestSqsQueues from './sqs-queues';
 
 const lambdasPath = path.join(__dirname, '..', '..', 'dist', 'ingest');
 
@@ -18,6 +19,7 @@ interface LambdasProps {
   elasticsearchDomain: IDomain & IConnectable
   feedReadInterval: number
   snsTopics: IngestSnsTopics
+  sqsQueues: IngestSqsQueues
   textExtractorFunction: IFunction
   stackName: string,
   vpc: IVpc
@@ -46,6 +48,7 @@ export default class IngestLambdas extends Construct {
       elasticsearchDomain,
       feedReadInterval = 300,
       snsTopics,
+      sqsQueues,
       stackName,
       textExtractorFunction,
       vpc,
@@ -84,12 +87,11 @@ export default class IngestLambdas extends Construct {
       environment: {
         DSPACE_ENDPOINT: dspaceEndpoint,
         DOCUMENT_BINARY_BUCKET: buckets.documentSource.bucketName,
-        INDEXER_FUNCTION_NAME: this.indexer.functionName,
+        INDEXER_QUEUE_URL: sqsQueues.indexerQueue.queueUrl,
       },
     });
     buckets.documentMetadata.grantRead(this.bitstreamsDownloader);
     buckets.documentSource.grantWrite(this.bitstreamsDownloader);
-    this.indexer.grantInvoke(this.bitstreamsDownloader);
 
     this.invokeExtractor = new Function(this, 'InvokeExtractor', {
       functionName: `${stackName}-ingest-invoke-extractor`,

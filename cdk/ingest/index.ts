@@ -5,6 +5,7 @@ import { LambdaSubscription } from '@aws-cdk/aws-sns-subscriptions';
 import {
   LambdaDestination,
   SnsDestination,
+  SqsDestination,
 } from '@aws-cdk/aws-s3-notifications';
 import { IFunction } from '@aws-cdk/aws-lambda';
 import { IDistribution } from '@aws-cdk/aws-cloudfront';
@@ -13,6 +14,7 @@ import { IConnectable, IVpc } from '@aws-cdk/aws-ec2';
 import IngestLambdas from './lambdas';
 import IngestSnsTopics from './sns-topics';
 import IngestBuckets from './buckets';
+import IngestSqsQueues from './sqs-queues';
 
 interface IngestProps {
   openSearch: IDomain & IConnectable
@@ -43,11 +45,14 @@ export default class Ingest extends Construct {
 
     const snsTopics = new IngestSnsTopics(this, 'SnsTopics', { stackName });
 
+    const sqsQueues = new IngestSqsQueues(this, 'SqsQueues', { stackName });
+
     const lambdas = new IngestLambdas(this, 'Lambdas', {
       buckets,
       elasticsearchDomain: openSearch,
       feedReadInterval,
       snsTopics,
+      sqsQueues,
       stackName,
       textExtractorFunction,
       vpc,
@@ -81,15 +86,17 @@ export default class Ingest extends Construct {
       lambdas.invokeExtractor
     ));
 
+    // The text extractor writes to S3. When an object is created put
+    // a message on the indexer queue.
     buckets.textExtractorDestination.addObjectCreatedNotification(
-      new SnsDestination(snsTopics.textExtractor)
+      new SqsDestination(sqsQueues.indexerQueue)
     );
-    // An event is published to the "text extractor" topic when an object is
-    // created in the "text extractor destination" bucket
 
-    // The "indexer" lambda is triggered by the "text extractor" topic
-    snsTopics.textExtractor.addSubscription(
-      new LambdaSubscription(lambdas.indexer)
-    );
+    // The bitstreams downloader should be able to put a message on the queue.
+    // This happens if there we skip text extraction.
+    sqsQueues.indexerQueue.grantSendMessages(lambdas.bitstreamsDownloader);
+
+    // The indexer needs to read from the indexer queue.
+    sqsQueues.indexerQueue.grantConsumeMessages(lambdas.indexer);
   }
 }
