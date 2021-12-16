@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import Citation from './Citation';
 
 import { constructViewerQuery } from '../helpers/query';
-import { env } from '../helpers/api';
+import { documentBucketSource } from '../helpers/api';
 
 import Superlink from './Superlink';
 
@@ -98,7 +98,7 @@ class Result extends Component {
   }
 
   launchPDF() {
-    const pdfURL = `viewer/index.html?file=https://s3.amazonaws.com/obp-document-source-${env}/${this.props.uuid}.pdf&search=${constructViewerQuery(this.props.searchReducer.activeSearch, false)}`;
+    const pdfURL = `viewer/index.html?file=https://s3.amazonaws.com/${documentBucketSource}-document-source/${this.props.uuid}.pdf&search=${constructViewerQuery(this.props.searchReducer.activeSearch, false)}`;
     window.open(pdfURL, '_blank');
     this.setState({showDocument: true});
   }

@@ -12,3 +12,6 @@ REACT_APP_API_ENDPOINT=http://localhost/
 REACT_APP_RECAPTCHA_SITE_KEY=6LfvzogUAAAAALqLwHJfLFkmaJ-0uu-OEetEHGYO
 
 SKIP_PREFLIGHT_CHECK=true
+
+// document bucket stack name
+REACT_APP_STACK_NAME=env-doc-bucket-name
