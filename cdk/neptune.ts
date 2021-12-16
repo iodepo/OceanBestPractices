@@ -98,6 +98,7 @@ export default class Neptune extends Construct {
         ES_URL: openSearch.domainEndpoint,
         ES_TERMS_INDEX: 'terms',
         ES_DOCUMENTS_INDEX: 'documents',
+        STOPWORDS_BUCKET: bulkLoaderBucket.bucketName,
       },
       logging: ecs.LogDriver.awsLogs({
         streamPrefix: `${stackName}-neptune-bulk-loader`,

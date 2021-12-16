@@ -5,6 +5,7 @@ import { getBoolFromEnv, getStringFromEnv } from '../lib/env-utils';
 import { loadMetadata } from './metadata';
 import { indexTerms } from './index-terms';
 import { updateAllDocumentsTerms } from './update-document-terms';
+import { loadStopwords } from './stopwords';
 
 export const neptuneBulkLoader = async (): Promise<void> => {
   const iamRoleArn = getStringFromEnv('IAM_ROLE_ARN');
@@ -15,6 +16,7 @@ export const neptuneBulkLoader = async (): Promise<void> => {
   const esUrl = getStringFromEnv('ES_URL');
   const termsIndex = getStringFromEnv('ES_TERMS_INDEX');
   const documentsIndex = getStringFromEnv('ES_DOCUMENTS_INDEX');
+  const stopwordsBucket = getStringFromEnv('STOPWORDS_BUCKET');
 
   const bulkLoaderClient = new NeptuneBulkLoaderClient({
     neptuneUrl,
@@ -54,7 +56,18 @@ export const neptuneBulkLoader = async (): Promise<void> => {
     match: { namedGraphUri },
   });
 
-  const sparqlQuery = await s3Utils.getObjectText(queryS3Url);
+  const stopwordsLocation = new s3Utils.S3ObjectLocation(
+    stopwordsBucket,
+    'stopwords.txt'
+  );
+
+  const [
+    sparqlQuery,
+    stopwords,
+  ] = await Promise.all([
+    s3Utils.getObjectText(queryS3Url),
+    loadStopwords(stopwordsLocation),
+  ]);
 
   await indexTerms({
     elasticsearchUrl: esUrl,
@@ -64,6 +77,7 @@ export const neptuneBulkLoader = async (): Promise<void> => {
     indexName: termsIndex,
     sparqlUrl: `${neptuneUrl}/sparql`,
     sparqlQuery,
+    stopwords,
   });
 
   await updateAllDocumentsTerms({
