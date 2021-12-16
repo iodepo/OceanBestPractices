@@ -9,7 +9,11 @@ import {
 import { IFunction } from '@aws-cdk/aws-lambda';
 import { IDistribution } from '@aws-cdk/aws-cloudfront';
 import { IDomain } from '@aws-cdk/aws-opensearchservice';
-import { IConnectable, IVpc } from '@aws-cdk/aws-ec2';
+import {
+  IConnectable,
+  InterfaceVpcEndpointAwsService,
+  IVpc,
+} from '@aws-cdk/aws-ec2';
 import IngestLambdas from './lambdas';
 import IngestSnsTopics from './sns-topics';
 import IngestBuckets from './buckets';
@@ -102,6 +106,10 @@ export default class Ingest extends Construct {
     sqsQueues.indexerQueue.grantSendMessages(lambdas.bitstreamsDownloader);
 
     // The indexer needs to read from the indexer queue.
+    const sqsEndpoint = vpc.addInterfaceEndpoint('sqs-gateway', {
+      service: InterfaceVpcEndpointAwsService.SQS,
+    });
+    sqsEndpoint.connections.allowDefaultPortFrom(lambdas.indexer);
     sqsQueues.indexerQueue.grantConsumeMessages(lambdas.indexer);
   }
 }
