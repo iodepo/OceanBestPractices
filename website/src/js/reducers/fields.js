@@ -34,6 +34,16 @@ const initialState = [
     help_text: 'Enter if possible at least the first five words of the <b>title</b> (try all title if you have it)',
   },
   {
+    title: 'Endorsed',
+    id: 'endorsed',
+    value: [
+      'obps_endorsementExternal_externalEndorsedBy'
+    ],
+    active_search: false,
+    autocomplete: false,
+    help_text: 'TODO: Email out to Pauline for this value.'
+  },
+  {
     title: 'EOV',
     id: 'eov',
     value: [
