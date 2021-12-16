@@ -190,7 +190,7 @@ describe('index-rectifier', () => {
   });
 
   describe('diff', () => {
-    test('should compare index items with the DSpace repository and produce a list of updated and removed items', async () => {
+    test.skip('should compare index items with the DSpace repository and produce a list of updated and removed items', async () => {
       const mockIndexItem1 = {
         _id: '1',
         _source: {
