@@ -1,9 +1,7 @@
 /* eslint-disable no-underscore-dangle */
 import { z } from 'zod';
-import _ from 'lodash';
 import pMap from 'p-map';
-import { zodTypeGuard } from '../../lib/zod-utils';
-import { getStringFromEnv } from '../../lib/env-utils';
+import { isError, noop } from 'lodash';
 import * as osClient from '../../lib/open-search-client';
 import {
   Bitstream,
@@ -18,6 +16,7 @@ import {
   findThumbnailBitstreamItem,
 } from '../../lib/dspace-item';
 import * as s3Utils from '../../lib/s3-utils';
+import { deleteMessage, receiveMessage, SqsMessage } from '../../lib/sqs-utils';
 
 export const getDSpaceItemFields = async (
   dspaceItemBucket: string,
@@ -120,79 +119,58 @@ export const getTerms = async (
   };
 };
 
-const explicitInvokeEventSchema = z.object({
-  uuid: z.string().uuid(),
-});
+const isIndexAlreadyExistsError = (e: unknown): e is Error =>
+  isError(e) && e.message === 'resource_already_exists_exception';
 
-const textExtractorSnsEventSchema = z.object({
-  Records: z.array(
-    z.object({
-      Sns: z.object({
-        Message: z.string().min(1), // This string should be an S3 Record.
-      }),
-    })
-  ).nonempty(),
-});
+const createIndex = async (
+  name: string,
+  createFn: () => Promise<void>
+): Promise<void> => {
+  try {
+    await createFn();
+  } catch (error) {
+    if (isIndexAlreadyExistsError(error)) {
+      console.log(`INFO: ${name} index already exists. Didn't need to create it.`);
+    } else {
+      console.log(`ERROR: Failed to create ${name} index: ${error}`);
+      throw error;
+    }
+  }
+};
 
-const textExtractorS3RecordSchema = z.object({
-  Records: z.array(
-    z.object({
-      s3: z.object({
-        bucket: z.object({
-          name: z.string().min(1),
-        }),
-        object: z.object({
-          key: z.string().min(1),
-        }),
-      }),
-    })
-  ).nonempty(),
-});
+const createDocumentsIndex = (esUrl: string): Promise<void> =>
+  createIndex(
+    'documents',
+    () => osClient.createDocumentsIndex(esUrl, 'documents').then(noop)
+  );
 
-const isTextExtractorSnsEventSchema = zodTypeGuard(textExtractorSnsEventSchema);
+const createTermsIndex = (esUrl: string): Promise<void> =>
+  createIndex(
+    'terms',
+    () => osClient.createTermsIndex(esUrl, 'terms').then(noop)
+  );
 
-const isExplicitInvokeEventSchema = zodTypeGuard(explicitInvokeEventSchema);
+const createIndexes = (esUrl: string) => Promise.all([
+  createDocumentsIndex(esUrl),
+  createTermsIndex(esUrl),
+]);
 
-interface IngestRecord {
-  uuid: string
-  bitstreamTextKey?: string
-  bitstreamTextBucket?: string
+interface Config {
+  esUrl: string;
+  dspaceItemBucket: string;
+  indexerQueueUrl: string;
 }
 
-const parseEvent = (event: unknown): IngestRecord[] => {
-  if (isTextExtractorSnsEventSchema(event)) {
-    return _.map(
-      event.Records,
-      (record) => {
-        const messageData = textExtractorS3RecordSchema.parse(
-          JSON.parse(record.Sns.Message)
-        );
+const getMessages = async (queueUrl: string): Promise<SqsMessage[]> =>
+  receiveMessage(queueUrl).then((r) => r.Messages);
 
-        const bitstreamTextBucket = messageData.Records[0].s3.bucket.name;
-        const bitstreamTextKey = messageData.Records[0].s3.object.key;
-        const [uuid] = bitstreamTextKey.split('.');
+const ingestRecordSchema = z.object({
+  uuid: z.string().uuid(),
+  bitstreamTextBucket: z.string().min(1).optional(),
+  bitstreamTextKey: z.string().min(1).optional(),
+});
 
-        if (!uuid) {
-          throw new Error(`Ingest indexer event missing UUID ${JSON.stringify(event)}`);
-        }
-
-        return {
-          bitstreamTextBucket,
-          bitstreamTextKey,
-          uuid,
-        };
-      }
-    );
-  }
-
-  if (isExplicitInvokeEventSchema(event)) {
-    return [{
-      uuid: event.uuid,
-    }];
-  }
-
-  throw new Error(`Ingest indexer invoked with unknown event: ${JSON.stringify(event)}`);
-};
+type IngestRecord = z.infer<typeof ingestRecordSchema>;
 
 const index = async (
   ingestRecord: IngestRecord,
@@ -257,45 +235,54 @@ const index = async (
   console.log(`INFO: Indexed document item ${documentItem.uuid}`);
 };
 
-export const handler = async (event: unknown) => {
-  const dspaceItemBucket = getStringFromEnv('DOCUMENT_METADATA_BUCKET');
-  const openSearchEndpoint = getStringFromEnv('OPEN_SEARCH_ENDPOINT');
+interface BuildSqsMessageHandlerParams {
+  dspaceItemBucket: string,
+  esUrl: string,
+  indexerQueueUrl: string
+}
 
-  const ingestRecords = parseEvent(event);
+const buildSqsMessageHandler = (params: BuildSqsMessageHandlerParams) =>
+  async (sqsMessage: SqsMessage) => {
+    const indexerEvent = ingestRecordSchema.parse(JSON.parse(sqsMessage.Body));
 
-  // Make sure the documents index exists before we create documents. If the
-  // index exists we'll catch the error and move on.
-  try {
-    await osClient.createDocumentsIndex(openSearchEndpoint, 'documents');
-  } catch (error) {
-    if (error instanceof Error
-      && error.message !== 'resource_already_exists_exception') {
-      console.log(`ERROR: Failed to create documents index: ${error}`);
-      throw error;
-    }
+    await index(indexerEvent, params.dspaceItemBucket, params.esUrl);
 
-    console.log('INFO: Documents index already exists. Didn\'t need to create it.');
-  }
+    await deleteMessage(params.indexerQueueUrl, sqsMessage.ReceiptHandle);
+  };
 
-  try {
-    await osClient.createTermsIndex(openSearchEndpoint, 'terms');
-  } catch (error) {
-    if (error instanceof Error
-      && error.message !== 'resource_already_exists_exception') {
-      console.log(`ERROR: Failed to create terms index: ${error}`);
-      throw error;
-    }
+const processIndexerQueue = async (config: Config): Promise<void> => {
+  await createIndexes(config.esUrl);
 
-    console.log('INFO: Terms index already exists. Didn\'t need to create it.');
-  }
+  const sqsMessageHandler = buildSqsMessageHandler(config);
 
-  await pMap(
-    ingestRecords,
-    async (record) => index(
-      record,
-      dspaceItemBucket,
-      openSearchEndpoint
-    ),
-    { concurrency: 1 }
-  );
+  let messages: SqsMessage[];
+  do {
+    /* eslint-disable no-await-in-loop */
+    messages = await getMessages(config.indexerQueueUrl);
+
+    await pMap(messages, sqsMessageHandler, { concurrency: 1 });
+    /* eslint-enable no-await-in-loop */
+  } while (messages.length > 0);
+};
+
+const envSchema = z.object({
+  DOCUMENT_METADATA_BUCKET: z.string().min(1),
+  OPEN_SEARCH_ENDPOINT: z.string().url(),
+  INDEXER_QUEUE_URL: z.string().url(),
+});
+
+const loadConfigFromEnv = (): Config => {
+  const env = envSchema.parse(process.env);
+
+  return {
+    dspaceItemBucket: env.DOCUMENT_METADATA_BUCKET,
+    esUrl: env.OPEN_SEARCH_ENDPOINT,
+    indexerQueueUrl: env.INDEXER_QUEUE_URL,
+  };
+};
+
+export const handler = async () => {
+  const config = loadConfigFromEnv();
+
+  await processIndexerQueue(config);
 };

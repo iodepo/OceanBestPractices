@@ -1,8 +1,4 @@
-import {
-  PublishCommand,
-  PublishCommandOutput,
-  SNSClient,
-} from '@aws-sdk/client-sns';
+import { sns } from '../../lib/aws-clients';
 
 /**
  * Queues a DSpace document for ingest using the `link` attribute. This will
@@ -10,22 +6,17 @@ import {
  *
  * @param uuid - UUID of the DSpace item to queue for ingest.
  * @param ingestTopicArn - SNS Topic ARN where new documents are queued.
- * @param region - AWS region containing the infrastructure.
  * @returns Returns the resut of the SNS PublishCommand:
  * https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-sns/interfaces/publishcommandoutput.html
  */
-export const queueIngestDocument = (
+export const queueIngestDocument = async (
   uuid: string,
-  ingestTopicArn: string,
-  region = 'us-east-1'
-): Promise<PublishCommandOutput> => {
-  const params = {
-    Message: uuid,
+  ingestTopicArn: string
+): Promise<void> => {
+  console.log(`Sending message ${uuid} to ${ingestTopicArn}`);
+
+  await sns().publish({
     TopicArn: ingestTopicArn,
-  };
-
-  const client = new SNSClient({ region });
-  const command = new PublishCommand(params);
-
-  return client.send(command);
+    Message: uuid,
+  }).promise();
 };
