@@ -75,7 +75,7 @@ const getAllMessages = async (url: string, n: number): Promise<Message[]> => {
   return messages;
 };
 
-const waitForMessages = async (
+export const waitForMessages = async (
   url: string,
   count: number
 ): Promise<Message[]> => pTimeout(getAllMessages(url, count), 10_000);
@@ -106,4 +106,13 @@ export const deleteMessage = (
   sqs().deleteMessage({
     QueueUrl: queueUrl,
     ReceiptHandle: receiptHandle,
+  }).promise().then(noop);
+
+export const sendMessage = (
+  queueUrl: string,
+  messageBody: string
+): Promise<void> =>
+  sqs().sendMessage({
+    QueueUrl: queueUrl,
+    MessageBody: messageBody,
   }).promise().then(noop);
