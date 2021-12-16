@@ -12,6 +12,7 @@ import {
   putDocumentItemResponseSchema,
 } from './open-search-schemas';
 import { documentsMapping } from './documents-mapping';
+import { isHTTPError } from './got-utils';
 
 const gotEs = (prefixUrl: string) => got4aws().extend({
   prefixUrl,
@@ -197,7 +198,17 @@ export const percolateDocumentFields = async (
     {
       json: body,
     }
-  );
+  ).catch((error) => {
+    if (isHTTPError(error)) {
+      console.log(
+        'HTTPError - POST /terms/_search failed, statusCode:',
+        error.response.statusCode,
+        'body:',
+        error.response.body
+      );
+    }
+    throw error;
+  });
 
   const percolateResponse = percolateResponseSchema
     .safeParse(rawPercolateResponse);
@@ -275,7 +286,16 @@ export const putDocumentItem = async (
     {
       json: documentItem,
     }
-  );
+  ).catch((error) => {
+    if (isHTTPError(error)) {
+      console.log(
+        `HTTPError - POST documents/_doc/${documentItem.uuid} failed, statusCode:`,
+        error.response.statusCode,
+        'body:',
+        error.response.body
+      );
+    }
+  });
 
   return putDocumentItemResponseSchema.parse(rawResponse);
 };
