@@ -111,7 +111,8 @@ export const deleteMessage = (
 export const sendMessage = (
   queueUrl: string,
   messageBody: string
-): Promise<void> => sqs().sendMessage({
-  QueueUrl: queueUrl,
-  MessageBody: messageBody,
-}).promise().then(noop);
+): Promise<void> =>
+  sqs().sendMessage({
+    QueueUrl: queueUrl,
+    MessageBody: messageBody,
+  }).promise().then(noop);

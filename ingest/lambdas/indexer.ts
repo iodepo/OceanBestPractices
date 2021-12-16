@@ -1,9 +1,6 @@
 /* eslint-disable no-underscore-dangle */
 import { z } from 'zod';
-import _ from 'lodash';
 import pMap from 'p-map';
-import { zodTypeGuard } from '../../lib/zod-utils';
-import { getStringFromEnv } from '../../lib/env-utils';
 import * as osClient from '../../lib/open-search-client';
 import {
   Bitstream,
@@ -18,6 +15,8 @@ import {
   findThumbnailBitstreamItem,
 } from '../../lib/dspace-item';
 import * as s3Utils from '../../lib/s3-utils';
+import { deleteMessage, receiveMessage, SqsMessage } from '../../lib/sqs-utils';
+import { zodTypeGuard } from '../../lib/zod-utils';
 
 export const getDSpaceItemFields = async (
   dspaceItemBucket: string,
@@ -120,82 +119,36 @@ export const getTerms = async (
   };
 };
 
-const explicitInvokeEventSchema = z.object({
+const justUuidMessageSchema = z.object({
   uuid: z.string().uuid(),
 });
 
-const textExtractorSnsEventSchema = z.object({
-  Records: z.array(
-    z.object({
-      Sns: z.object({
-        Message: z.string().min(1), // This string should be an S3 Record.
-      }),
-    })
-  ).nonempty(),
-});
+const isExplicitInvokeMessage = zodTypeGuard(justUuidMessageSchema);
 
-const textExtractorS3RecordSchema = z.object({
-  Records: z.array(
-    z.object({
-      s3: z.object({
-        bucket: z.object({
-          name: z.string().min(1),
-        }),
-        object: z.object({
-          key: z.string().min(1),
-        }),
-      }),
-    })
-  ).nonempty(),
-});
+const createIndexes = (esUrl: string) => Promise.all([
+  osClient.createDocumentsIndex(esUrl, 'documents'),
+  osClient.createTermsIndex(esUrl, 'terms'),
+]);
 
-const isTextExtractorSnsEventSchema = zodTypeGuard(textExtractorSnsEventSchema);
-
-const isExplicitInvokeEventSchema = zodTypeGuard(explicitInvokeEventSchema);
-
-interface IngestRecord {
-  uuid: string
-  bitstreamTextKey?: string
-  bitstreamTextBucket?: string
+interface Config {
+  esUrl: string;
+  dspaceItemBucket: string;
+  indexerQueueUrl: string;
 }
 
-const parseEvent = (event: unknown): IngestRecord[] => {
-  if (isTextExtractorSnsEventSchema(event)) {
-    return _.map(
-      event.Records,
-      (record) => {
-        const messageData = textExtractorS3RecordSchema.parse(
-          JSON.parse(record.Sns.Message)
-        );
+const getMessages = async (queueUrl: string): Promise<SqsMessage[]> =>
+  receiveMessage(queueUrl).then((r) => r.Messages || []);
 
-        const bitstreamTextBucket = messageData.Records[0].s3.bucket.name;
-        const bitstreamTextKey = messageData.Records[0].s3.object.key;
-        const [uuid] = bitstreamTextKey.split('.');
+const ingestRecordSchema = z.object({
+  uuid: z.string().uuid(),
+  bitstreamTextBucket: z.string().min(1).optional(),
+  bitstreamTextKey: z.string().min(1).optional(),
+});
 
-        if (!uuid) {
-          throw new Error(`Ingest indexer event missing UUID ${JSON.stringify(event)}`);
-        }
-
-        return {
-          bitstreamTextBucket,
-          bitstreamTextKey,
-          uuid,
-        };
-      }
-    );
-  }
-
-  if (isExplicitInvokeEventSchema(event)) {
-    return [{
-      uuid: event.uuid,
-    }];
-  }
-
-  throw new Error(`Ingest indexer invoked with unknown event: ${JSON.stringify(event)}`);
-};
+type IndexerRequest = z.infer<typeof ingestRecordSchema>;
 
 const index = async (
-  ingestRecord: IngestRecord,
+  ingestRecord: IndexerRequest,
   dspaceItemBucket: string,
   openSearchEndpoint: string
 ): Promise<void> => {
@@ -257,45 +210,94 @@ const index = async (
   console.log(`INFO: Indexed document item ${documentItem.uuid}`);
 };
 
-export const handler = async (event: unknown) => {
-  const dspaceItemBucket = getStringFromEnv('DOCUMENT_METADATA_BUCKET');
-  const openSearchEndpoint = getStringFromEnv('OPEN_SEARCH_ENDPOINT');
+const s3EventRecordToIngestRecord = (
+  record: s3Utils.S3EventRecord
+): IndexerRequest => {
+  const bitstreamTextBucket = record.s3.bucket.name;
+  const bitstreamTextKey = record.s3.object.key;
+  const [uuid] = bitstreamTextKey.split('.');
 
-  const ingestRecords = parseEvent(event);
-
-  // Make sure the documents index exists before we create documents. If the
-  // index exists we'll catch the error and move on.
-  try {
-    await osClient.createDocumentsIndex(openSearchEndpoint, 'documents');
-  } catch (error) {
-    if (error instanceof Error
-      && error.message !== 'resource_already_exists_exception') {
-      console.log(`ERROR: Failed to create documents index: ${error}`);
-      throw error;
-    }
-
-    console.log('INFO: Documents index already exists. Didn\'t need to create it.');
+  if (!uuid) {
+    throw new Error(`Ingest indexer event missing UUID ${JSON.stringify(record)}`);
   }
 
-  try {
-    await osClient.createTermsIndex(openSearchEndpoint, 'terms');
-  } catch (error) {
-    if (error instanceof Error
-      && error.message !== 'resource_already_exists_exception') {
-      console.log(`ERROR: Failed to create terms index: ${error}`);
-      throw error;
-    }
+  return {
+    bitstreamTextBucket,
+    bitstreamTextKey,
+    uuid,
+  };
+};
 
-    console.log('INFO: Terms index already exists. Didn\'t need to create it.');
+const parseSqsMessageBody = (body: string): IndexerRequest[] => {
+  const messageBody = JSON.parse(body);
+
+  if (isExplicitInvokeMessage(messageBody)) {
+    return [{ uuid: messageBody.uuid }];
   }
+
+  if (s3Utils.isS3Event(messageBody)) {
+    return messageBody.Records.map((r) => s3EventRecordToIngestRecord(r));
+  }
+
+  throw new Error(`Unparsable message body: ${body}`);
+};
+
+interface SqsMessageHandlerConfig {
+  dspaceItemBucket: string,
+  esUrl: string,
+  indexerQueueUrl: string
+}
+
+const sqsMessageHandler = async (
+  config: SqsMessageHandlerConfig,
+  sqsMessage: SqsMessage
+) => {
+  const ingestRecords = parseSqsMessageBody(sqsMessage.Body);
 
   await pMap(
     ingestRecords,
-    async (record) => index(
-      record,
-      dspaceItemBucket,
-      openSearchEndpoint
-    ),
+    (record) => index(record, config.dspaceItemBucket, config.esUrl),
     { concurrency: 1 }
   );
+
+  await deleteMessage(config.indexerQueueUrl, sqsMessage.ReceiptHandle);
+};
+
+const processIndexerQueue = async (config: Config): Promise<void> => {
+  await createIndexes(config.esUrl);
+
+  let messages: SqsMessage[];
+  do {
+    /* eslint-disable no-await-in-loop */
+    messages = await getMessages(config.indexerQueueUrl);
+
+    await pMap(
+      messages,
+      sqsMessageHandler.bind(undefined, config),
+      { concurrency: 1 }
+    );
+    /* eslint-enable no-await-in-loop */
+  } while (messages.length > 0);
+};
+
+const envSchema = z.object({
+  DOCUMENT_METADATA_BUCKET: z.string().min(1),
+  OPEN_SEARCH_ENDPOINT: z.string().url(),
+  INDEXER_QUEUE_URL: z.string().url(),
+});
+
+const loadConfigFromEnv = (): Config => {
+  const env = envSchema.parse(process.env);
+
+  return {
+    dspaceItemBucket: env.DOCUMENT_METADATA_BUCKET,
+    esUrl: env.OPEN_SEARCH_ENDPOINT,
+    indexerQueueUrl: env.INDEXER_QUEUE_URL,
+  };
+};
+
+export const handler = async () => {
+  const config = loadConfigFromEnv();
+
+  await processIndexerQueue(config);
 };

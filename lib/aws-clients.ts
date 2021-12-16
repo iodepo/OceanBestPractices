@@ -7,7 +7,7 @@ const localStackEndpoint = (): string =>
   getStringFromEnv(localStackEndpointEnvVar, true)
     || 'http://localhost:4566';
 
-const defaultLocalstackOverrides = (): S3.Types.ClientConfiguration => ({
+const defaultLocalstackOverrides = () => ({
   credentials: {
     accessKeyId: 'accessKeyId',
     secretAccessKey: 'secretAccessKey',

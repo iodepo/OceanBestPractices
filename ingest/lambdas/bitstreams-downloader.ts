@@ -1,7 +1,7 @@
-import { z } from 'zod';
 import pMap from 'p-map';
 import got from 'got/dist/source';
 import {
+  s3EventSchema,
   S3ObjectLocation,
   safeGetObjectJson,
   uploadStream,
@@ -10,21 +10,6 @@ import { dspaceItemSchema } from '../../lib/dspace-schemas';
 import { getStringFromEnv } from '../../lib/env-utils';
 import { findPDFBitstreamItem } from '../../lib/dspace-item';
 import { sendMessage } from '../../lib/sqs-utils';
-
-const s3EventSchema = z.object({
-  Records: z.array(
-    z.object({
-      s3: z.object({
-        bucket: z.object({
-          name: z.string().min(1),
-        }),
-        object: z.object({
-          key: z.string().min(1),
-        }),
-      }),
-    })
-  ).nonempty(),
-});
 
 export const handler = async (event: unknown) => {
   const dspaceEndpoint = getStringFromEnv('DSPACE_ENDPOINT');
