@@ -13,4 +13,4 @@ services:
     ports:
       - "127.0.0.1:4566:4566"
     environment:
-      - SERVICES=s3,sns,sqs
+      - SERVICES=s3
