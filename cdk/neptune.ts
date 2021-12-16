@@ -1,4 +1,5 @@
 import {
+  CfnOutput,
   Construct,
   Duration,
   RemovalPolicy,
@@ -163,5 +164,10 @@ export default class Neptune extends Construct {
         suffix: '.json',
       }
     );
+
+    new CfnOutput(this, 'BulkLoaderBucket', {
+      value: bulkLoaderBucket.bucketName,
+      exportName: 'bulk-loader-bucket',
+    });
   }
 }
