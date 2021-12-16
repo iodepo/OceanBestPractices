@@ -8,8 +8,6 @@ interface SnsTopicsProps {
 export default class IngestSnsTopics extends Construct {
   public readonly availableDocument: Topic;
 
-  public readonly textExtractor: Topic;
-
   constructor(scope: Construct, id: string, props: SnsTopicsProps) {
     super(scope, id);
 
@@ -17,12 +15,6 @@ export default class IngestSnsTopics extends Construct {
       this,
       'AvailableDocument',
       { displayName: `${props.stackName} Available Documents Topic` }
-    );
-
-    this.textExtractor = new Topic(
-      this,
-      'TextExtractor',
-      { displayName: `${props.stackName}-Text Extractor Completed Topic` }
     );
   }
 }
