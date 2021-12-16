@@ -137,7 +137,7 @@ interface Config {
 }
 
 const getMessages = async (queueUrl: string): Promise<SqsMessage[]> =>
-  receiveMessage(queueUrl).then((r) => r.Messages || []);
+  receiveMessage(queueUrl).then((r) => r.Messages);
 
 const ingestRecordSchema = z.object({
   uuid: z.string().uuid(),
@@ -270,6 +270,8 @@ const processIndexerQueue = async (config: Config): Promise<void> => {
   do {
     /* eslint-disable no-await-in-loop */
     messages = await getMessages(config.indexerQueueUrl);
+
+    console.log('>>> messages:', JSON.stringify(messages, undefined, 2));
 
     await pMap(
       messages,

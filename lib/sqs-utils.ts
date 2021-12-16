@@ -14,7 +14,7 @@ const sqsMessageSchema = z.object({
 export type SqsMessage = z.infer<typeof sqsMessageSchema>;
 
 const receiveMessageResultSchema = z.object({
-  Messages: z.array(sqsMessageSchema),
+  Messages: z.array(sqsMessageSchema).default([]),
 });
 
 type ReceiveMessageResult = z.infer<typeof receiveMessageResultSchema>;
