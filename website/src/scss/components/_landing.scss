@@ -20,6 +20,28 @@
     width: 80%;
     padding: 3rem 1rem;
   }
+
+  .tip__label {
+    margin-bottom: 5rem;
+    cursor: pointer;
+    color: $primary-blue;
+    font-weight: bold;
+    background-color: rgba($white, 0.4);
+    padding: 0.75rem 1rem;
+    text-align: center;
+    border-radius: 0.25rem;
+    transition: all 0.1s ease-in-out;
+    box-shadow:$box-shadow-light;
+    width: 100vw;
+  
+    &:hover, &:focus {
+      background-color: rgba($white, 0.8);
+    }
+  
+    @media #{$screen-xs} {
+      width: 14.75rem;
+    }
+  }
 }
 
 .landing__obp-logo {
