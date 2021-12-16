@@ -16,6 +16,7 @@ import {
 } from '../../lib/dspace-item';
 import * as s3Utils from '../../lib/s3-utils';
 import { deleteMessage, receiveMessage, SqsMessage } from '../../lib/sqs-utils';
+import { zodTypeGuard } from '../../lib/zod-utils';
 
 export const getDSpaceItemFields = async (
   dspaceItemBucket: string,
@@ -118,6 +119,12 @@ export const getTerms = async (
   };
 };
 
+const justUuidMessageSchema = z.object({
+  uuid: z.string().uuid(),
+});
+
+const isExplicitInvokeMessage = zodTypeGuard(justUuidMessageSchema);
+
 const createIndexes = (esUrl: string) => Promise.all([
   osClient.createDocumentsIndex(esUrl, 'documents'),
   osClient.createTermsIndex(esUrl, 'terms'),
@@ -130,7 +137,7 @@ interface Config {
 }
 
 const getMessages = async (queueUrl: string): Promise<SqsMessage[]> =>
-  receiveMessage(queueUrl).then((r) => r.Messages);
+  receiveMessage(queueUrl).then((r) => r.Messages || []);
 
 const ingestRecordSchema = z.object({
   uuid: z.string().uuid(),
@@ -138,10 +145,10 @@ const ingestRecordSchema = z.object({
   bitstreamTextKey: z.string().min(1).optional(),
 });
 
-type IngestRecord = z.infer<typeof ingestRecordSchema>;
+type IndexerRequest = z.infer<typeof ingestRecordSchema>;
 
 const index = async (
-  ingestRecord: IngestRecord,
+  ingestRecord: IndexerRequest,
   dspaceItemBucket: string,
   openSearchEndpoint: string
 ): Promise<void> => {
@@ -203,6 +210,38 @@ const index = async (
   console.log(`INFO: Indexed document item ${documentItem.uuid}`);
 };
 
+const s3EventRecordToIngestRecord = (
+  record: s3Utils.S3EventRecord
+): IndexerRequest => {
+  const bitstreamTextBucket = record.s3.bucket.name;
+  const bitstreamTextKey = record.s3.object.key;
+  const [uuid] = bitstreamTextKey.split('.');
+
+  if (!uuid) {
+    throw new Error(`Ingest indexer event missing UUID ${JSON.stringify(record)}`);
+  }
+
+  return {
+    bitstreamTextBucket,
+    bitstreamTextKey,
+    uuid,
+  };
+};
+
+const parseSqsMessageBody = (body: string): IndexerRequest[] => {
+  const messageBody = JSON.parse(body);
+
+  if (isExplicitInvokeMessage(messageBody)) {
+    return [{ uuid: messageBody.uuid }];
+  }
+
+  if (s3Utils.isS3Event(messageBody)) {
+    return messageBody.Records.map((r) => s3EventRecordToIngestRecord(r));
+  }
+
+  throw new Error(`Unparsable message body: ${body}`);
+};
+
 interface SqsMessageHandlerConfig {
   dspaceItemBucket: string,
   esUrl: string,
@@ -213,9 +252,13 @@ const sqsMessageHandler = async (
   config: SqsMessageHandlerConfig,
   sqsMessage: SqsMessage
 ) => {
-  const indexerEvent = ingestRecordSchema.parse(JSON.parse(sqsMessage.Body));
+  const ingestRecords = parseSqsMessageBody(sqsMessage.Body);
 
-  await index(indexerEvent, config.dspaceItemBucket, config.esUrl);
+  await pMap(
+    ingestRecords,
+    (record) => index(record, config.dspaceItemBucket, config.esUrl),
+    { concurrency: 1 }
+  );
 
   await deleteMessage(config.indexerQueueUrl, sqsMessage.ReceiptHandle);
 };
