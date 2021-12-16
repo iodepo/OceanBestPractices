@@ -2,7 +2,7 @@ const dspaceFeedIngester = require('./rss-feed-ingester');
 const dspaceClient = require('../../lib/dspace-client');
 const ingestQueue = require('../lib/ingest-queue');
 
-describe('rss-feed-ingester', () => {
+describe('rss-feed-ingester.handler', () => {
   beforeAll(() => {
     jest.useFakeTimers('modern');
     jest.setSystemTime(new Date('Wed, 9 Nov 2021 18:00:30 GMT'));
@@ -46,7 +46,7 @@ describe('rss-feed-ingester', () => {
 
     ingestQueue.queueIngestDocument = jest.fn();
 
-    await dspaceFeedIngester();
+    await dspaceFeedIngester.handler();
 
     expect(dspaceClient.getFeed).toHaveBeenCalledTimes(1);
     expect(dspaceClient.getFeed).toHaveBeenCalledWith('https://dspace.test.com');

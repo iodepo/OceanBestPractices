@@ -1086,6 +1086,23 @@ html {
     .landing__search-container {
       width: 80%;
       padding: 3rem 1rem; } }
+  .landing__search-container .tip__label {
+    margin-bottom: 5rem;
+    cursor: pointer;
+    color: #0068B3;
+    font-weight: bold;
+    background-color: rgba(255, 255, 255, 0.4);
+    padding: 0.75rem 1rem;
+    text-align: center;
+    border-radius: 0.25rem;
+    transition: all 0.1s ease-in-out;
+    box-shadow: 0px 2px 8px 0px rgba(0, 0, 0, 0.05);
+    width: 100vw; }
+    .landing__search-container .tip__label:hover, .landing__search-container .tip__label:focus {
+      background-color: rgba(255, 255, 255, 0.8); }
+    @media (min-width: 481px) {
+      .landing__search-container .tip__label {
+        width: 14.75rem; } }
 
 .landing__obp-logo {
   width: 80%;
@@ -1705,9 +1722,9 @@ html {
   .searchbar__advanced--status .tip__label {
     display: block;
     margin: 0;
-    background-color: #0068B3;
+    background-color: #75b3e1;
     color: #fff;
-    padding: .05em .4em .15em .4em;
+    padding: 0.25rem;
     border-radius: .2rem; }
   .searchbar__advanced--status a {
     text-decoration: none;
@@ -1717,8 +1734,7 @@ html {
   .searchbar__advanced--status .tip__label:hover {
     text-decoration: underline; }
   .searchbar__advanced--status span {
-    display: block;
-    margin-top: .25rem; }
+    display: block; }
 
 .search-filter {
   display: inline;

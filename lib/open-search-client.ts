@@ -237,7 +237,7 @@ export const createIndex = (
   prefixUrl: string,
   index: string,
   indexBody?: Record<string, unknown>
-): Promise<unknown> =>
+): Promise<void> =>
   gotEs(prefixUrl).put(
     index,
     {
@@ -246,13 +246,18 @@ export const createIndex = (
       throwHttpErrors: false,
     }
   ).then(({ statusCode, body }) => {
-    if (statusCode === 200) return body;
+    if (statusCode === 200) return;
 
     const errorMessage = get(
       body,
       'error.type',
       `Unexpected ${statusCode} response: ${body}`
     );
+
+    if (errorMessage === 'resource_already_exists_exception') {
+      console.log(`INFO: index "${index}" already exists.`);
+      return;
+    }
 
     throw new Error(errorMessage);
   });

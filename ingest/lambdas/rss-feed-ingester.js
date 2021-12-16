@@ -45,6 +45,7 @@ const handler = async () => {
         const [dspaceItem] = await dspaceClient.find(
           dspaceEndpoint,
           'dc.identifier.uri',
+          // @ts-expect-error Figure this typing out later.
           feedItem.link[0]
         );
 
@@ -65,4 +66,4 @@ const handler = async () => {
   }
 };
 
-module.exports = handler;
+module.exports = { handler };

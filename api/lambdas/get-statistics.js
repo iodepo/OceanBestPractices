@@ -41,15 +41,17 @@ const getGraphCount = async (sparqlUrl) => {
 exports.handler = async () => {
   const openSearchEndpoint = getStringFromEnv('OPEN_SEARCH_ENDPOINT');
   const sparqlUrl = getStringFromEnv('SPARQL_URL');
+  const documentsIndexName = getStringFromEnv('DOCUMENTS_INDEX_NAME');
+  const termsIndexName = getStringFromEnv('TERMS_INDEX_NAME');
 
   const documentCount = await osClient.getCount(
     openSearchEndpoint,
-    'documents'
+    documentsIndexName
   );
 
   const termCount = await osClient.getCount(
     openSearchEndpoint,
-    'terms'
+    termsIndexName
   );
 
   const graphCount = await getGraphCount(sparqlUrl);

@@ -3,10 +3,11 @@ import { randomUUID } from 'crypto';
 import nock from 'nock';
 import { handler } from './bitstreams-downloader';
 import * as s3Utils from '../../lib/s3-utils';
-import * as lambdaClient from '../../lib/lambda-client';
+import * as sqsUtils from '../../lib/sqs-utils';
 
 const dspaceItemBucket = `bucket-${cryptoRandomString({ length: 6 })}`;
 const bitstreamSourceBucket = `bucket-${cryptoRandomString({ length: 6 })}`;
+let indexerQueue: { arn: string, url: string };
 
 const s3EventFactory = (bucket: string, key: string) => ({
   Records: [
@@ -23,17 +24,25 @@ const s3EventFactory = (bucket: string, key: string) => ({
   ],
 });
 
-jest.mock('../../lib/lambda-client', () => ({
-  invoke: jest.fn(),
-}));
-
 describe('bitstreams-downloader.handler', () => {
+  let awsAccessKeyIdBefore: string | undefined;
+  let awsSecretAccessKey: string | undefined;
+
   beforeAll(async () => {
+    awsAccessKeyIdBefore = process.env['AWS_ACCESS_KEY_ID'];
+    process.env['AWS_ACCESS_KEY_ID'] = 'test-key-id';
+
+    awsSecretAccessKey = process.env['AWS_SECRET_ACCESS_KEY'];
+    process.env['AWS_SECRET_ACCESS_KEY'] = 'test-access-key';
+
     nock.disableNetConnect();
     nock.enableNetConnect('localhost');
 
     await s3Utils.createBucket(dspaceItemBucket);
     await s3Utils.createBucket(bitstreamSourceBucket);
+
+    const indexerQueueName = `queue-${cryptoRandomString({ length: 6 })}`;
+    indexerQueue = await sqsUtils.createSQSQueue(indexerQueueName);
   });
 
   beforeEach(() => {
@@ -41,14 +50,18 @@ describe('bitstreams-downloader.handler', () => {
 
     process.env['DSPACE_ENDPOINT'] = 'https://dspace.test.com';
     process.env['DOCUMENT_BINARY_BUCKET'] = bitstreamSourceBucket;
-    process.env['INDEXER_FUNCTION_NAME'] = 'obp-test-indexer-function';
+    process.env['INDEXER_QUEUE_URL'] = indexerQueue.url;
   });
 
   afterAll(async () => {
     await s3Utils.deleteBucket(dspaceItemBucket, true);
     await s3Utils.deleteBucket(bitstreamSourceBucket, true);
+    await sqsUtils.deleteSqsQueue(indexerQueue.url);
 
     nock.enableNetConnect();
+
+    process.env['AWS_ACCESS_KEY_ID'] = awsAccessKeyIdBefore;
+    process.env['AWS_SECRET_ACCESS_KEY'] = awsSecretAccessKey;
   });
 
   test('should upload the PDF bitstream from a DSpace item to S3', async () => {
@@ -124,11 +137,14 @@ describe('bitstreams-downloader.handler', () => {
 
     await handler(event);
 
-    expect(lambdaClient.invoke).toHaveBeenCalledTimes(1);
-    expect(lambdaClient.invoke).toHaveBeenCalledWith(
-      'obp-test-indexer-function',
-      'Event',
-      { uuid }
+    const [message] = await sqsUtils.waitForMessages(
+      indexerQueue.url,
+      1
     );
+
+    const body = JSON.parse(message?.Body || '{}');
+    expect(body).toEqual({
+      uuid,
+    });
   });
 });

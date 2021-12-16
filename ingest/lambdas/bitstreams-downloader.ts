@@ -1,35 +1,20 @@
-import { z } from 'zod';
 import pMap from 'p-map';
 import got from 'got/dist/source';
 import {
+  s3EventSchema,
   S3ObjectLocation,
   safeGetObjectJson,
   uploadStream,
 } from '../../lib/s3-utils';
-import * as lambdaClient from '../../lib/lambda-client';
 import { dspaceItemSchema } from '../../lib/dspace-schemas';
 import { getStringFromEnv } from '../../lib/env-utils';
 import { findPDFBitstreamItem } from '../../lib/dspace-item';
-
-const s3EventSchema = z.object({
-  Records: z.array(
-    z.object({
-      s3: z.object({
-        bucket: z.object({
-          name: z.string().min(1),
-        }),
-        object: z.object({
-          key: z.string().min(1),
-        }),
-      }),
-    })
-  ).nonempty(),
-});
+import { sendMessage } from '../../lib/sqs-utils';
 
 export const handler = async (event: unknown) => {
   const dspaceEndpoint = getStringFromEnv('DSPACE_ENDPOINT');
   const bitstreamSourceBucket = getStringFromEnv('DOCUMENT_BINARY_BUCKET');
-  const indexerFunction = getStringFromEnv('INDEXER_FUNCTION_NAME');
+  const indexerQueueUrl = getStringFromEnv('INDEXER_QUEUE_URL');
 
   const s3Event = s3EventSchema.parse(event);
 
@@ -62,12 +47,12 @@ export const handler = async (event: unknown) => {
           console.log(`INFO: Uploaded PDF for DSpace item ${dspaceItem.uuid}`);
         } else {
           // No PDF so just invoke the indexer.
-          console.log(`INFO: DSpace item ${dspaceItem.uuid} has no PDF. Skipping upload and invoking the indexer.`);
+          console.log(`INFO: DSpace item ${dspaceItem.uuid} has no PDF. Skipping upload and queuing it for indexing.`);
 
-          await lambdaClient.invoke(
-            indexerFunction,
-            'Event',
-            { uuid: dspaceItem.uuid }
+          // Write to SQS.
+          await sendMessage(
+            indexerQueueUrl,
+            JSON.stringify({ uuid: dspaceItem.uuid })
           );
         }
       } catch (error) {

@@ -1,9 +1,10 @@
+/* eslint-disable max-len */
 /* eslint-disable no-underscore-dangle */
 /* eslint-disable unicorn/no-null */
 import cryptoRandomString from 'crypto-random-string';
 import nock from 'nock';
 
-import * as osClient from '../../lib/open-search-client';
+// import * as osClient from '../../lib/open-search-client';
 import * as indexer from './indexer';
 import * as s3Utils from '../../lib/s3-utils';
 
@@ -368,428 +369,428 @@ describe('indexer', () => {
     });
   });
 
-  describe('indexer.handler', () => {
-    describe('when indexing a document', () => {
-      beforeAll(async () => {
-        await s3Utils.putJson(
-          new s3Utils.S3ObjectLocation(
-            dspaceItemBucket,
-            '01ebed91-218a-4465-8a67-f6712ff3cfb7.json'
-          ),
-          {
-            uuid: '01ebed91-218a-4465-8a67-f6712ff3cfb7',
-            handle: '11329/874.2',
-            lastModified: '2021-11-15 11:30:57.109',
-            bitstreams: [
-              {
-                uuid: 'da66b42c-b435-4c47-981c-44da170a1018',
-                name: 'oceansites_data_format_reference_manual.pdf',
-                bundleName: 'ORIGINAL',
-                mimeType: 'application/pdf',
-                retrieveLink: '/rest/bitstreams/da66b42c-b435-4c47-981c-44da170a1018/retrieve',
-                checkSum: {
-                  value: '6a45c8850908937a88f18e9a87674393',
-                },
-              },
-              {
-                uuid: 'da66b42c-b435-4c47-981c-44da170a1018',
-                name: 'oceansites_data_format_reference_manual.pdf',
-                bundleName: 'THUMBNAIL',
-                mimeType: 'image/jpeg',
-                retrieveLink: '/rest/bitstreams/da66b42c-b435-4c47-981c-44da170a1018/retrieve',
-                checkSum: {
-                  value: '6a45c8850908937a88f18e9a87674393',
-                },
-              },
-            ],
-            metadata: [
-              {
-                key: 'dc.date.accessioned',
-                value: '2021-07-05T19:56:13Z',
-              },
-              {
-                key: 'dc.title',
-                value: 'Hello document with a PDF!',
-              },
-              {
-                key: 'dc.contributor.author',
-                value: 'Paul Pilone',
-              },
-              {
-                key: 'dc.contributor.author',
-                value: 'Marc Huffnagle',
-              },
-            ],
-          }
-        );
+  // describe('indexer.handler', () => {
+  //   describe('when indexing a document', () => {
+  //     beforeAll(async () => {
+  //       await s3Utils.putJson(
+  //         new s3Utils.S3ObjectLocation(
+  //           dspaceItemBucket,
+  //           '01ebed91-218a-4465-8a67-f6712ff3cfb7.json'
+  //         ),
+  //         {
+  //           uuid: '01ebed91-218a-4465-8a67-f6712ff3cfb7',
+  //           handle: '11329/874.2',
+  //           lastModified: '2021-11-15 11:30:57.109',
+  //           bitstreams: [
+  //             {
+  //               uuid: 'da66b42c-b435-4c47-981c-44da170a1018',
+  //               name: 'oceansites_data_format_reference_manual.pdf',
+  //               bundleName: 'ORIGINAL',
+  //               mimeType: 'application/pdf',
+  //               retrieveLink: '/rest/bitstreams/da66b42c-b435-4c47-981c-44da170a1018/retrieve',
+  //               checkSum: {
+  //                 value: '6a45c8850908937a88f18e9a87674393',
+  //               },
+  //             },
+  //             {
+  //               uuid: 'da66b42c-b435-4c47-981c-44da170a1018',
+  //               name: 'oceansites_data_format_reference_manual.pdf',
+  //               bundleName: 'THUMBNAIL',
+  //               mimeType: 'image/jpeg',
+  //               retrieveLink: '/rest/bitstreams/da66b42c-b435-4c47-981c-44da170a1018/retrieve',
+  //               checkSum: {
+  //                 value: '6a45c8850908937a88f18e9a87674393',
+  //               },
+  //             },
+  //           ],
+  //           metadata: [
+  //             {
+  //               key: 'dc.date.accessioned',
+  //               value: '2021-07-05T19:56:13Z',
+  //             },
+  //             {
+  //               key: 'dc.title',
+  //               value: 'Hello document with a PDF!',
+  //             },
+  //             {
+  //               key: 'dc.contributor.author',
+  //               value: 'Paul Pilone',
+  //             },
+  //             {
+  //               key: 'dc.contributor.author',
+  //               value: 'Marc Huffnagle',
+  //             },
+  //           ],
+  //         }
+  //       );
 
-        await s3Utils.putJson(
-          new s3Utils.S3ObjectLocation(
-            dspaceItemBucket,
-            '9c404a3c-a09a-44f9-b27b-67c8ec2b95bc.json'
-          ),
-          {
-            uuid: '9c404a3c-a09a-44f9-b27b-67c8ec2b95bc',
-            handle: '11329/874.2',
-            lastModified: '2021-11-15 11:30:57.109',
-            bitstreams: [
-              {
-                uuid: 'da66b42c-b435-4c47-981c-44da170a1018',
-                name: 'oceansites_data_format_reference_manual.pdf',
-                bundleName: 'ORIGINAL',
-                mimeType: 'application/pdf',
-                retrieveLink: '/rest/bitstreams/da66b42c-b435-4c47-981c-44da170a1018/retrieve',
-                checkSum: {
-                  value: '6a45c8850908937a88f18e9a87674393',
-                },
-              },
-              {
-                uuid: 'da66b42c-b435-4c47-981c-44da170a1018',
-                name: 'oceansites_data_format_reference_manual.pdf',
-                bundleName: 'THUMBNAIL',
-                mimeType: 'image/jpeg',
-                retrieveLink: '/rest/bitstreams/da66b42c-b435-4c47-981c-44da170a1018/retrieve',
-                checkSum: {
-                  value: '6a45c8850908937a88f18e9a87674393',
-                },
-              },
-            ],
-            metadata: [
-              {
-                key: 'dc.date.accessioned',
-                value: '2021-07-05T19:56:13Z',
-              },
-              {
-                key: 'dc.title',
-                value: 'Hello another document with a PDF!',
-              },
-            ],
-          }
-        );
+  //       await s3Utils.putJson(
+  //         new s3Utils.S3ObjectLocation(
+  //           dspaceItemBucket,
+  //           '9c404a3c-a09a-44f9-b27b-67c8ec2b95bc.json'
+  //         ),
+  //         {
+  //           uuid: '9c404a3c-a09a-44f9-b27b-67c8ec2b95bc',
+  //           handle: '11329/874.2',
+  //           lastModified: '2021-11-15 11:30:57.109',
+  //           bitstreams: [
+  //             {
+  //               uuid: 'da66b42c-b435-4c47-981c-44da170a1018',
+  //               name: 'oceansites_data_format_reference_manual.pdf',
+  //               bundleName: 'ORIGINAL',
+  //               mimeType: 'application/pdf',
+  //               retrieveLink: '/rest/bitstreams/da66b42c-b435-4c47-981c-44da170a1018/retrieve',
+  //               checkSum: {
+  //                 value: '6a45c8850908937a88f18e9a87674393',
+  //               },
+  //             },
+  //             {
+  //               uuid: 'da66b42c-b435-4c47-981c-44da170a1018',
+  //               name: 'oceansites_data_format_reference_manual.pdf',
+  //               bundleName: 'THUMBNAIL',
+  //               mimeType: 'image/jpeg',
+  //               retrieveLink: '/rest/bitstreams/da66b42c-b435-4c47-981c-44da170a1018/retrieve',
+  //               checkSum: {
+  //                 value: '6a45c8850908937a88f18e9a87674393',
+  //               },
+  //             },
+  //           ],
+  //           metadata: [
+  //             {
+  //               key: 'dc.date.accessioned',
+  //               value: '2021-07-05T19:56:13Z',
+  //             },
+  //             {
+  //               key: 'dc.title',
+  //               value: 'Hello another document with a PDF!',
+  //             },
+  //           ],
+  //         }
+  //       );
 
-        await s3Utils.putJson(
-          new s3Utils.S3ObjectLocation(
-            dspaceItemBucket,
-            '2982b980-5bb3-4964-9cdb-ceaf602f3599.json'
-          ),
-          {
-            uuid: '2982b980-5bb3-4964-9cdb-ceaf602f3599',
-            handle: '11329/874.2',
-            lastModified: '2021-11-15 11:30:57.109',
-            bitstreams: [
-              {
-                uuid: 'da66b42c-b435-4c47-981c-44da170a1018',
-                name: 'oceansites_data_format_reference_manual.pdf',
-                bundleName: 'THUMBNAIL',
-                mimeType: 'image/jpeg',
-                retrieveLink: '/rest/bitstreams/da66b42c-b435-4c47-981c-44da170a1018/retrieve',
-                checkSum: {
-                  value: '6a45c8850908937a88f18e9a87674393',
-                },
-              },
-            ],
-            metadata: [
-              {
-                key: 'dc.date.accessioned',
-                value: '2021-07-05T19:56:13Z',
-              },
-              {
-                key: 'dc.title',
-                value: 'Hello document without a PDF!',
-              },
-            ],
-          }
-        );
+  //       await s3Utils.putJson(
+  //         new s3Utils.S3ObjectLocation(
+  //           dspaceItemBucket,
+  //           '2982b980-5bb3-4964-9cdb-ceaf602f3599.json'
+  //         ),
+  //         {
+  //           uuid: '2982b980-5bb3-4964-9cdb-ceaf602f3599',
+  //           handle: '11329/874.2',
+  //           lastModified: '2021-11-15 11:30:57.109',
+  //           bitstreams: [
+  //             {
+  //               uuid: 'da66b42c-b435-4c47-981c-44da170a1018',
+  //               name: 'oceansites_data_format_reference_manual.pdf',
+  //               bundleName: 'THUMBNAIL',
+  //               mimeType: 'image/jpeg',
+  //               retrieveLink: '/rest/bitstreams/da66b42c-b435-4c47-981c-44da170a1018/retrieve',
+  //               checkSum: {
+  //                 value: '6a45c8850908937a88f18e9a87674393',
+  //               },
+  //             },
+  //           ],
+  //           metadata: [
+  //             {
+  //               key: 'dc.date.accessioned',
+  //               value: '2021-07-05T19:56:13Z',
+  //             },
+  //             {
+  //               key: 'dc.title',
+  //               value: 'Hello document without a PDF!',
+  //             },
+  //           ],
+  //         }
+  //       );
 
-        await s3Utils.putText(
-          new s3Utils.S3ObjectLocation(
-            bitstreamTextBucket,
-            '01ebed91-218a-4465-8a67-f6712ff3cfb7.txt'
-          ),
-          'Bitstream text for 01ebed91-218a-4465-8a67-f6712ff3cfb7.'
-        );
+  //       await s3Utils.putText(
+  //         new s3Utils.S3ObjectLocation(
+  //           bitstreamTextBucket,
+  //           '01ebed91-218a-4465-8a67-f6712ff3cfb7.txt'
+  //         ),
+  //         'Bitstream text for 01ebed91-218a-4465-8a67-f6712ff3cfb7.'
+  //       );
 
-        await s3Utils.putText(
-          new s3Utils.S3ObjectLocation(
-            bitstreamTextBucket,
-            '9c404a3c-a09a-44f9-b27b-67c8ec2b95bc.txt'
-          ),
-          'Bitstream text for 9c404a3c-a09a-44f9-b27b-67c8ec2b95bc.'
-        );
+  //       await s3Utils.putText(
+  //         new s3Utils.S3ObjectLocation(
+  //           bitstreamTextBucket,
+  //           '9c404a3c-a09a-44f9-b27b-67c8ec2b95bc.txt'
+  //         ),
+  //         'Bitstream text for 9c404a3c-a09a-44f9-b27b-67c8ec2b95bc.'
+  //       );
 
-        // Create the terms index.
-        await osClient.createTermsIndex(
-          'http://localhost:9200',
-          'terms'
-        );
+  //       // Create the terms index.
+  //       await osClient.createTermsIndex(
+  //         'http://localhost:9200',
+  //         'terms'
+  //       );
 
-        await osClient.addDocument(
-          'http://localhost:9200',
-          'terms',
-          {
-            query: {
-              multi_match: {
-                query: 'Hello',
-                type: 'phrase',
-                fields: ['contents', 'title'],
-              },
-            },
-            source_terminology: 'Test Terminology',
-            namedUriGraph: 'https://test-terminology.owl',
-            uri: 'http://test-terminology.owl/1234',
-          }
-        );
+  //       await osClient.addDocument(
+  //         'http://localhost:9200',
+  //         'terms',
+  //         {
+  //           query: {
+  //             multi_match: {
+  //               query: 'Hello',
+  //               type: 'phrase',
+  //               fields: ['contents', 'title'],
+  //             },
+  //           },
+  //           source_terminology: 'Test Terminology',
+  //           namedUriGraph: 'https://test-terminology.owl',
+  //           uri: 'http://test-terminology.owl/1234',
+  //         }
+  //       );
 
-        await osClient.refreshIndex(
-          openSearchEndpoint,
-          'terms'
-        );
-      });
+  //       await osClient.refreshIndex(
+  //         openSearchEndpoint,
+  //         'terms'
+  //       );
+  //     });
 
-      afterAll(async () => {
-        await osClient.deleteIndex(openSearchEndpoint, 'terms');
-        await osClient.deleteIndex(openSearchEndpoint, 'documents');
-      });
+  //     afterAll(async () => {
+  //       await osClient.deleteIndex(openSearchEndpoint, 'terms');
+  //       await osClient.deleteIndex(openSearchEndpoint, 'documents');
+  //     });
 
-      describe('and invoked by the text extractor', () => {
-        test('should index documents with all index-able fields', async () => {
-          const snsEvent = {
-            Records: [
-              {
-                Sns: {
-                  Message: JSON.stringify({
-                    Records: [
-                      {
-                        s3: {
-                          bucket: {
-                            name: bitstreamTextBucket,
-                          },
-                          object: {
-                            key: '01ebed91-218a-4465-8a67-f6712ff3cfb7.txt',
-                          },
-                        },
-                      },
-                    ],
-                  }),
-                },
-              },
-              {
-                Sns: {
-                  Message: JSON.stringify({
-                    Records: [
-                      {
-                        s3: {
-                          bucket: {
-                            name: bitstreamTextBucket,
-                          },
-                          object: {
-                            key: '9c404a3c-a09a-44f9-b27b-67c8ec2b95bc.txt',
-                          },
-                        },
-                      },
-                    ],
-                  }),
-                },
-              },
-            ],
-          };
+  //     describe('and invoked by the text extractor', () => {
+  //       test('should index documents with all index-able fields', async () => {
+  //         const snsEvent = {
+  //           Records: [
+  //             {
+  //               Sns: {
+  //                 Message: JSON.stringify({
+  //                   Records: [
+  //                     {
+  //                       s3: {
+  //                         bucket: {
+  //                           name: bitstreamTextBucket,
+  //                         },
+  //                         object: {
+  //                           key: '01ebed91-218a-4465-8a67-f6712ff3cfb7.txt',
+  //                         },
+  //                       },
+  //                     },
+  //                   ],
+  //                 }),
+  //               },
+  //             },
+  //             {
+  //               Sns: {
+  //                 Message: JSON.stringify({
+  //                   Records: [
+  //                     {
+  //                       s3: {
+  //                         bucket: {
+  //                           name: bitstreamTextBucket,
+  //                         },
+  //                         object: {
+  //                           key: '9c404a3c-a09a-44f9-b27b-67c8ec2b95bc.txt',
+  //                         },
+  //                       },
+  //                     },
+  //                   ],
+  //                 }),
+  //               },
+  //             },
+  //           ],
+  //         };
 
-          await indexer.handler(snsEvent);
+  //         await indexer.handler(snsEvent);
 
-          // Fetch the object from OpenSearch.
-          const result1 = await osClient.getDocument(
-            openSearchEndpoint,
-            'documents',
-            '01ebed91-218a-4465-8a67-f6712ff3cfb7'
-          ) as { _id: string, _source: Record<string, unknown> };
+  //         // Fetch the object from OpenSearch.
+  //         const result1 = await osClient.getDocument(
+  //           openSearchEndpoint,
+  //           'documents',
+  //           '01ebed91-218a-4465-8a67-f6712ff3cfb7'
+  //         ) as { _id: string, _source: Record<string, unknown> };
 
-          expect(result1._id).toEqual('01ebed91-218a-4465-8a67-f6712ff3cfb7');
-          expect(result1._source).toEqual({
-            uuid: '01ebed91-218a-4465-8a67-f6712ff3cfb7',
-            handle: '11329/874.2',
-            lastModified: '2021-11-15 11:30:57.109',
-            bitstreams: [
-              {
-                uuid: 'da66b42c-b435-4c47-981c-44da170a1018',
-                name: 'oceansites_data_format_reference_manual.pdf',
-                bundleName: 'ORIGINAL',
-                mimeType: 'application/pdf',
-                retrieveLink: '/rest/bitstreams/da66b42c-b435-4c47-981c-44da170a1018/retrieve',
-                checkSum: {
-                  value: '6a45c8850908937a88f18e9a87674393',
-                },
-              },
-              {
-                uuid: 'da66b42c-b435-4c47-981c-44da170a1018',
-                name: 'oceansites_data_format_reference_manual.pdf',
-                bundleName: 'THUMBNAIL',
-                mimeType: 'image/jpeg',
-                retrieveLink: '/rest/bitstreams/da66b42c-b435-4c47-981c-44da170a1018/retrieve',
-                checkSum: {
-                  value: '6a45c8850908937a88f18e9a87674393',
-                },
-              },
-            ],
-            metadata: [
-              {
-                key: 'dc.date.accessioned',
-                value: '2021-07-05T19:56:13Z',
-              },
-              {
-                key: 'dc.title',
-                value: 'Hello document with a PDF!',
-              },
-              {
-                key: 'dc.contributor.author',
-                value: 'Paul Pilone',
-              },
-              {
-                key: 'dc.contributor.author',
-                value: 'Marc Huffnagle',
-              },
-            ],
-            dc_title: 'Hello document with a PDF!',
-            dc_date_accessioned: '2021-07-05T19:56:13Z',
-            dc_contributor_author: ['Paul Pilone', 'Marc Huffnagle'],
-            _bitstreamText: 'Bitstream text for 01ebed91-218a-4465-8a67-f6712ff3cfb7.',
-            _bitstreamTextKey: '01ebed91-218a-4465-8a67-f6712ff3cfb7.txt',
-            _primaryAuthor: 'Paul Pilone',
-            _terms: [
-              {
-                label: 'Hello',
-                source_terminology: 'Test Terminology',
-                uri: 'http://test-terminology.owl/1234',
-              },
-            ],
-            _thumbnailRetrieveLink: '/rest/bitstreams/da66b42c-b435-4c47-981c-44da170a1018/retrieve',
-          });
+  //         expect(result1._id).toEqual('01ebed91-218a-4465-8a67-f6712ff3cfb7');
+  //         expect(result1._source).toEqual({
+  //           uuid: '01ebed91-218a-4465-8a67-f6712ff3cfb7',
+  //           handle: '11329/874.2',
+  //           lastModified: '2021-11-15 11:30:57.109',
+  //           bitstreams: [
+  //             {
+  //               uuid: 'da66b42c-b435-4c47-981c-44da170a1018',
+  //               name: 'oceansites_data_format_reference_manual.pdf',
+  //               bundleName: 'ORIGINAL',
+  //               mimeType: 'application/pdf',
+  //               retrieveLink: '/rest/bitstreams/da66b42c-b435-4c47-981c-44da170a1018/retrieve',
+  //               checkSum: {
+  //                 value: '6a45c8850908937a88f18e9a87674393',
+  //               },
+  //             },
+  //             {
+  //               uuid: 'da66b42c-b435-4c47-981c-44da170a1018',
+  //               name: 'oceansites_data_format_reference_manual.pdf',
+  //               bundleName: 'THUMBNAIL',
+  //               mimeType: 'image/jpeg',
+  //               retrieveLink: '/rest/bitstreams/da66b42c-b435-4c47-981c-44da170a1018/retrieve',
+  //               checkSum: {
+  //                 value: '6a45c8850908937a88f18e9a87674393',
+  //               },
+  //             },
+  //           ],
+  //           metadata: [
+  //             {
+  //               key: 'dc.date.accessioned',
+  //               value: '2021-07-05T19:56:13Z',
+  //             },
+  //             {
+  //               key: 'dc.title',
+  //               value: 'Hello document with a PDF!',
+  //             },
+  //             {
+  //               key: 'dc.contributor.author',
+  //               value: 'Paul Pilone',
+  //             },
+  //             {
+  //               key: 'dc.contributor.author',
+  //               value: 'Marc Huffnagle',
+  //             },
+  //           ],
+  //           dc_title: 'Hello document with a PDF!',
+  //           dc_date_accessioned: '2021-07-05T19:56:13Z',
+  //           dc_contributor_author: ['Paul Pilone', 'Marc Huffnagle'],
+  //           _bitstreamText: 'Bitstream text for 01ebed91-218a-4465-8a67-f6712ff3cfb7.',
+  //           _bitstreamTextKey: '01ebed91-218a-4465-8a67-f6712ff3cfb7.txt',
+  //           _primaryAuthor: 'Paul Pilone',
+  //           _terms: [
+  //             {
+  //               label: 'Hello',
+  //               source_terminology: 'Test Terminology',
+  //               uri: 'http://test-terminology.owl/1234',
+  //             },
+  //           ],
+  //           _thumbnailRetrieveLink: '/rest/bitstreams/da66b42c-b435-4c47-981c-44da170a1018/retrieve',
+  //         });
 
-          const result2 = await osClient.getDocument(
-            openSearchEndpoint,
-            'documents',
-            '9c404a3c-a09a-44f9-b27b-67c8ec2b95bc'
-          ) as { _id: string, _source: Record<string, unknown> };
-          expect(result2._id).toEqual('9c404a3c-a09a-44f9-b27b-67c8ec2b95bc');
-          expect(result2._source).toEqual({
-            uuid: '9c404a3c-a09a-44f9-b27b-67c8ec2b95bc',
-            handle: '11329/874.2',
-            lastModified: '2021-11-15 11:30:57.109',
-            bitstreams: [
-              {
-                uuid: 'da66b42c-b435-4c47-981c-44da170a1018',
-                name: 'oceansites_data_format_reference_manual.pdf',
-                bundleName: 'ORIGINAL',
-                mimeType: 'application/pdf',
-                retrieveLink: '/rest/bitstreams/da66b42c-b435-4c47-981c-44da170a1018/retrieve',
-                checkSum: {
-                  value: '6a45c8850908937a88f18e9a87674393',
-                },
-              },
-              {
-                uuid: 'da66b42c-b435-4c47-981c-44da170a1018',
-                name: 'oceansites_data_format_reference_manual.pdf',
-                bundleName: 'THUMBNAIL',
-                mimeType: 'image/jpeg',
-                retrieveLink: '/rest/bitstreams/da66b42c-b435-4c47-981c-44da170a1018/retrieve',
-                checkSum: {
-                  value: '6a45c8850908937a88f18e9a87674393',
-                },
-              },
-            ],
-            metadata: [
-              {
-                key: 'dc.date.accessioned',
-                value: '2021-07-05T19:56:13Z',
-              },
-              {
-                key: 'dc.title',
-                value: 'Hello another document with a PDF!',
-              },
-            ],
-            dc_title: 'Hello another document with a PDF!',
-            dc_date_accessioned: '2021-07-05T19:56:13Z',
-            _bitstreamText: 'Bitstream text for 9c404a3c-a09a-44f9-b27b-67c8ec2b95bc.',
-            _bitstreamTextKey: '9c404a3c-a09a-44f9-b27b-67c8ec2b95bc.txt',
-            _terms: [
-              {
-                label: 'Hello',
-                source_terminology: 'Test Terminology',
-                uri: 'http://test-terminology.owl/1234',
-              },
-            ],
-            _thumbnailRetrieveLink: '/rest/bitstreams/da66b42c-b435-4c47-981c-44da170a1018/retrieve',
-          });
-        });
-      });
+  //         const result2 = await osClient.getDocument(
+  //           openSearchEndpoint,
+  //           'documents',
+  //           '9c404a3c-a09a-44f9-b27b-67c8ec2b95bc'
+  //         ) as { _id: string, _source: Record<string, unknown> };
+  //         expect(result2._id).toEqual('9c404a3c-a09a-44f9-b27b-67c8ec2b95bc');
+  //         expect(result2._source).toEqual({
+  //           uuid: '9c404a3c-a09a-44f9-b27b-67c8ec2b95bc',
+  //           handle: '11329/874.2',
+  //           lastModified: '2021-11-15 11:30:57.109',
+  //           bitstreams: [
+  //             {
+  //               uuid: 'da66b42c-b435-4c47-981c-44da170a1018',
+  //               name: 'oceansites_data_format_reference_manual.pdf',
+  //               bundleName: 'ORIGINAL',
+  //               mimeType: 'application/pdf',
+  //               retrieveLink: '/rest/bitstreams/da66b42c-b435-4c47-981c-44da170a1018/retrieve',
+  //               checkSum: {
+  //                 value: '6a45c8850908937a88f18e9a87674393',
+  //               },
+  //             },
+  //             {
+  //               uuid: 'da66b42c-b435-4c47-981c-44da170a1018',
+  //               name: 'oceansites_data_format_reference_manual.pdf',
+  //               bundleName: 'THUMBNAIL',
+  //               mimeType: 'image/jpeg',
+  //               retrieveLink: '/rest/bitstreams/da66b42c-b435-4c47-981c-44da170a1018/retrieve',
+  //               checkSum: {
+  //                 value: '6a45c8850908937a88f18e9a87674393',
+  //               },
+  //             },
+  //           ],
+  //           metadata: [
+  //             {
+  //               key: 'dc.date.accessioned',
+  //               value: '2021-07-05T19:56:13Z',
+  //             },
+  //             {
+  //               key: 'dc.title',
+  //               value: 'Hello another document with a PDF!',
+  //             },
+  //           ],
+  //           dc_title: 'Hello another document with a PDF!',
+  //           dc_date_accessioned: '2021-07-05T19:56:13Z',
+  //           _bitstreamText: 'Bitstream text for 9c404a3c-a09a-44f9-b27b-67c8ec2b95bc.',
+  //           _bitstreamTextKey: '9c404a3c-a09a-44f9-b27b-67c8ec2b95bc.txt',
+  //           _terms: [
+  //             {
+  //               label: 'Hello',
+  //               source_terminology: 'Test Terminology',
+  //               uri: 'http://test-terminology.owl/1234',
+  //             },
+  //           ],
+  //           _thumbnailRetrieveLink: '/rest/bitstreams/da66b42c-b435-4c47-981c-44da170a1018/retrieve',
+  //         });
+  //       });
+  //     });
 
-      describe('and invoked by a Lambda event', () => {
-        test('should index a document with all fields except bitstream source fields', async () => {
-          const invokeEvent = {
-            uuid: '2982b980-5bb3-4964-9cdb-ceaf602f3599',
-          };
+  //     describe('and invoked by a Lambda event', () => {
+  //       test('should index a document with all fields except bitstream source fields', async () => {
+  //         const invokeEvent = {
+  //           uuid: '2982b980-5bb3-4964-9cdb-ceaf602f3599',
+  //         };
 
-          await indexer.handler(invokeEvent);
+  //         await indexer.handler(invokeEvent);
 
-          // Fetch the object from OpenSearch.
-          const result = await osClient.getDocument(
-            openSearchEndpoint,
-            'documents',
-            '2982b980-5bb3-4964-9cdb-ceaf602f3599'
-          ) as { _id: string, _source: Record<string, unknown> };
+  //         // Fetch the object from OpenSearch.
+  //         const result = await osClient.getDocument(
+  //           openSearchEndpoint,
+  //           'documents',
+  //           '2982b980-5bb3-4964-9cdb-ceaf602f3599'
+  //         ) as { _id: string, _source: Record<string, unknown> };
 
-          expect(result._id).toEqual('2982b980-5bb3-4964-9cdb-ceaf602f3599');
-          expect(result._source).toEqual({
-            uuid: '2982b980-5bb3-4964-9cdb-ceaf602f3599',
-            handle: '11329/874.2',
-            lastModified: '2021-11-15 11:30:57.109',
-            bitstreams: [
-              {
-                uuid: 'da66b42c-b435-4c47-981c-44da170a1018',
-                name: 'oceansites_data_format_reference_manual.pdf',
-                bundleName: 'THUMBNAIL',
-                mimeType: 'image/jpeg',
-                retrieveLink: '/rest/bitstreams/da66b42c-b435-4c47-981c-44da170a1018/retrieve',
-                checkSum: {
-                  value: '6a45c8850908937a88f18e9a87674393',
-                },
-              },
-            ],
-            metadata: [
-              {
-                key: 'dc.date.accessioned',
-                value: '2021-07-05T19:56:13Z',
-              },
-              {
-                key: 'dc.title',
-                value: 'Hello document without a PDF!',
-              },
-            ],
-            dc_title: 'Hello document without a PDF!',
-            dc_date_accessioned: '2021-07-05T19:56:13Z',
-            _terms: [
-              {
-                label: 'Hello',
-                source_terminology: 'Test Terminology',
-                uri: 'http://test-terminology.owl/1234',
-              },
-            ],
-            _thumbnailRetrieveLink: '/rest/bitstreams/da66b42c-b435-4c47-981c-44da170a1018/retrieve',
-          });
-        });
-      });
-    });
+  //         expect(result._id).toEqual('2982b980-5bb3-4964-9cdb-ceaf602f3599');
+  //         expect(result._source).toEqual({
+  //           uuid: '2982b980-5bb3-4964-9cdb-ceaf602f3599',
+  //           handle: '11329/874.2',
+  //           lastModified: '2021-11-15 11:30:57.109',
+  //           bitstreams: [
+  //             {
+  //               uuid: 'da66b42c-b435-4c47-981c-44da170a1018',
+  //               name: 'oceansites_data_format_reference_manual.pdf',
+  //               bundleName: 'THUMBNAIL',
+  //               mimeType: 'image/jpeg',
+  //               retrieveLink: '/rest/bitstreams/da66b42c-b435-4c47-981c-44da170a1018/retrieve',
+  //               checkSum: {
+  //                 value: '6a45c8850908937a88f18e9a87674393',
+  //               },
+  //             },
+  //           ],
+  //           metadata: [
+  //             {
+  //               key: 'dc.date.accessioned',
+  //               value: '2021-07-05T19:56:13Z',
+  //             },
+  //             {
+  //               key: 'dc.title',
+  //               value: 'Hello document without a PDF!',
+  //             },
+  //           ],
+  //           dc_title: 'Hello document without a PDF!',
+  //           dc_date_accessioned: '2021-07-05T19:56:13Z',
+  //           _terms: [
+  //             {
+  //               label: 'Hello',
+  //               source_terminology: 'Test Terminology',
+  //               uri: 'http://test-terminology.owl/1234',
+  //             },
+  //           ],
+  //           _thumbnailRetrieveLink: '/rest/bitstreams/da66b42c-b435-4c47-981c-44da170a1018/retrieve',
+  //         });
+  //       });
+  //     });
+  //   });
 
-    describe('when failing to index a document', () => {
-      describe('and invoked by an invalid event', () => {
-        test('should throw an error', async () => {
-          const randomEvent = {
-            Records: [],
-            s3: 'bucket',
-          };
+  //   describe('when failing to index a document', () => {
+  //     describe('and invoked by an invalid event', () => {
+  //       test('should throw an error', async () => {
+  //         const randomEvent = {
+  //           Records: [],
+  //           s3: 'bucket',
+  //         };
 
-          await expect(indexer.handler(randomEvent)).rejects.toThrow(Error);
-        });
-      });
-    });
-  });
+  //         await expect(indexer.handler(randomEvent)).rejects.toThrow(Error);
+  //       });
+  //     });
+  //   });
+  // });
 });

@@ -37,8 +37,15 @@ describe('bulk-ingester', () => {
     );
 
     expect(result).toEqual({
-      success: ['1', '2', '3'],
-      error: [],
+      success: {
+        ids: ['1', '2', '3'],
+        count: 3,
+      },
+      error: {
+        ids: [],
+        count: 0,
+      },
+      total: 3,
     });
 
     expect(dspaceClient.getItems).toHaveBeenCalledTimes(3);
@@ -111,8 +118,15 @@ describe('bulk-ingester', () => {
     );
 
     expect(result).toEqual({
-      success: ['1', '2'],
-      error: ['3'],
+      success: {
+        ids: ['1', '2'],
+        count: 2,
+      },
+      error: {
+        ids: ['3'],
+        count: 1,
+      },
+      total: 3,
     });
   });
 });
