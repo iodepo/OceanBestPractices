@@ -68,6 +68,7 @@ export default class IngestLambdas extends Construct {
       environment: {
         DOCUMENT_METADATA_BUCKET: buckets.documentMetadata.bucketName,
         OPEN_SEARCH_ENDPOINT: openSearchEndpoint,
+        INDEXER_QUEUE_URL: sqsQueues.indexerQueue.queueUrl,
       },
       vpc,
     });

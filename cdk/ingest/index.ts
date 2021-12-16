@@ -4,7 +4,6 @@ import * as eventTargets from '@aws-cdk/aws-events-targets';
 import { LambdaSubscription } from '@aws-cdk/aws-sns-subscriptions';
 import {
   LambdaDestination,
-  SnsDestination,
   SqsDestination,
 } from '@aws-cdk/aws-s3-notifications';
 import { IFunction } from '@aws-cdk/aws-lambda';

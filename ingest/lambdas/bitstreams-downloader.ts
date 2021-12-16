@@ -9,7 +9,7 @@ import {
 import { dspaceItemSchema } from '../../lib/dspace-schemas';
 import { getStringFromEnv } from '../../lib/env-utils';
 import { findPDFBitstreamItem } from '../../lib/dspace-item';
-import { sqs } from '../../lib/aws-clients';
+import { sendMessage } from '../../lib/sqs-utils';
 
 const s3EventSchema = z.object({
   Records: z.array(
@@ -65,10 +65,10 @@ export const handler = async (event: unknown) => {
           console.log(`INFO: DSpace item ${dspaceItem.uuid} has no PDF. Skipping upload and queuing it for indexing.`);
 
           // Write to SQS.
-          await sqs().sendMessage({
-            MessageBody: JSON.stringify({ uuid: dspaceItem.uuid }),
-            QueueUrl: indexerQueueUrl,
-          }).promise();
+          await sendMessage(
+            indexerQueueUrl,
+            JSON.stringify({ uuid: dspaceItem.uuid })
+          );
         }
       } catch (error) {
         console.log(`ERROR: Failed to process DSpace item bitstream with error: ${error}`);
