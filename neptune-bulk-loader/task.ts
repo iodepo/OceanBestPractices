@@ -4,10 +4,9 @@ import { NeptuneBulkLoaderClient } from './neptune-bulk-loader-client';
 import { getBoolFromEnv, getStringFromEnv } from '../lib/env-utils';
 import { loadMetadata } from './metadata';
 import { indexTerms } from './index-terms';
+import { updateAllDocumentsTerms } from './update-document-terms';
 
-type MainResult = Error | undefined;
-
-export const neptuneBulkLoader = async (): Promise<MainResult> => {
+export const neptuneBulkLoader = async (): Promise<void> => {
   const iamRoleArn = getStringFromEnv('IAM_ROLE_ARN');
   const insecureHttps = getBoolFromEnv('INSECURE_HTTPS', false);
   const metadataUrl = getStringFromEnv('S3_TRIGGER_OBJECT');
@@ -15,6 +14,7 @@ export const neptuneBulkLoader = async (): Promise<MainResult> => {
   const region = getStringFromEnv('AWS_REGION');
   const esUrl = getStringFromEnv('ES_URL');
   const termsIndex = getStringFromEnv('ES_TERMS_INDEX');
+  const documentsIndex = getStringFromEnv('ES_DOCUMENTS_INDEX');
 
   const bulkLoaderClient = new NeptuneBulkLoaderClient({
     neptuneUrl,
@@ -66,7 +66,10 @@ export const neptuneBulkLoader = async (): Promise<MainResult> => {
     sparqlQuery,
   });
 
-  return undefined;
+  await updateAllDocumentsTerms({
+    esUrl,
+    index: documentsIndex,
+  });
 };
 
 if (require.main === module) {

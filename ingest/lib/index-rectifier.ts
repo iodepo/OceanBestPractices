@@ -1,14 +1,14 @@
 /* eslint-disable camelcase */
 /* eslint-disable no-underscore-dangle */
 import pMap from 'p-map';
-
+import { z } from 'zod';
 import * as dspaceClient from '../../lib/dspace-client';
 import { DSpaceItem } from '../../lib/dspace-schemas';
 import * as osClient from '../../lib/open-search-client';
 import { findPDFBitstreamItem } from '../../lib/dspace-item';
 import {
   DocumentItem,
-  openSearchScrollDocumentsResponseSchema,
+  documentItemSchema,
 } from '../../lib/open-search-schemas';
 import { queueIngestDocument } from './ingest-queue';
 
@@ -147,71 +147,38 @@ export const diff = async (
     includes: ['uuid', 'bitstreams', 'lastModified'],
   };
 
-  const rawOpenScrollResponse = await osClient.openScroll(
-    openSearchEndpoint,
-    'documents',
-    scrollOptions
-  );
+  const hitSchema = z.object({
+    _id: z.string(),
+    _source: documentItemSchema,
+  });
 
-  const openScrollResponse = openSearchScrollDocumentsResponseSchema.safeParse(
-    rawOpenScrollResponse
-  );
+  await osClient.scrollMap({
+    esUrl: openSearchEndpoint,
+    index: 'documents',
+    pMapOptions: { concurrency: 5 },
+    scrollOptions,
+    handler: async (rawHit) => {
+      try {
+        const hit = hitSchema.parse(rawHit);
 
-  if (!openScrollResponse.success) {
-    console.log(`ERROR: Failed to scroll documents: ${openScrollResponse.error}`);
-    return diffResult;
-  }
+        const dspaceItem = await dspaceClient.getItem(
+          dspaceEndpoint,
+          hit._source.uuid
+        );
 
-  let { _scroll_id, hits: { hits } } = openScrollResponse.data;
-
-  while (hits.length > 0) {
-    // eslint-disable-next-line no-await-in-loop
-    await pMap(
-      hits,
-      async (indexItem) => {
-        try {
-          const dspaceItem = await dspaceClient.getItem(
-            dspaceEndpoint,
-            indexItem._source.uuid
-          );
-
-          // If we can't find the DSpace item for this UUID consider it
-          // deleted. Also, check if the metadata has changed and if so
-          // mark it updated. Otherwise consider it unchanged.
-          if (dspaceItem === undefined) {
-            diffResult.removed.push(indexItem._source.uuid);
-          } else if (isUpdated(indexItem, dspaceItem)) {
-            diffResult.updated.push(indexItem._source.uuid);
-          }
-        } catch (error) {
-          console.log(`ERROR: Encountered error: ${error} for diff of item: ${JSON.stringify(indexItem)}`);
+        // If we can't find the DSpace item for this UUID consider it
+        // deleted. Also, check if the metadata has changed and if so
+        // mark it updated. Otherwise consider it unchanged.
+        if (dspaceItem === undefined) {
+          diffResult.removed.push(hit._source.uuid);
+        } else if (isUpdated(hit, dspaceItem)) {
+          diffResult.updated.push(hit._source.uuid);
         }
-      },
-      { concurrency: 5 }
-    );
-
-    // eslint-disable-next-line no-await-in-loop
-    const rawNextScrollResponse = await osClient.nextScroll(
-      openSearchEndpoint,
-      _scroll_id
-    );
-
-    const nextScrollResponse = openSearchScrollDocumentsResponseSchema
-      .safeParse(
-        rawNextScrollResponse
-      );
-
-    if (!nextScrollResponse.success) {
-      console.log(`ERROR: Failed to continue documents scroll: ${nextScrollResponse.error}`);
-      hits = [];
-    } else {
-      // eslint-disable-next-line camelcase
-      ({ _scroll_id, hits: { hits } } = nextScrollResponse.data);
-    }
-  }
-
-  // OpenSearch documentation recommends we close the scroll when we're done.
-  await osClient.closeScroll(dspaceEndpoint, _scroll_id);
+      } catch (error) {
+        console.log(`ERROR: Encountered error: ${error} for diff of item: ${JSON.stringify(rawHit)}`);
+      }
+    },
+  });
 
   return diffResult;
 };
