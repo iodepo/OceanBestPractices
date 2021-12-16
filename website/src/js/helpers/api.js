@@ -4,6 +4,7 @@ export const baseAPIURL = process.env.REACT_APP_API_ENDPOINT;
 export const defaultQuerySize = 50;
 export const defaultQueryOffset = 0;
 export const env = baseAPIURL.substr(baseAPIURL.lastIndexOf('/') + 1);
+export const documentBucketSource = process.env.REACT_APP_STACK_NAME || '';
 
 
 // Creates the autocomplete url
