@@ -140,6 +140,7 @@ interface CreateTermIndexParams {
   terminologyTitle: string
   sparqlUrl: string
   sparqlQuery: string
+  stopwords: string[]
 }
 
 export const indexTerms = async (
@@ -152,6 +153,7 @@ export const indexTerms = async (
     indexName,
     sparqlUrl,
     sparqlQuery,
+    stopwords,
   } = params;
 
   const elasticsearchClient = got4aws({
@@ -174,13 +176,19 @@ export const indexTerms = async (
 
     if (terms.length === 0) break;
 
-    await bulkIndexTerms({ // eslint-disable-line no-await-in-loop
-      elasticsearchClient,
-      terms,
-      indexName,
-      terminologyTitle,
-      namedGraphUri,
-    });
+    const validTerms = terms.filter(
+      (t) => t.label.length > 2 && !stopwords.includes(t.label)
+    );
+
+    if (validTerms.length > 0) {
+      await bulkIndexTerms({ // eslint-disable-line no-await-in-loop
+        elasticsearchClient,
+        terms: validTerms,
+        indexName,
+        terminologyTitle,
+        namedGraphUri,
+      });
+    }
 
     console.log(`Indexed terms from ${offset} to ${offset + terms.length - 1}`);
 

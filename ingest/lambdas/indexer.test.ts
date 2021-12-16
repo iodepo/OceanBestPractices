@@ -4,14 +4,36 @@
 import cryptoRandomString from 'crypto-random-string';
 import nock from 'nock';
 
-// import * as osClient from '../../lib/open-search-client';
+import { randomUUID } from 'crypto';
 import * as indexer from './indexer';
 import * as s3Utils from '../../lib/s3-utils';
+import { Bitstream, DSpaceItem } from '../../lib/dspace-schemas';
+import { randomId } from '../../lib/string-utils';
 
 const dspaceItemBucket = `bucket-${cryptoRandomString({ length: 6 })}`;
 const bitstreamTextBucket = `bucket-${cryptoRandomString({ length: 6 })}`;
 
 const openSearchEndpoint = 'http://localhost:9200';
+
+const dspaceItemFactory = (overrides: Partial<DSpaceItem>): DSpaceItem => ({
+  uuid: randomUUID(),
+  handle: randomId('handle'),
+  lastModified: '2021-08-24 17:36:38.000',
+  bitstreams: [],
+  metadata: [],
+  extraFieldKey: 'extraFieldValue',
+  ...overrides,
+});
+
+const bitstreamFactory = (overrides: Partial<Bitstream>): Bitstream => ({
+  bundleName: randomId('bundleName'),
+  mimeType: 'application/json',
+  checkSum: {
+    value: randomId('checksum'),
+  },
+  retrieveLink: randomId('retrive-link'),
+  ...overrides,
+});
 
 describe('indexer', () => {
   let awsAccessKeyIdBefore: string | undefined;
@@ -60,58 +82,61 @@ describe('indexer', () => {
 
   describe('getDSpaceItemFields', () => {
     test('should return fields for an existing DSpace item', async () => {
-      const dspaceItemUUID = 'dbe0240b-403e-49f1-8386-17863ba1285b';
-      const dspaceItem = {
-        uuid: dspaceItemUUID,
-        handle: '11329/874.2',
-        lastModified: '2021-07-05T19:56:13Z',
-        bitstreams: [
-          {
-            uuid: 'da66b42c-b435-4c47-981c-44da170a1018',
-            name: 'oceansites_data_format_reference_manual.pdf',
-            handle: null,
-            type: 'bitstream',
-            expand: [
-              'parent',
-              'policies',
-              'all',
-            ],
-            bundleName: 'ORIGINAL',
-            description: 'PDF (Version 1.4, Endorsed)',
-            format: 'Adobe PDF',
-            mimeType: 'application/pdf',
-            sizeBytes: 873_856,
-            parentObject: null,
-            retrieveLink: '/rest/bitstreams/da66b42c-b435-4c47-981c-44da170a1018/retrieve',
-            checkSum: {
-              value: '6a45c8850908937a88f18e9a87674393',
-              // checkSumAlgorithm: 'MD5',
-            },
-            sequenceId: 5,
-            policies: null,
-            link: '/rest/bitstreams/da66b42c-b435-4c47-981c-44da170a1018',
-          },
-        ],
-        metadata: [
-          {
-            key: 'dc.date.accessioned',
-            value: '2021-07-05T19:56:13Z',
-          },
-        ],
-      };
+      const dspaceItem = dspaceItemFactory({
+        bitstreams: [bitstreamFactory({ extraFieldKey: 'extraFieldValue' })],
+      });
+
+      const dspaceItemKey = `${dspaceItem.uuid}.json`;
 
       await s3Utils.putJson(
-        new s3Utils.S3ObjectLocation(
-          dspaceItemBucket,
-          `${dspaceItemUUID}.json`
-        ),
+        new s3Utils.S3ObjectLocation(dspaceItemBucket, dspaceItemKey),
         dspaceItem
       );
       const result = await indexer.getDSpaceItemFields(
         dspaceItemBucket,
-        `${dspaceItemUUID}.json`
+        dspaceItemKey
       );
       expect(result).toEqual(dspaceItem);
+    });
+
+    it('normalizes a lastModified date with a 3-digit ms value', async () => {
+      const dspaceItem = dspaceItemFactory({
+        lastModified: '2021-08-24 17:36:38.123',
+      });
+
+      const dspaceItemKey = `${dspaceItem.uuid}.json`;
+
+      await s3Utils.putJson(
+        new s3Utils.S3ObjectLocation(dspaceItemBucket, dspaceItemKey),
+        dspaceItem
+      );
+
+      const result = await indexer.getDSpaceItemFields(
+        dspaceItemBucket,
+        dspaceItemKey
+      );
+
+      expect(result.lastModified).toBe('2021-08-24 17:36:38.000');
+    });
+
+    it('normalizes a lastModified date with a 1-digit ms value', async () => {
+      const dspaceItem = dspaceItemFactory({
+        lastModified: '2021-08-24 17:36:38.1',
+      });
+
+      const dspaceItemKey = `${dspaceItem.uuid}.json`;
+
+      await s3Utils.putJson(
+        new s3Utils.S3ObjectLocation(dspaceItemBucket, dspaceItemKey),
+        dspaceItem
+      );
+
+      const result = await indexer.getDSpaceItemFields(
+        dspaceItemBucket,
+        dspaceItemKey
+      );
+
+      expect(result.lastModified).toBe('2021-08-24 17:36:38.000');
     });
   });
 
