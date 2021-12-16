@@ -1,24 +1,9 @@
-import { isError } from 'lodash';
 import * as s3Utils from '../lib/s3-utils';
 import * as osClient from '../lib/open-search-client';
 import { NeptuneBulkLoaderClient } from './neptune-bulk-loader-client';
 import { getBoolFromEnv, getStringFromEnv } from '../lib/env-utils';
 import { loadMetadata } from './metadata';
 import { indexTerms } from './index-terms';
-
-const createTermsIndex = async (
-  esUrl: string,
-  index: string
-): Promise<void> => {
-  try {
-    await osClient.createTermsIndex(esUrl, index);
-  } catch (error) {
-    if (
-      !isError(error)
-      || error.message !== 'resource_already_exists_exception'
-    ) throw error;
-  }
-};
 
 type MainResult = Error | undefined;
 
@@ -63,7 +48,7 @@ export const neptuneBulkLoader = async (): Promise<MainResult> => {
 
   await bulkLoaderClient.waitForLoadCompleted(loadId);
 
-  await createTermsIndex(esUrl, termsIndex);
+  await osClient.createTermsIndex(esUrl, termsIndex);
 
   await osClient.deleteByQuery(esUrl, termsIndex, {
     match: { namedGraphUri },

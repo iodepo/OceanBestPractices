@@ -1,7 +1,6 @@
 /* eslint-disable no-underscore-dangle */
 import { z } from 'zod';
 import pMap from 'p-map';
-import { isError, noop } from 'lodash';
 import * as osClient from '../../lib/open-search-client';
 import {
   Bitstream,
@@ -119,40 +118,9 @@ export const getTerms = async (
   };
 };
 
-const isIndexAlreadyExistsError = (e: unknown): e is Error =>
-  isError(e) && e.message === 'resource_already_exists_exception';
-
-const createIndex = async (
-  name: string,
-  createFn: () => Promise<void>
-): Promise<void> => {
-  try {
-    await createFn();
-  } catch (error) {
-    if (isIndexAlreadyExistsError(error)) {
-      console.log(`INFO: ${name} index already exists. Didn't need to create it.`);
-    } else {
-      console.log(`ERROR: Failed to create ${name} index: ${error}`);
-      throw error;
-    }
-  }
-};
-
-const createDocumentsIndex = (esUrl: string): Promise<void> =>
-  createIndex(
-    'documents',
-    () => osClient.createDocumentsIndex(esUrl, 'documents').then(noop)
-  );
-
-const createTermsIndex = (esUrl: string): Promise<void> =>
-  createIndex(
-    'terms',
-    () => osClient.createTermsIndex(esUrl, 'terms').then(noop)
-  );
-
 const createIndexes = (esUrl: string) => Promise.all([
-  createDocumentsIndex(esUrl),
-  createTermsIndex(esUrl),
+  osClient.createDocumentsIndex(esUrl, 'documents'),
+  osClient.createTermsIndex(esUrl, 'terms'),
 ]);
 
 interface Config {
