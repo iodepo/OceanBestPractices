@@ -25,7 +25,16 @@ const s3EventFactory = (bucket: string, key: string) => ({
 });
 
 describe('bitstreams-downloader.handler', () => {
+  let awsAccessKeyIdBefore: string | undefined;
+  let awsSecretAccessKey: string | undefined;
+
   beforeAll(async () => {
+    awsAccessKeyIdBefore = process.env['AWS_ACCESS_KEY_ID'];
+    process.env['AWS_ACCESS_KEY_ID'] = 'test-key-id';
+
+    awsSecretAccessKey = process.env['AWS_SECRET_ACCESS_KEY'];
+    process.env['AWS_SECRET_ACCESS_KEY'] = 'test-access-key';
+
     nock.disableNetConnect();
     nock.enableNetConnect('localhost');
 
@@ -50,6 +59,9 @@ describe('bitstreams-downloader.handler', () => {
     await sqsUtils.deleteSqsQueue(indexerQueue.url);
 
     nock.enableNetConnect();
+
+    process.env['AWS_ACCESS_KEY_ID'] = awsAccessKeyIdBefore;
+    process.env['AWS_SECRET_ACCESS_KEY'] = awsSecretAccessKey;
   });
 
   test('should upload the PDF bitstream from a DSpace item to S3', async () => {
