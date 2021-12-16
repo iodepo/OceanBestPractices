@@ -18,6 +18,24 @@ import * as s3Utils from '../../lib/s3-utils';
 import { deleteMessage, receiveMessage, SqsMessage } from '../../lib/sqs-utils';
 import { zodTypeGuard } from '../../lib/zod-utils';
 
+const lastModifiedRegex = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/;
+
+/**
+ * There are cases where DSpace is giving us an invalid timestamp string. The
+ * milliseconds field should be three digits, but some DSpace values only
+ * contain one milliseconds digit. For example: `2021-08-24 17:36:38.7`
+ *
+ * Because that value can't be trusted, we are setting all values to have a ms
+ * of `000`.
+ */
+const normalizeLastModified = (x: string): string => {
+  const match = x.match(lastModifiedRegex);
+
+  if (match === null) throw new TypeError(`Invalid lastModified: ${x}`);
+
+  return `${match[0]}.000`;
+};
+
 export const getDSpaceItemFields = async (
   dspaceItemBucket: string,
   dspaceItemKey: string
@@ -27,10 +45,15 @@ export const getDSpaceItemFields = async (
     dspaceItemKey
   );
 
-  return await s3Utils.safeGetObjectJson(
+  const { lastModified, ...fields } = await s3Utils.safeGetObjectJson(
     s3Location,
-    dspaceItemSchema.passthrough()
+    dspaceItemSchema
   );
+
+  return {
+    lastModified: normalizeLastModified(lastModified),
+    ...fields,
+  };
 };
 
 interface BitstreamTextSource {
@@ -173,7 +196,7 @@ const index = async (
   // is dynamic we validate that the dc.title field exists.
   // TODO: As we add explicit search fields we could turn this into a type.
   const metadataSearchFields = z.object({ dc_title: z.string() })
-    .passthrough()
+    .catchall(z.unknown())
     .parse(getMetadataSearchFields(dspaceItem.metadata));
 
   const primaryAuthor = getPrimaryAuthor(dspaceItem.metadata);

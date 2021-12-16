@@ -5,16 +5,16 @@ export const bitstreamSchema = z.object({
   mimeType: z.string(),
   checkSum: z.object({
     value: z.string(),
-  }).passthrough(),
+  }).catchall(z.unknown()),
   retrieveLink: z.string(),
-}).passthrough();
+}).catchall(z.unknown());
 
 export type Bitstream = z.infer<typeof bitstreamSchema>;
 
 export const metadataSchema = z.object({
   key: z.string().min(1),
   value: z.string(),
-}).passthrough();
+}).catchall(z.unknown());
 
 export type Metadata = z.infer<typeof metadataSchema>;
 
@@ -24,7 +24,7 @@ export const dspaceItemSchema = z.object({
   lastModified: z.string(),
   bitstreams: z.array(bitstreamSchema),
   metadata: z.array(metadataSchema),
-}).passthrough();
+}).catchall(z.unknown());
 
 export type DSpaceItem = z.infer<typeof dspaceItemSchema>;
 
