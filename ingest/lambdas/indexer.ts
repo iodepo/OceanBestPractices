@@ -203,32 +203,36 @@ const index = async (
   console.log(`INFO: Indexed document item ${documentItem.uuid}`);
 };
 
-interface BuildSqsMessageHandlerParams {
+interface SqsMessageHandlerConfig {
   dspaceItemBucket: string,
   esUrl: string,
   indexerQueueUrl: string
 }
 
-const buildSqsMessageHandler = (params: BuildSqsMessageHandlerParams) =>
-  async (sqsMessage: SqsMessage) => {
-    const indexerEvent = ingestRecordSchema.parse(JSON.parse(sqsMessage.Body));
+const sqsMessageHandler = async (
+  config: SqsMessageHandlerConfig,
+  sqsMessage: SqsMessage
+) => {
+  const indexerEvent = ingestRecordSchema.parse(JSON.parse(sqsMessage.Body));
 
-    await index(indexerEvent, params.dspaceItemBucket, params.esUrl);
+  await index(indexerEvent, config.dspaceItemBucket, config.esUrl);
 
-    await deleteMessage(params.indexerQueueUrl, sqsMessage.ReceiptHandle);
-  };
+  await deleteMessage(config.indexerQueueUrl, sqsMessage.ReceiptHandle);
+};
 
 const processIndexerQueue = async (config: Config): Promise<void> => {
   await createIndexes(config.esUrl);
-
-  const sqsMessageHandler = buildSqsMessageHandler(config);
 
   let messages: SqsMessage[];
   do {
     /* eslint-disable no-await-in-loop */
     messages = await getMessages(config.indexerQueueUrl);
 
-    await pMap(messages, sqsMessageHandler, { concurrency: 1 });
+    await pMap(
+      messages,
+      sqsMessageHandler.bind(undefined, config),
+      { concurrency: 1 }
+    );
     /* eslint-enable no-await-in-loop */
   } while (messages.length > 0);
 };
