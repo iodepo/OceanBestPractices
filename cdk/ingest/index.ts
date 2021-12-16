@@ -62,6 +62,12 @@ export default class Ingest extends Construct {
       schedule: events.Schedule.rate(Duration.seconds(feedReadInterval)),
       targets: [new eventTargets.LambdaFunction(lambdas.feedIngester)],
     });
+
+    // Invoke the indexer every 1 minute
+    new events.Rule(this, 'IndexerEventRule', {
+      schedule: events.Schedule.rate(Duration.minutes(1)),
+      targets: [new eventTargets.LambdaFunction(lambdas.indexer)],
+    });
     // Writes events to the "available document" topic
 
     // "metadata downloader" lambda is triggered by the
