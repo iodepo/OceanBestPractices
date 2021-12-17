@@ -41,7 +41,7 @@ const initialState = [
     ],
     active_search: false,
     autocomplete: false,
-    help_text: 'TODO: Email out to Pauline for this value.'
+    help_text: 'TODO: Help me!'
   },
   {
     title: 'EOV',
@@ -116,6 +116,24 @@ const initialState = [
     active_search: false,
     help_text: 'Search for the <b>full name of the EBV</b> eg.  Ecosystem Vertical Profile',
   },
+  {
+    title: 'Funders',
+    id: 'funders',
+    value: [
+      'dc_description_sponsorship',
+    ],
+    active_search: false,
+    help_text: 'TODO: Help me!'
+  },
+  {
+    title: 'Adoption Level',
+    id: 'adoption',
+    value: [
+      'dc_description_adoption',
+    ],
+    active_search: false,
+    help_text: 'TODO: Help me!'
+  }
 ];
 
 export default (state = initialState, action) => {
