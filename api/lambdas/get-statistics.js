@@ -9,7 +9,7 @@ const defaultHeaders = {
   'Access-Control-Allow-Credentials': true,
 };
 
-const graphCountQuery = 'select distinct ?g where  { graph ?g {?s ?p ?o} } group by ?g';
+const graphCountQuery = 'select distinct ?g where { graph ?g {?s ?p ?o} }';
 
 const graphCountSparqlSchema = z.object({
   results: z.object({
