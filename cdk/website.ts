@@ -1,9 +1,5 @@
 import * as path from 'path';
-import {
-  CfnOutput,
-  Construct,
-  RemovalPolicy,
-} from '@aws-cdk/core';
+import { CfnOutput, Construct, RemovalPolicy } from '@aws-cdk/core';
 import { Bucket } from '@aws-cdk/aws-s3';
 import {
   AllowedMethods,
@@ -102,6 +98,11 @@ export default class Website extends Construct {
       errorResponses: [
         {
           httpStatus: 404,
+          responseHttpStatus: 200,
+          responsePagePath: '/index.html',
+        },
+        {
+          httpStatus: 403,
           responseHttpStatus: 200,
           responsePagePath: '/index.html',
         },
