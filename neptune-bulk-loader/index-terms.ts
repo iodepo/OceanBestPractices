@@ -8,11 +8,11 @@ const fetchTermsResponseSchema = z.object({
   results: z.object({
     bindings: z.array(
       z.object({
-        label: z.object({
+        slabel: z.object({
           value: z.string(),
         }),
         s: z.object({
-          value: z.string(),
+          value: z.string().url(),
         }),
       })
     ),
@@ -39,7 +39,7 @@ const fetchTerms = async (params: FetchTermsParams): Promise<FetchedTerm[]> => {
 
   const query = `
 ${sparqlQuery}
-LIMIT 200
+LIMIT 1000
 OFFSET ${offset}`;
 
   const response = await got.post(
@@ -53,7 +53,7 @@ OFFSET ${offset}`;
   );
 
   if (response.statusCode !== 200) {
-    throw new Error(`Neptune request failed with status ${response.statusCode}: ${response.body}`);
+    throw new Error(`Neptune request failed with status ${response.statusCode}: ${JSON.stringify(response.body)}`);
   }
 
   const parsedResponseBody = fetchTermsResponseSchema.parse(response.body);
@@ -61,7 +61,7 @@ OFFSET ${offset}`;
   const { bindings } = parsedResponseBody.results;
 
   return bindings.map((b) => ({
-    label: b.label.value,
+    label: b.slabel.value,
     uri: b.s.value,
   }));
 };
@@ -69,7 +69,7 @@ OFFSET ${offset}`;
 const indexForTerm = (indexName: string): unknown => ({
   index: {
     _index: indexName,
-    _type: 'doc',
+    _type: '_doc',
   },
 });
 
@@ -118,8 +118,9 @@ const bulkIndexTerms = async (params: BulkIndexTermsParams): Promise<void> => {
 
   const body = `${esDoc}\n`;
 
+  console.log('Starting bulk index of', terms.length, 'terms');
   const response = await elasticsearchClient.post(
-    `${indexName}/doc/_bulk`,
+    '_bulk',
     {
       headers: { 'Content-Type': 'application/json' },
       body,
@@ -128,8 +129,10 @@ const bulkIndexTerms = async (params: BulkIndexTermsParams): Promise<void> => {
   );
 
   if (response.statusCode !== 200) {
-    throw new Error(`Neptune request failed with status ${response.statusCode}: ${response.body}`);
+    throw new Error(`ES request failed with status ${response.statusCode}: ${JSON.stringify(response.body)}`);
   }
+
+  console.log('Finished bulk index of', terms.length, 'terms');
 };
 
 interface CreateTermIndexParams {
@@ -174,11 +177,15 @@ export const indexTerms = async (
       sparqlQuery,
     });
 
+    console.log('Got', terms.length, 'terms from Neptune');
+
     if (terms.length === 0) break;
 
     const validTerms = terms.filter(
       (t) => t.label.length > 2 && !stopwords.includes(t.label)
     );
+
+    console.log('Got', validTerms.length, 'valid terms from Neptune');
 
     if (validTerms.length > 0) {
       await bulkIndexTerms({ // eslint-disable-line no-await-in-loop

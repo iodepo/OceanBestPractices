@@ -153,7 +153,7 @@ export class NeptuneBulkLoaderClient implements BulkLoaderClient {
       },
       {
         interval: 1000,
-        timeout: 60 * 1000, // Wait for a minute, will probably need to bump
+        timeout: 10 * 60 * 1000,
       }
     );
   }

@@ -46,21 +46,8 @@ export default class ObpStack extends Stack {
       vpc,
     });
 
-    const neptune = new Neptune(this, 'Neptune', {
-      deletionProtection,
-      stackName: this.stackName,
-      allowFrom: [bastion.instance],
-      openSearch: openSearch.domain,
-      vpc,
-    });
-
-    openSearch.domain.connections.allowFrom(bastion.instance, Port.tcp(443));
-
-    const website = new Website(this, 'Website', {
-      deletionProtection,
-      stackName: this.stackName,
-      disableWebsiteCache,
-    });
+    openSearch.domain.grantRead(bastion.instance);
+    openSearch.domain.grantWrite(bastion.instance);
 
     const textExtractorFunction = Function.fromFunctionArn(
       this,
@@ -68,13 +55,30 @@ export default class ObpStack extends Stack {
       `arn:aws:lambda:${this.region}:${this.account}:function:textractor_simple`
     );
 
-    new Ingest(this, 'Ingest', {
+    const website = new Website(this, 'Website', {
+      deletionProtection,
+      stackName: this.stackName,
+      disableWebsiteCache,
+    });
+
+    const ingest = new Ingest(this, 'Ingest', {
       openSearch: openSearch.domain,
       stackName: this.stackName,
       textExtractorFunction,
       websiteDistribution: website.cloudfrontDistribution,
       vpc,
     });
+
+    const neptune = new Neptune(this, 'Neptune', {
+      deletionProtection,
+      stackName: this.stackName,
+      allowFrom: [bastion.instance],
+      openSearch: openSearch.domain,
+      vpc,
+      bulkIngesterFunction: ingest.bulkIngesterFunction,
+    });
+
+    openSearch.domain.connections.allowFrom(bastion.instance, Port.tcp(443));
 
     new Api(this, 'Api', {
       stackName: this.stackName,

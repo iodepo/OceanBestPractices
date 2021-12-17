@@ -1,8 +1,35 @@
 // @ts-check
+const { default: got } = require('got');
 const pMap = require('p-map');
 
-const dspaceClient = require('../../lib/dspace-client');
 const utils = require('./ingest-queue');
+
+/**
+ * @param {string} endpoint
+ * @param {number} offset
+ * @returns
+ */
+const getItems = async (endpoint, offset) => {
+  console.time('getItems()');
+
+  const result = await got.get(`${endpoint}/rest/items`, {
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      'User-Agent': 'Mozilla/5.0 (iPhone; U; CPU iPhone OS 4_3_3 like Mac OS X; en-us) AppleWebKit/533.17.9 (KHTML, like Gecko) Version/5.0.2 Mobile/8J2 Safari/6533.18.5',
+    },
+    searchParams: {
+      limit: 50,
+      offset,
+    },
+    responseType: 'json',
+    resolveBodyOnly: true,
+  });
+
+  console.timeEnd('getItems()');
+
+  return result;
+};
 
 /**
  * @typedef BulkIngesterResult
@@ -35,7 +62,8 @@ const bulkIngester = async (dspaceEndpoint, ingestTopicArn) => {
     total: 0,
   };
 
-  let dspaceItems = await dspaceClient.getItems(dspaceEndpoint, { limit: 100 });
+  let dspaceItems = await getItems(dspaceEndpoint, 0);
+
   let offset = dspaceItems.length;
 
   console.log(`INFO: Bulk ingester got ${offset} items from DSpace...`);
@@ -66,13 +94,7 @@ const bulkIngester = async (dspaceEndpoint, ingestTopicArn) => {
     );
 
     // eslint-disable-next-line no-await-in-loop
-    dspaceItems = await dspaceClient.getItems(
-      dspaceEndpoint,
-      {
-        limit: 100,
-        offset,
-      }
-    );
+    dspaceItems = await getItems(dspaceEndpoint, offset);
 
     // DSpace doesn't guarantee that we get the specified limit back so we have
     // to increment the offset by the actual result length.
