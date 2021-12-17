@@ -218,6 +218,10 @@ const index = async (
     }
   );
 
+  const { uuid } = dspaceItem;
+  const termNames = terms._terms.map((t) => t.label);
+  console.log(`${uuid} matched terms ${JSON.stringify(termNames)}`);
+
   const documentItem = documentItemSchema.parse({
     ...dspaceItem,
     ...bitstreamSource,
@@ -293,8 +297,6 @@ const processIndexerQueue = async (config: Config): Promise<void> => {
   do {
     /* eslint-disable no-await-in-loop */
     messages = await getMessages(config.indexerQueueUrl);
-
-    console.log('>>> messages:', JSON.stringify(messages, undefined, 2));
 
     await pMap(
       messages,
