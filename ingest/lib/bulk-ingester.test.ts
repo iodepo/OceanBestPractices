@@ -104,23 +104,16 @@ describe('bulk-ingester', () => {
       total: 3,
     });
 
-    const [message1, message2, message3] = await sqsUtils.waitForMessages(
+    const messages = await sqsUtils.waitForMessages(
       testIngestTopicQueue.url,
       3
     );
 
-    if (!message1 || !message2 || !message3) {
-      fail('Expected 3 messages but got less than that');
-    }
-
-    const messageBody1 = JSON.parse(message1.Body || '{}');
-    expect(messageBody1.Message).toEqual('1');
-
-    const messageBody2 = JSON.parse(message2.Body || '{}');
-    expect(messageBody2.Message).toEqual('2');
-
-    const messageBody3 = JSON.parse(message3.Body || '{}');
-    expect(messageBody3.Message).toEqual('3');
+    const messagesResult = messages.map((m) => {
+      const messageBody = JSON.parse(m.Body || '{}');
+      return messageBody.Message;
+    });
+    expect(messagesResult).toEqual(['1', '2', '3']);
   });
 
   test('should return a list of items that failed to queue', async () => {
