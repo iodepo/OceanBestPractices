@@ -112,7 +112,7 @@ describe('bulk-ingester', () => {
     const messagesResult = messages.map((m) => {
       const messageBody = JSON.parse(m.Body || '{}');
       return messageBody.Message;
-    });
+    }).sort();
     expect(messagesResult).toEqual(['1', '2', '3']);
   });
 
