@@ -92,17 +92,13 @@ describe('bulk-ingester', () => {
       ingestTopicArn
     );
 
-    expect(result).toEqual({
-      success: {
-        ids: ['1', '2', '3'],
-        count: 3,
-      },
-      error: {
-        ids: [],
-        count: 0,
-      },
-      total: 3,
-    });
+    // Items are queued concurrently so we can't guarantee order.
+    expect(result.success.ids.sort()).toEqual(['1', '2', '3']);
+    expect(result.success.count).toEqual(3);
+
+    expect(result.error.ids).toEqual([]);
+    expect(result.error.count).toEqual(0);
+    expect(result.total).toEqual(3);
 
     const messages = await sqsUtils.waitForMessages(
       testIngestTopicQueue.url,
