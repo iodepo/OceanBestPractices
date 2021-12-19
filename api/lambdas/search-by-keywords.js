@@ -171,7 +171,7 @@ function getRequest(body) {
 function getSearchDocument(opts) {
   const searchDoc = {
     _source: {
-      excludes: ['_bitstreamText'],
+      excludes: ['_bitstreamText', 'bitstreams', 'metadata'],
     },
     from: opts.from,
     size: opts.size,
