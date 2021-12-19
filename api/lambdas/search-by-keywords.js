@@ -5,6 +5,8 @@ const region = process.env.REGION || 'us-east-1';
 
 const https = require('https');
 
+const { defaultSearchFields } = require('../lib/search-fields');
+
 const esOpts = {
   host: process.env.ELASTIC_SEARCH_HOST,
   path: '/documents/_search',
@@ -130,7 +132,7 @@ function parseParams(params) {
     from: params.from === undefined ? DEFAULT_FROM : params.from,
     size: params.size === undefined ? DEFAULT_SIZE : params.size,
     sort: params.sort === undefined ? [] : params.sort.split(','),
-    fields: params.fields === undefined ? queryFields() : params.fields.split(','),
+    fields: params.fields === undefined ? defaultSearchFields : params.fields.split(','),
     synonyms: params.synonyms === undefined ? false : params.synonyms,
     refereed: params.refereed === undefined ? false : params.refereed,
   };
@@ -289,48 +291,6 @@ function buildElasticsearchQuery(keywords, terms, termURIs, fields, refereed) {
   console.log(JSON.stringify(query));
 
   return query;
-}
-
-/**
- * Returns the list of fields that should be targeted in an Elasticsearch query.
- * All fields are set to the default Elasticsearch boost value unless otherwise
- * denoted by ^n.
- *
- * @returns {array} Array of field names to target in a query
- */
-function queryFields() {
-  return [
-    '_bitstreamText',
-    'dc_title^2',
-    'dc_publisher',
-    'dc_contributor_author',
-    'dc_title_alternative',
-    'dc_contributor_corpauthor',
-    'dc_contributor_editor',
-    'dc_bibliographicCitation_title',
-    'dc_description_eov',
-    'dc_description_sdg',
-    'dc_description_refereed',
-    'dc_description_abstract^2',
-    'dc_description_status',
-    'dc_description_currentstatus',
-    'dc_relation_uri',
-    'dc_language_iso',
-    'dc_description_bptype',
-    'dc_relation_ispartofseries',
-    'dc_type',
-    'dc_subject_other',
-    'dc_subject_instrumentType',
-    'dc_subject_parameterDiscipline',
-    'dc_subject_dmProcesses',
-    'dc_identifier_orcid',
-    'dc_identifier_doi',
-    'dc_description_maturitylevel',
-    'dc_description_notes',
-    'dc_coverage_spatial',
-    'dc_description_ecv',
-    'dc_description_ebv',
-  ];
 }
 
 function nestedQuery(termPhrase) {
