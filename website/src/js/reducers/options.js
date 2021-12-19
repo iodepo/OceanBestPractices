@@ -40,6 +40,13 @@ const initialState = [
     description: 'Limit search to only Refereed documents',
     value: false,
     is_advanced_search: true,
+  },
+  {
+    title: 'Endorsed',
+    id: 'endorsed',
+    description: 'Limit search to only items that have been Endorsed',
+    value: false,
+    is_advanced_search: true
   }
 ];
 
