@@ -29,4 +29,7 @@ export const defaultSearchFields = [
   'dc_coverage_spatial',
   'dc_description_ecv',
   'dc_description_ebv',
+  'obps_endorsementExternal_externalEndorsedBy',
+  'dc_description_sponsorship',
+  'dc_description_adoption',
 ];
