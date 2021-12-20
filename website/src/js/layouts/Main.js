@@ -67,7 +67,7 @@ class Main extends Component {
     const isFirstTimeVisit = !document.cookie.includes(firstVisitCookieName);
 
     return (
-      <Wrapper header={false} page="landing" childrenContainerClass="landing">
+      <Wrapper header={false} page="landing" childrenContainerClass="landing" footerLinks={true}>
         <section className='landing__header'>
 
           <div className='link-list--landing'>
@@ -124,7 +124,7 @@ class Main extends Component {
             <Stats />
           </div>
         </section>
-        {/* // TODO Final text TBD for first time welcome message */}
+
         {isFirstTimeVisit && (
           <FullScreenModal
             open={true}
