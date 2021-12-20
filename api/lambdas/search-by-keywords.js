@@ -1,18 +1,8 @@
-const AWS = require('aws-sdk');
-
-const creds = new AWS.EnvironmentCredentials('AWS');
-const region = process.env.REGION || 'us-east-1';
-
 const https = require('https');
+const { getStringFromEnv } = require('../../lib/env-utils');
+const osClient = require('../../lib/open-search-client');
 
 const { defaultSearchFields } = require('../lib/search-fields');
-
-const esOpts = {
-  host: process.env.ELASTIC_SEARCH_HOST,
-  path: '/documents/_search',
-};
-
-const esEndpoint = new AWS.Endpoint(esOpts.host);
 
 const ontOpts = {
   host: process.env.ONTOLOGY_STORE_HOST,
@@ -23,11 +13,21 @@ const ontOpts = {
 const DEFAULT_FROM = 0;
 const DEFAULT_SIZE = 20;
 
+function responseHeaders() {
+  return {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Credentials': 'true',
+  };
+}
+
 /**
  * This function is responsible for handling a keyword search and returning
  * matching documents.
  */
 exports.handler = (event, context, callback) => {
+  const documentsIndexName = getStringFromEnv('DOCUMENTS_INDEX_NAME');
+  const openSearchEndpoint = getStringFromEnv('OPEN_SEARCH_ENDPOINT');
+
   const params = event.queryStringParameters;
 
   if (params === undefined || params === null) {
@@ -51,7 +51,16 @@ exports.handler = (event, context, callback) => {
           for (const r of results) { keywords = keywords.concat(r); }
           opts.keywords = keywords;
 
-          executeSearch(opts, callback);
+          executeSearch(openSearchEndpoint, documentsIndexName, opts)
+            .then((searchResults) => {
+              const response = {
+                statusCode: 200,
+                body: JSON.stringify(searchResults),
+                headers: responseHeaders(),
+              };
+
+              callback(null, response);
+            });
         }).catch((error) => {
           callback(error, {
             statusCode: 500,
@@ -60,10 +69,61 @@ exports.handler = (event, context, callback) => {
           });
         });
     } else {
-      executeSearch(opts, callback);
+      executeSearch(openSearchEndpoint, documentsIndexName, opts)
+        .then((searchResults) => {
+          const response = {
+            statusCode: 200,
+            body: JSON.stringify(searchResults),
+            headers: responseHeaders(),
+          };
+
+          callback(null, response);
+        });
     }
   }
 };
+
+/**
+ * Builds an Elasticsearch search document object that can be used in an
+ * Elasctsearch search request. Specifically, this function sets the fields to
+ * include, options like from and size, and which fields should provide the
+ * highlight information. It also builds the query string value based on
+ * keywords provided in the `opts` argument.
+ *
+ * @param {object} opts Search options to include in the search document. At a
+ * minimum this object should contain a from, size, keywords, terms | termsURI,
+ * fields, and whether or not `refereed` should be checked.
+ *
+ * @returns {Record<string, unknown>} A search document object that can be
+ * used directly by an Elasticsearch search request.
+ */
+function getSearchDocument(opts) {
+  const searchDoc = {
+    _source: {
+      excludes: ['_bitstreamText', 'bitstreams', 'metadata'],
+    },
+    from: opts.from,
+    size: opts.size,
+    query: buildElasticsearchQuery(
+      opts.keywords,
+      opts.terms,
+      opts.termURIs,
+      opts.fields,
+      opts.refereed,
+      opts.endorsed
+    ),
+    highlight: {
+      fields: {
+        _bitstreamText: {},
+      },
+    },
+    sort: sortQuery(opts.sort),
+  };
+
+  console.log(`Search document: ${JSON.stringify(searchDoc)}`);
+
+  return searchDoc;
+}
 
 /**
  * Executes an Elasticsearch query with the given search options and notifies
@@ -71,48 +131,19 @@ exports.handler = (event, context, callback) => {
  * function that ends this Lambda function, so most likely passed directly from
  * the handler.
  *
- * @param {object} options An object defining the search options to use when
+ * @param {string} openSearchEndpoint
+ * @param {string} documentsIndexName
+ * @param {Object} options An object defining the search options to use when
  * building the search query.
- * @param {function} callback The function to use as a callback when this
- * asynchronous function finishes.
  */
-function executeSearch(options, callback) {
-  const searchBody = JSON.stringify(getSearchDocument(options));
+function executeSearch(openSearchEndpoint, documentsIndexName, options) {
+  const searchBody = getSearchDocument(options);
 
-  const req = getRequest(searchBody);
-
-  const signer = new AWS.Signers.V4(req, 'es');
-  signer.addAuthorization(creds, new Date());
-
-  const client = new AWS.NodeHttpClient();
-  client.handleRequest(req, null, (httpResp) => {
-    let body = '';
-    httpResp.on('data', (chunk) => {
-      body += chunk;
-    });
-
-    httpResp.on('error', (err) => {
-      callback(err, {
-        statusCode: 500,
-        body: JSON.stringify({ err }),
-        headers: responseHeaders(),
-      });
-    });
-
-    httpResp.on('end', (chunk) => {
-      callback(null, {
-        statusCode: 200,
-        body,
-        headers: responseHeaders(),
-      });
-    });
-  }, (err) => {
-    callback(err, {
-      statusCode: 500,
-      body: JSON.stringify({ err }),
-      headers: responseHeaders(),
-    });
-  });
+  return osClient.searchByQuery(
+    openSearchEndpoint,
+    documentsIndexName,
+    searchBody
+  );
 }
 
 /**
@@ -135,60 +166,8 @@ function parseParams(params) {
     fields: params.fields === undefined ? defaultSearchFields : params.fields.split(','),
     synonyms: params.synonyms === undefined ? false : params.synonyms,
     refereed: params.refereed === undefined ? false : params.refereed,
+    endorsed: params.endorsed === 'true',
   };
-}
-
-/**
- * Builds an HTTP request taht can be used in an Elasticsearch query.
- * @param {object} body The body of the HTTP request. Ideally this contains the
- * Elasticsearch search document.
- */
-function getRequest(body) {
-  const req = new AWS.HttpRequest(esEndpoint);
-  req.method = 'POST';
-  req.path = esOpts.path;
-  req.body = body;
-  req.region = region;
-  req.headers['presigned-expires'] = false;
-  req.headers['Host'] = esEndpoint.host;
-  req.headers['Content-Type'] = 'application/json';
-
-  return req;
-}
-
-/**
- * Builds an Elasticsearch search document object that can be used in an
- * Elasctsearch search request. Specifically, this function sets the fields to
- * include, options like from and size, and which fields should provide the
- * highlight information. It also builds the query string value based on
- * keywords provided in the `opts` argument.
- *
- * @param {object} opts Search options to include in the search document. At a
- * minimum this object should contain a from, size, keywords, terms | termsURI,
- * fields, and whether or not `refereed` should be checked.
- *
- * @returns {object} A search document object that can be used directly by an
- * Elasticsearch search request.
- */
-function getSearchDocument(opts) {
-  const searchDoc = {
-    _source: {
-      excludes: ['_bitstreamText', 'bitstreams', 'metadata'],
-    },
-    from: opts.from,
-    size: opts.size,
-    query: buildElasticsearchQuery(opts.keywords, opts.terms, opts.termURIs, opts.fields, opts.refereed),
-    highlight: {
-      fields: {
-        _bitstreamText: {},
-      },
-    },
-    sort: sortQuery(opts.sort),
-  };
-
-  console.log(`Search document: ${JSON.stringify(searchDoc)}`);
-
-  return searchDoc;
 }
 
 /**
@@ -237,28 +216,58 @@ function formatKeyword(k) {
 }
 
 /**
+ * @param {Object} termPhrase
+ * @returns {Object}
+ */
+function nestedQuery(termPhrase) {
+  return {
+    nested: {
+      path: 'terms',
+      query: {
+        bool: {
+          must: {
+            match_phrase: termPhrase,
+          },
+        },
+      },
+    },
+  };
+}
+
+/**
  * Helper function that builds the `query` field of the Elasticsearch search
  * document.
  *
- * @param {array} keywords An array of search keywords.
- * @param {array} terms An array of terms that will be used as filters in the
+ * @param {string[]} keywords An array of search keywords.
+ * @param {string[]} terms An array of terms that will be used as filters in the
  * query.
- * @param {array} termURIs A list of term URIs (ontology URIs) that can be
+ * @param {string[]} termURIs A list of term URIs (ontology URIs) that can be
  * used as filters in the query.
- * @param {array} fields An array of field names to be searched against by the
- * query.
+ * @param {string[]} fields An array of field names to be searched against by
+ * the query.
  * @param {boolean} refereed Whether or not `refereed` should be used as a
  * filter.
+ * @param {boolean} endorsed Whether or not to filter by a document being
+ * endorsed.
  *
- * @returns {object} The query object that can be used in an Elasticsearch
+ * @returns {Object} The query object that can be used in an Elasticsearch
  * search document `query` field.
  */
-function buildElasticsearchQuery(keywords, terms, termURIs, fields, refereed) {
+function buildElasticsearchQuery(
+  keywords,
+  terms,
+  termURIs,
+  fields,
+  refereed,
+  endorsed
+) {
   const boolQuery = {
     must: {
       query_string: {
         fields,
-        query: keywords.length > 0 ? keywords.map(formatKeyword).join(' ') : '*',
+        query: keywords.length > 0
+          ? keywords.map((k) => formatKeyword(k)).join(' ')
+          : '*',
       },
     },
   };
@@ -280,6 +289,14 @@ function buildElasticsearchQuery(keywords, terms, termURIs, fields, refereed) {
     filter.push({ term: { refereed: 'Refereed' } });
   }
 
+  if (endorsed) {
+    filter.push({
+      exists: {
+        field: 'obps_endorsementExternal_externalEndorsedBy',
+      },
+    });
+  }
+
   if (filter.length > 0) {
     boolQuery['filter'] = filter;
   }
@@ -291,21 +308,6 @@ function buildElasticsearchQuery(keywords, terms, termURIs, fields, refereed) {
   console.log(JSON.stringify(query));
 
   return query;
-}
-
-function nestedQuery(termPhrase) {
-  return {
-    nested: {
-      path: 'terms',
-      query: {
-        bool: {
-          must: {
-            match_phrase: termPhrase,
-          },
-        },
-      },
-    },
-  };
 }
 
 function sortQuery(sortParams) {
@@ -417,11 +419,4 @@ function parseSynonymsResponse(body) {
   }
 
   return synonyms;
-}
-
-function responseHeaders() {
-  return {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Credentials': 'true',
-  };
 }
