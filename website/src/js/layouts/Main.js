@@ -9,6 +9,9 @@ import Stats from '../components/Stats';
 import LinkListItem from '../components/LinkListItem';
 import LinkListItemToggle from '../components/LinkListItemToggle';
 import Superlink from '../components/Superlink';
+import { formSearchRoute } from '../helpers/url';
+import { activeFieldsString } from '../helpers/fields';
+import { activeAdvancedOptionsString } from '../helpers/options';
 
 import { clearAllSearch } from '../actions/search';
 import { getStats } from '../actions/stats';
@@ -50,7 +53,13 @@ class Main extends Component {
   }
 
   handleSearchButtonClick() {
-    this.props.history.push('/search');
+    const route = formSearchRoute({
+      active_fields: activeFieldsString(this.props.fields),
+      active_options: activeAdvancedOptionsString(this.props.options),
+      active_search: this.props.searchReducer.search,
+    });
+
+    this.props.history.push(route);
   }
 
   // sets cookie on welcome message modal close
