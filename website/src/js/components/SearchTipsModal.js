@@ -165,7 +165,7 @@ mention the term “ocean” from your results.</p>
               <SearchTipsModalItem
                 number='5'
                 header='Advanced search options &amp; filters'
-                content='The “Advanced” dropdown menu on the right of the search bar allows you access additional functions to enhance your search.'
+                content='The “Search Options” dropdown menu on the right of the search bar allows you access additional functions to enhance your search.'
               />
               <h4>Synonyms</h4>
               <p>Enabling this feature by toggling the OFF/ON button will allow the system to check if a) your search
