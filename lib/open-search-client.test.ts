@@ -312,24 +312,15 @@ describe('open-search-client', () => {
   describe('createIndex()', () => {
     it('creates the requested index', async () => {
       const indexName = randomIndexName();
-
       await osClient.createIndex(esUrl, indexName);
 
       expect(await osClient.indexExists(esUrl, indexName)).toBe(true);
-    });
-
-    it('throws an Error if the index already exists', async () => {
-      const promisedResult = osClient.createIndex(esUrl, index);
-
-      await expect(promisedResult)
-        .rejects.toThrow('resource_already_exists_exception');
     });
   });
 
   describe('createTermsIndex()', () => {
     it('creates the expected index mappings', async () => {
       const indexName = randomIndexName();
-
       await osClient.createTermsIndex(esUrl, indexName);
 
       const createdIndex = await osClient.getIndex(esUrl, indexName);
@@ -358,13 +349,6 @@ describe('open-search-client', () => {
           },
         },
       });
-    });
-
-    it('throws an Error if the index already exists', async () => {
-      const promisedResult = osClient.createTermsIndex(esUrl, index);
-
-      await expect(promisedResult)
-        .rejects.toThrow('resource_already_exists_exception');
     });
   });
 
@@ -488,18 +472,66 @@ describe('open-search-client', () => {
 
       await expect(osClient.indexExists(esUrl, indexName)).resolves.toBe(false);
     });
+  });
 
-    describe('getCount', () => {
-      it.only('returns the number of documents in an index', async () => {
-        const indexName = `index-${cryptoRandomString({ length: 6 })}`;
-        await osClient.addDocument(esUrl, indexName, { foo: 'bar' });
-        await osClient.refreshIndex(esUrl, indexName);
+  describe('getCount', () => {
+    const indexName = `index-${cryptoRandomString({ length: 6 })}`;
 
-        const count = await osClient.getCount(esUrl, indexName);
-        expect(count).toEqual(1);
+    beforeAll(async () => {
+      await osClient.addDocument(esUrl, indexName, { foo: 'bar' });
+      await osClient.refreshIndex(esUrl, indexName);
+    });
 
-        await osClient.deleteIndex(esUrl, indexName);
-      });
+    afterAll(async () => {
+      await osClient.deleteIndex(esUrl, indexName);
+    });
+
+    it('returns the number of documents in an index', async () => {
+      const count = await osClient.getCount(esUrl, indexName);
+      expect(count).toEqual(1);
+    });
+  });
+
+  describe('searchByQuery', () => {
+    const indexName = `index-${cryptoRandomString({ length: 6 })}`;
+    beforeEach(async () => {
+      await osClient.addDocument(esUrl, indexName, { foo: 'bar' });
+      await osClient.refreshIndex(esUrl, indexName);
+    });
+
+    afterEach(async () => {
+      await osClient.deleteIndex(esUrl, indexName);
+    });
+
+    test('should return the results of a search', async () => {
+      const query = {
+        bool: {
+          must: {
+            term: {
+              foo: 'bar',
+            },
+          },
+        },
+      };
+
+      const results = await osClient.searchByQuery(
+        esUrl,
+        indexName,
+        { query }
+      ) as {
+        hits: {
+          total: { value: number },
+          hits: { _source: { foo: string } }[]
+        }
+      };
+
+      expect(results.hits.total.value).toBe(1);
+
+      const [result] = results.hits.hits;
+      if (!result) {
+        fail('Expected result but got none');
+      }
+      expect(result._source.foo).toBe('bar');
     });
   });
 });

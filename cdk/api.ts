@@ -17,7 +17,6 @@ const lambdasPath = path.join(__dirname, '..', 'dist', 'api');
 interface ApiProps {
   neptuneCluster: neptune.IDatabaseCluster & ec2.IConnectable
   openSearch: IDomain & ec2.IConnectable
-  region: string
   stackName: string
   vpc: ec2.IVpc
   websiteDistribution: IDistribution
@@ -30,7 +29,6 @@ export default class Api extends Construct {
     const {
       neptuneCluster,
       openSearch,
-      region,
       stackName,
       vpc,
       websiteDistribution,
@@ -116,8 +114,8 @@ export default class Api extends Construct {
       description: 'Searches the OBP index for documents matching the given keywords.',
       timeout: Duration.minutes(5),
       environment: {
-        ELASTIC_SEARCH_HOST: openSearch.domainEndpoint,
-        REGION: region,
+        DOCUMENTS_INDEX_NAME: 'documents',
+        OPEN_SEARCH_ENDPOINT: openSearchEndpoint,
         ONTOLOGY_STORE_HOST: neptuneHostname,
         ONTOLOGY_STORE_PORT: neptunePort,
       },

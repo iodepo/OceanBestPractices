@@ -82,7 +82,6 @@ export default class ObpStack extends Stack {
 
     new Api(this, 'Api', {
       stackName: this.stackName,
-      region: this.region,
       neptuneCluster: neptune.neptuneCluster,
       openSearch: openSearch.domain,
       vpc,

@@ -481,3 +481,12 @@ export const getCount = async (
 
   return result.count;
 };
+
+export const searchByQuery = async (
+  prefixUrl: string,
+  index: string,
+  query: Record<string, unknown>
+): Promise<unknown> => gotEs(prefixUrl).post(
+  `${index}/_search`,
+  { json: query }
+);
