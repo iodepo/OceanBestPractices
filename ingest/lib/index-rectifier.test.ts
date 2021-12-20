@@ -22,11 +22,7 @@ jest.mock('../../lib/dspace-client', () => ({
 describe('index-rectifier', () => {
   describe('commitUpdatedItems', () => {
     test('should queue updated items for ingest', async () => {
-      mockQueueIngestDocument.mockResolvedValue({
-        $metadata: {},
-        MessageId: 'foo',
-        SequenceNumber: '456',
-      });
+      mockQueueIngestDocument.mockResolvedValue();
 
       const updatedItems = ['123', '456'];
 
@@ -38,13 +34,11 @@ describe('index-rectifier', () => {
       expect(queueIngestDocument).toBeCalledTimes(2);
       expect(queueIngestDocument).toBeCalledWith(
         '123',
-        'arn:ingestTopicArn',
-        'us-east-1'
+        'arn:ingestTopicArn'
       );
       expect(queueIngestDocument).toBeCalledWith(
         '456',
-        'arn:ingestTopicArn',
-        'us-east-1'
+        'arn:ingestTopicArn'
       );
     });
   });

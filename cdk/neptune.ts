@@ -16,13 +16,16 @@ import * as path from 'path';
 import * as s3 from '@aws-cdk/aws-s3';
 import * as s3Notifications from '@aws-cdk/aws-s3-notifications';
 import { IDomain } from '@aws-cdk/aws-opensearchservice';
+import { IConnectable } from '@aws-cdk/aws-ec2';
+import { IFunction } from '@aws-cdk/aws-lambda';
 
 interface NeptuneProps {
-  stackName: string
-  deletionProtection: boolean
-  allowFrom?: ec2.IConnectable[]
-  vpc: ec2.IVpc
-  openSearch: IDomain
+  stackName: string;
+  deletionProtection: boolean;
+  allowFrom?: ec2.IConnectable[];
+  vpc: ec2.IVpc;
+  openSearch: IDomain & IConnectable;
+  bulkIngesterFunction: IFunction;
 }
 
 export default class Neptune extends Construct {
@@ -37,6 +40,7 @@ export default class Neptune extends Construct {
       vpc,
       allowFrom = [],
       openSearch,
+      bulkIngesterFunction,
     } = props;
 
     const removalPolicy = deletionProtection
@@ -84,6 +88,9 @@ export default class Neptune extends Construct {
 
     bulkLoaderBucket.grantRead(taskDefinition.taskRole);
 
+    openSearch.grantRead(taskDefinition.taskRole);
+    openSearch.grantWrite(taskDefinition.taskRole);
+
     const logGroup = new logs.LogGroup(this, 'LogGroup', {
       logGroupName: `/obp/${stackName}/neptune-bulk-loader`,
     });
@@ -96,10 +103,10 @@ export default class Neptune extends Construct {
       environment: {
         IAM_ROLE_ARN: neptuneRole.roleArn,
         NEPTUNE_URL: neptuneUrl,
-        ES_URL: openSearch.domainEndpoint,
+        ES_URL: `https://${openSearch.domainEndpoint}`,
         ES_TERMS_INDEX: 'terms',
-        ES_DOCUMENTS_INDEX: 'documents',
         STOPWORDS_BUCKET: bulkLoaderBucket.bucketName,
+        BULK_INGESTER_FUNCTION_NAME: bulkIngesterFunction.functionName,
       },
       logging: ecs.LogDriver.awsLogs({
         streamPrefix: `${stackName}-neptune-bulk-loader`,
@@ -116,6 +123,11 @@ export default class Neptune extends Construct {
     // eslint-disable-next-line unicorn/consistent-destructuring
     this.neptuneCluster.connections.allowDefaultPortFrom(
       taskDefinitionSecurityGroup
+    );
+
+    openSearch.connections.allowFrom(
+      taskDefinitionSecurityGroup,
+      ec2.Port.tcp(443)
     );
 
     const taskLauncher = new lambda.Function(this, 'TaskLauncher', {
@@ -135,6 +147,10 @@ export default class Neptune extends Construct {
     if (taskDefinition.executionRole === undefined) {
       throw new Error('taskDefinition.executionRole is undefined');
     }
+
+    bulkIngesterFunction.grantInvoke(taskDefinition.taskRole);
+    openSearch.grantRead(taskDefinition.taskRole);
+    openSearch.grantWrite(taskDefinition.taskRole);
 
     const taskLauncherPolicies: iam.PolicyStatementProps[] = [
       {

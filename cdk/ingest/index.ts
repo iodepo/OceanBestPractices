@@ -6,7 +6,7 @@ import {
   LambdaDestination,
   SqsDestination,
 } from '@aws-cdk/aws-s3-notifications';
-import { IFunction } from '@aws-cdk/aws-lambda';
+import { Function, IFunction } from '@aws-cdk/aws-lambda';
 import { IDistribution } from '@aws-cdk/aws-cloudfront';
 import { IDomain } from '@aws-cdk/aws-opensearchservice';
 import {
@@ -29,6 +29,8 @@ interface IngestProps {
 }
 
 export default class Ingest extends Construct {
+  public readonly bulkIngesterFunction: Function;
+
   constructor(scope: Construct, id: string, props: IngestProps) {
     super(scope, id);
 
@@ -60,6 +62,8 @@ export default class Ingest extends Construct {
       textExtractorFunction,
       vpc,
     });
+
+    this.bulkIngesterFunction = lambdas.bulkIngester;
 
     // Invoke the scheduler function every 5 minutes
     new events.Rule(this, 'FeedReadEventRule', {

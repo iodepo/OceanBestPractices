@@ -262,7 +262,7 @@ export const createIndex = (
     const errorMessage = get(
       body,
       'error.type',
-      `Unexpected ${statusCode} response: ${body}`
+      `Unexpected ${statusCode} response: ${JSON.stringify(body, undefined, 2)}`
     );
 
     if (errorMessage === 'resource_already_exists_exception') {
