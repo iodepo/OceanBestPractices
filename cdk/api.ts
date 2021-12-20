@@ -116,8 +116,8 @@ export default class Api extends Construct {
       description: 'Searches the OBP index for documents matching the given keywords.',
       timeout: Duration.minutes(5),
       environment: {
-        ELASTIC_SEARCH_HOST: openSearch.domainEndpoint,
-        REGION: region,
+        DOCUMENTS_INDEX_NAME: 'documents',
+        OPEN_SEARCH_ENDPOINT: openSearchEndpoint,
         ONTOLOGY_STORE_HOST: neptuneHostname,
         ONTOLOGY_STORE_PORT: neptunePort,
       },
