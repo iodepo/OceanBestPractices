@@ -41,7 +41,7 @@ const initialState = [
     ],
     active_search: false,
     autocomplete: false,
-    help_text: 'TODO: Help me!'
+    help_text: 'Enter the name of the <b>Endorsing Group</b> eg. GOOS'
   },
   {
     title: 'EOV',
@@ -123,7 +123,7 @@ const initialState = [
       'dc_description_sponsorship',
     ],
     active_search: false,
-    help_text: 'TODO: Help me!'
+    help_text: 'Search for the <b>Funders/Sponsors name</b> eg. European Commission'
   },
   {
     title: 'Adoption Level',
@@ -132,7 +132,7 @@ const initialState = [
       'dc_description_adoption',
     ],
     active_search: false,
-    help_text: 'TODO: Help me!'
+    help_text: 'Search for the following <b>Adoption terms</b>: Novel (no adoption outside originators); Validated (tested by third parties); Organizational; Multi-Organizational; National; International'
   }
 ];
 
