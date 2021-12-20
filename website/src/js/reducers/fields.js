@@ -137,7 +137,7 @@ const initialState = [
 ];
 
 export default (state = initialState, action) => {
-  const existingState = Array.isArray(initialState) ? initialState : [];
+  const existingState = Array.isArray(state) ? state : [];
 
   // Set up a new array with new object instances
 
