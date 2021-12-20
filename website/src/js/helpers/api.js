@@ -39,6 +39,7 @@ export const createAPISearchURL = (query, options) => {
   let fields = options.fields;
   let synonyms = options.synonyms;
   let refereed = options.refereed;
+  let endorsed = options.endorsed;
 
   if ( Array.isArray(fields) ) {
     url = addParam(url, 'fields', fields.join(','));
@@ -70,6 +71,10 @@ export const createAPISearchURL = (query, options) => {
 
   if ( refereed ) {
     url = addParam(url, 'refereed', refereed);
+  }
+
+  if ( endorsed ) {
+    url = addParam(url, 'endorsed', endorsed);
   }
 
   return url;
