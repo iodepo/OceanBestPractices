@@ -1,8 +1,4 @@
-import {
-  PublishCommand,
-  PublishCommandOutput,
-  SNSClient,
-} from '@aws-sdk/client-sns';
+import { sns } from '../../lib/aws-clients';
 
 /**
  * Queues a DSpace document for ingest using the `link` attribute. This will
@@ -14,18 +10,12 @@ import {
  * @returns Returns the resut of the SNS PublishCommand:
  * https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-sns/interfaces/publishcommandoutput.html
  */
-export const queueIngestDocument = (
+export const queueIngestDocument = async (
   uuid: string,
-  ingestTopicArn: string,
-  region = 'us-east-1'
-): Promise<PublishCommandOutput> => {
-  const params = {
+  ingestTopicArn: string
+): Promise<void> => {
+  await sns().publish({
     Message: uuid,
     TopicArn: ingestTopicArn,
-  };
-
-  const client = new SNSClient({ region });
-  const command = new PublishCommand(params);
-
-  return client.send(command);
+  }).promise();
 };

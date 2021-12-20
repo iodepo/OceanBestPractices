@@ -19,13 +19,10 @@ import { queueIngestDocument } from './ingest-queue';
  * @param ids - List of existing index document item IDs that need to be
  * updated.
  * @param ingestTopicArn - SNS Topic ARN where new documents are queued.
- * @param region - AWS region containing the infrastructure.
- * @returns
  */
 export const commitUpdatedItems = async (
   ids: string[],
-  ingestTopicArn: string,
-  region = 'us-east-1'
+  ingestTopicArn: string
 ): Promise<void> => {
   await pMap(
     ids,
@@ -33,8 +30,7 @@ export const commitUpdatedItems = async (
       try {
         await queueIngestDocument(
           id,
-          ingestTopicArn,
-          region
+          ingestTopicArn
         );
       } catch (error) {
         console.log(`ERROR: Failed to queue updated document ${JSON.stringify(id)} with error: ${error}`);
