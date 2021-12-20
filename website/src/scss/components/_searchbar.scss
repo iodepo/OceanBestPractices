@@ -85,14 +85,14 @@
   order: 3;
 
   @media #{$screen-m} {
-    width: 12rem;
+    width: 15rem;
   }
 
   .dropdown {
     width: 70%;
 
     @media #{$screen-m} {
-      width: 8rem;
+      width: 10rem;
     }
   }
 

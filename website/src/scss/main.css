@@ -1533,12 +1533,12 @@ html {
   order: 3; }
   @media (min-width: 961px) {
     .searchbar__input--append {
-      width: 12rem; } }
+      width: 15rem; } }
   .searchbar__input--append .dropdown {
     width: 70%; }
     @media (min-width: 961px) {
       .searchbar__input--append .dropdown {
-        width: 8rem; } }
+        width: 10rem; } }
   .searchbar__input--append .button__dropdown {
     padding: 1.25rem .5rem;
     line-height: 1rem;
