@@ -64,7 +64,7 @@ export default class IngestLambdas extends Construct {
       runtime: Runtime.NODEJS_14_X,
       code: Code.fromAsset(path.join(lambdasPath, 'indexer')),
       description: 'Responsible for percolating (tagging) and indexing document metadata based on a given document UID',
-      timeout: Duration.minutes(5),
+      timeout: Duration.minutes(15),
       environment: {
         DOCUMENT_METADATA_BUCKET: buckets.documentMetadata.bucketName,
         OPEN_SEARCH_ENDPOINT: openSearchEndpoint,

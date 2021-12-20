@@ -4,8 +4,8 @@ import { NeptuneBulkLoaderClient } from './neptune-bulk-loader-client';
 import { getBoolFromEnv, getStringFromEnv } from '../lib/env-utils';
 import { loadMetadata } from './metadata';
 import { indexTerms } from './index-terms';
-import { updateAllDocumentsTerms } from './update-document-terms';
 import { loadStopwords } from './stopwords';
+import { lambda } from '../lib/aws-clients';
 
 export const neptuneBulkLoader = async (): Promise<void> => {
   const iamRoleArn = getStringFromEnv('IAM_ROLE_ARN');
@@ -15,8 +15,8 @@ export const neptuneBulkLoader = async (): Promise<void> => {
   const region = getStringFromEnv('AWS_REGION');
   const esUrl = getStringFromEnv('ES_URL');
   const termsIndex = getStringFromEnv('ES_TERMS_INDEX');
-  const documentsIndex = getStringFromEnv('ES_DOCUMENTS_INDEX');
   const stopwordsBucket = getStringFromEnv('STOPWORDS_BUCKET');
+  const bulkIngesterFunctionName = getStringFromEnv('BULK_INGESTER_FUNCTION_NAME');
 
   const bulkLoaderClient = new NeptuneBulkLoaderClient({
     neptuneUrl,
@@ -50,17 +50,22 @@ export const neptuneBulkLoader = async (): Promise<void> => {
 
   await bulkLoaderClient.waitForLoadCompleted(loadId);
 
+  console.log('Creating terms index');
   await osClient.createTermsIndex(esUrl, termsIndex);
+  console.log('terms index created');
 
+  console.log('Deleting by query');
   await osClient.deleteByQuery(esUrl, termsIndex, {
     match: { namedGraphUri },
   });
+  console.log('Deleting by query finished');
 
   const stopwordsLocation = new s3Utils.S3ObjectLocation(
     stopwordsBucket,
     'stopwords.txt'
   );
 
+  console.log('Loading sparql query and stopwords');
   const [
     sparqlQuery,
     stopwords,
@@ -68,6 +73,8 @@ export const neptuneBulkLoader = async (): Promise<void> => {
     s3Utils.getObjectText(queryS3Url),
     loadStopwords(stopwordsLocation),
   ]);
+
+  console.log('Starting indexTerms');
 
   await indexTerms({
     elasticsearchUrl: esUrl,
@@ -80,14 +87,22 @@ export const neptuneBulkLoader = async (): Promise<void> => {
     stopwords,
   });
 
-  await updateAllDocumentsTerms({
-    esUrl,
-    index: documentsIndex,
-  });
+  console.log('Finished indexTerms');
+
+  console.log('Invoking bulk ingester function');
+  await lambda().invoke({
+    FunctionName: bulkIngesterFunctionName,
+    InvocationType: 'Event',
+  }).promise();
+  console.log('Finished invoking bulk ingester function');
 };
 
 if (require.main === module) {
+  console.time('Total');
   neptuneBulkLoader()
-    .then((r) => console.log('Result:', r))
-    .catch((error) => console.log(error));
+    .then(() => console.timeEnd('Total'))
+    .catch((error) => {
+      console.log(error);
+      console.timeEnd('Total');
+    });
 }

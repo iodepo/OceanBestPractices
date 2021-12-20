@@ -1,4 +1,9 @@
-import { S3, SNS, SQS } from 'aws-sdk';
+import {
+  Lambda,
+  S3,
+  SNS,
+  SQS,
+} from 'aws-sdk';
 import { getStringFromEnv } from './env-utils';
 
 const localStackEndpointEnvVar = 'LOCAL_STACK_ENDPOINT';
@@ -19,6 +24,15 @@ const defaultLocalstackOverrides = () => ({
 const useLocalStack = (): boolean => {
   if (getStringFromEnv(localStackEndpointEnvVar, true)) return true;
   return process.env['NODE_ENV'] === 'test';
+};
+
+export const lambda = (options?: Lambda.Types.ClientConfiguration): Lambda => {
+  const overrides = useLocalStack() ? defaultLocalstackOverrides() : {};
+
+  return new Lambda({
+    ...overrides,
+    ...options,
+  });
 };
 
 export const s3 = (options?: S3.Types.ClientConfiguration): S3 => {
