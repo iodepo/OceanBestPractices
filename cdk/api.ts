@@ -17,7 +17,6 @@ const lambdasPath = path.join(__dirname, '..', 'dist', 'api');
 interface ApiProps {
   neptuneCluster: neptune.IDatabaseCluster & ec2.IConnectable
   openSearch: IDomain & ec2.IConnectable
-  region: string
   stackName: string
   vpc: ec2.IVpc
   websiteDistribution: IDistribution
@@ -30,7 +29,6 @@ export default class Api extends Construct {
     const {
       neptuneCluster,
       openSearch,
-      region,
       stackName,
       vpc,
       websiteDistribution,
