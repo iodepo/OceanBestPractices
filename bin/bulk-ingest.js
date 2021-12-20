@@ -5,14 +5,14 @@ const { getStringFromEnv } = require('../lib/env-utils');
 
 (async () => {
   const dspaceEndpoint = getStringFromEnv('DSPACE_ENDPOINT');
-  const ingestTopicArn = getStringFromEnv('INGEST_TOPIC_ARN');
+  const itemIngestQueueUrl = getStringFromEnv('DSPACE_ITEM_INGEST_QUEUE_URL');
 
   console.log('INFO: Starting the bulk ingester...');
 
   try {
     const result = await bulkIngester(
       dspaceEndpoint,
-      ingestTopicArn
+      itemIngestQueueUrl
     );
 
     console.log(`INFO: Successfully queued ${result.success.count} items.`);

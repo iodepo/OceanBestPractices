@@ -1,15 +1,9 @@
 import * as path from 'path';
-import {
-  Code,
-  Function,
-  IFunction,
-  Runtime,
-} from '@aws-cdk/aws-lambda';
+import { Code, Function, Runtime } from '@aws-cdk/aws-lambda';
 import { Construct, Duration } from '@aws-cdk/core';
 import { IDomain } from '@aws-cdk/aws-opensearchservice';
 import { IConnectable, IVpc, Port } from '@aws-cdk/aws-ec2';
 import IngestBuckets from './buckets';
-import IngestSnsTopics from './sns-topics';
 import IngestSqsQueues from './sqs-queues';
 
 const lambdasPath = path.join(__dirname, '..', '..', 'dist', 'ingest');
@@ -18,21 +12,13 @@ interface LambdasProps {
   buckets: IngestBuckets
   elasticsearchDomain: IDomain & IConnectable
   feedReadInterval: number
-  snsTopics: IngestSnsTopics
   sqsQueues: IngestSqsQueues
-  textExtractorFunction: IFunction
   stackName: string,
   vpc: IVpc
 }
 
 export default class IngestLambdas extends Construct {
-  public readonly bitstreamsDownloader: Function;
-
   public readonly indexer: Function;
-
-  public readonly invokeExtractor: Function;
-
-  public readonly metadataDownloader: Function;
 
   public readonly feedIngester: Function;
 
@@ -47,10 +33,8 @@ export default class IngestLambdas extends Construct {
       buckets,
       elasticsearchDomain,
       feedReadInterval = 300,
-      snsTopics,
       sqsQueues,
       stackName,
-      textExtractorFunction,
       vpc,
     } = props;
 
@@ -66,62 +50,16 @@ export default class IngestLambdas extends Construct {
       description: 'Responsible for percolating (tagging) and indexing document metadata based on a given document UID',
       timeout: Duration.minutes(5),
       environment: {
-        DOCUMENT_METADATA_BUCKET: buckets.documentMetadata.bucketName,
+        DOCUMENT_SOURCE_BUCKET: buckets.documentSource.bucketName,
+        DSPACE_ITEM_INGEST_QUEUE_URL: sqsQueues.dspaceItemIngestQueue.queueUrl,
+        DSPACE_URL: dspaceEndpoint,
         OPEN_SEARCH_ENDPOINT: openSearchEndpoint,
-        INDEXER_QUEUE_URL: sqsQueues.indexerQueue.queueUrl,
       },
       vpc,
     });
-    buckets.documentMetadata.grantRead(this.indexer);
-    buckets.textExtractorDestination.grantRead(this.indexer);
+    buckets.documentSource.grantWrite(this.indexer);
     elasticsearchDomain.connections.allowFrom(this.indexer, Port.tcp(443));
     elasticsearchDomain.grantWrite(this.indexer);
-
-    this.bitstreamsDownloader = new Function(this, 'BitstreamsDownloader', {
-      functionName: `${stackName}-ingest-bitstreams-downloader`,
-      handler: 'lambda.handler',
-      runtime: Runtime.NODEJS_14_X,
-      code: Code.fromAsset(path.join(lambdasPath, 'bitstreams-downloader')),
-      description: 'Downloads the binary file for a given document UID from the OBP API',
-      timeout: Duration.minutes(5),
-      memorySize: 1024,
-      environment: {
-        DSPACE_ENDPOINT: dspaceEndpoint,
-        DOCUMENT_BINARY_BUCKET: buckets.documentSource.bucketName,
-        INDEXER_QUEUE_URL: sqsQueues.indexerQueue.queueUrl,
-      },
-    });
-    buckets.documentMetadata.grantRead(this.bitstreamsDownloader);
-    buckets.documentSource.grantWrite(this.bitstreamsDownloader);
-
-    this.invokeExtractor = new Function(this, 'InvokeExtractor', {
-      functionName: `${stackName}-ingest-invoke-extractor`,
-      handler: 'lambda.handler',
-      runtime: Runtime.NODEJS_14_X,
-      code: Code.fromAsset(path.join(lambdasPath, 'invoke-extractor')),
-      description: 'Invokes the text extractor (3rd party library) functions for a given document UID',
-      timeout: Duration.seconds(20),
-      environment: {
-        TEXT_EXTRACTOR_FUNCTION_NAME: textExtractorFunction.functionName,
-        TEXT_EXTRACTOR_TEMP_BUCKET: buckets.textExtractorTemp.bucketName,
-        TEXT_EXTRACTOR_BUCKET: buckets.textExtractorDestination.bucketName,
-      },
-    });
-    textExtractorFunction.grantInvoke(this.invokeExtractor);
-
-    this.metadataDownloader = new Function(this, 'MetadataDownloader', {
-      functionName: `${stackName}-ingest-metadata-downloader`,
-      handler: 'lambda.handler',
-      runtime: Runtime.NODEJS_14_X,
-      code: Code.fromAsset(path.join(lambdasPath, 'metadata-downloader')),
-      description: 'Downloads the metadata for a given document UUID from DSpace',
-      timeout: Duration.minutes(5),
-      environment: {
-        DOCUMENT_METADATA_BUCKET: buckets.documentMetadata.bucketName,
-        DSPACE_ENDPOINT: dspaceEndpoint,
-      },
-    });
-    buckets.documentMetadata.grantWrite(this.metadataDownloader);
 
     this.feedIngester = new Function(this, 'RSSFeedIngester', {
       functionName: `${stackName}-ingest-feed-ingester`,
@@ -133,10 +71,9 @@ export default class IngestLambdas extends Construct {
       environment: {
         DSPACE_FEED_READ_INTERVAL: feedReadInterval.toString(),
         DSPACE_ENDPOINT: dspaceEndpoint,
-        INGEST_TOPIC_ARN: snsTopics.availableDocument.topicArn,
+        DSPACE_ITEM_INGEST_QUEUE_URL: sqsQueues.dspaceItemIngestQueue.queueUrl,
       },
     });
-    snsTopics.availableDocument.grantPublish(this.feedIngester);
 
     this.indexRectifier = new Function(this, 'IndexRectifier', {
       functionName: `${stackName}-index-rectifier`,
@@ -146,12 +83,11 @@ export default class IngestLambdas extends Construct {
       description: 'Performs a diff against the OBP Search Index and DSpace; Updates or removes items as necessary.',
       timeout: Duration.minutes(15),
       environment: {
-        INGEST_TOPIC_ARN: snsTopics.availableDocument.topicArn,
-        OPEN_SEARCH_ENDPOINT: openSearchEndpoint,
         DSPACE_ENDPOINT: dspaceEndpoint,
+        DSPACE_ITEM_INGEST_QUEUE_URL: sqsQueues.dspaceItemIngestQueue.queueUrl,
+        OPEN_SEARCH_ENDPOINT: openSearchEndpoint,
       },
     });
-    snsTopics.availableDocument.grantPublish(this.indexRectifier);
 
     this.bulkIngester = new Function(this, 'BulkIngester', {
       functionName: `${stackName}-bulk-ingester`,
@@ -162,9 +98,8 @@ export default class IngestLambdas extends Construct {
       timeout: Duration.minutes(15),
       environment: {
         DSPACE_ENDPOINT: dspaceEndpoint,
-        INGEST_TOPIC_ARN: snsTopics.availableDocument.topicArn,
+        DSPACE_ITEM_INGEST_QUEUE_URL: sqsQueues.dspaceItemIngestQueue.queueUrl,
       },
     });
-    snsTopics.availableDocument.grantPublish(this.bulkIngester);
   }
 }

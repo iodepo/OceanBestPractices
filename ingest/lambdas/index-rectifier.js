@@ -3,10 +3,9 @@ const ir = require('../lib/index-rectifier');
 
 const parseEnv = () =>
   z.object({
-    AWS_REGION: z.string(),
     OPEN_SEARCH_ENDPOINT: z.string().url(),
     DSPACE_ENDPOINT: z.string().url(),
-    INGEST_TOPIC_ARN: z.string(),
+    DSPACE_ITEM_INGEST_QUEUE_URL: z.string().url(),
   }).parse(process.env);
 
 const handler = async () => {
@@ -18,8 +17,7 @@ const handler = async () => {
   // Queue updated items for re-ingest.
   await ir.commitUpdatedItems(
     result.updated,
-    env.INGEST_TOPIC_ARN,
-    env.AWS_REGION
+    env.DSPACE_ITEM_INGEST_QUEUE_URL
   );
 
   // Remove deleted items from the index.

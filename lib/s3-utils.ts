@@ -146,24 +146,3 @@ export const uploadStream = async (
     Body: stream,
   }).promise();
 };
-
-const s3EventRecordSchema = z.object({
-  s3: z.object({
-    bucket: z.object({
-      name: z.string().min(1),
-    }),
-    object: z.object({
-      key: z.string().min(1),
-    }),
-  }),
-});
-
-export type S3EventRecord = z.infer<typeof s3EventRecordSchema>;
-
-export const s3EventSchema = z.object({
-  Records: z.array(s3EventRecordSchema),
-});
-
-export type S3Event = z.infer<typeof s3EventSchema>;
-
-export const isS3Event = zodTypeGuard(s3EventSchema);

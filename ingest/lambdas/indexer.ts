@@ -1,6 +1,11 @@
 /* eslint-disable no-underscore-dangle */
+
+// @ts-expect-error This package does not have types available
+import PDFParser from 'pdf2json';
+import got from 'got';
 import { z } from 'zod';
 import pMap from 'p-map';
+import { curry } from 'lodash';
 import * as osClient from '../../lib/open-search-client';
 import {
   Bitstream,
@@ -12,49 +17,30 @@ import { documentItemSchema } from '../../lib/open-search-schemas';
 
 import {
   findMetadataItems,
+  findPDFBitstreamItem,
   findThumbnailBitstreamItem,
 } from '../../lib/dspace-item';
 import * as s3Utils from '../../lib/s3-utils';
 import { deleteMessage, receiveMessage, SqsMessage } from '../../lib/sqs-utils';
-import { zodTypeGuard } from '../../lib/zod-utils';
 
-const lastModifiedRegex = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/;
+const getUrlBuffer = (url: string): Promise<Buffer> => got.get(url).buffer();
 
-/**
- * There are cases where DSpace is giving us an invalid timestamp string. The
- * milliseconds field should be three digits, but some DSpace values only
- * contain one milliseconds digit. For example: `2021-08-24 17:36:38.7`
- *
- * Because that value can't be trusted, we are setting all values to have a ms
- * of `000`.
- */
-const normalizeLastModified = (x: string): string => {
-  const match = x.match(lastModifiedRegex);
+const textFromPdfBuffer = (buffer: Buffer): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const pdfParser = new PDFParser();
 
-  if (match === null) throw new TypeError(`Invalid lastModified: ${x}`);
+    pdfParser.on('pdfParser_dataError', reject);
 
-  return `${match[0]}.000`;
-};
+    pdfParser.on(
+      'pdfParser_dataReady',
+      () => resolve(pdfParser.getRawTextContent())
+    );
 
-export const getDSpaceItemFields = async (
-  dspaceItemBucket: string,
-  dspaceItemKey: string
-): Promise<DSpaceItem> => {
-  const s3Location = new s3Utils.S3ObjectLocation(
-    dspaceItemBucket,
-    dspaceItemKey
-  );
+    pdfParser.parseBuffer(buffer);
+  });
 
-  const { lastModified, ...fields } = await s3Utils.safeGetObjectJson(
-    s3Location,
-    dspaceItemSchema
-  );
-
-  return {
-    lastModified: normalizeLastModified(lastModified),
-    ...fields,
-  };
-};
+const fetchPdfText = async (url: string): Promise<string> =>
+  getUrlBuffer(url).then(textFromPdfBuffer);
 
 interface BitstreamTextSource {
   _bitstreamText: string
@@ -142,55 +128,31 @@ export const getTerms = async (
   };
 };
 
-const justUuidMessageSchema = z.object({
-  uuid: z.string().uuid(),
-});
-
-const isExplicitInvokeMessage = zodTypeGuard(justUuidMessageSchema);
-
 const createIndexes = (esUrl: string) => Promise.all([
   osClient.createDocumentsIndex(esUrl, 'documents'),
   osClient.createTermsIndex(esUrl, 'terms'),
 ]);
 
 interface Config {
+  documentSourceBucket: string;
+  dspaceUrl: string;
   esUrl: string;
-  dspaceItemBucket: string;
-  indexerQueueUrl: string;
+  queueUrl: string;
 }
 
 const getMessages = async (queueUrl: string): Promise<SqsMessage[]> =>
   receiveMessage(queueUrl).then((r) => r.Messages);
 
-const ingestRecordSchema = z.object({
-  uuid: z.string().uuid(),
-  bitstreamTextBucket: z.string().min(1).optional(),
-  bitstreamTextKey: z.string().min(1).optional(),
-});
-
-type IndexerRequest = z.infer<typeof ingestRecordSchema>;
-
 const index = async (
-  ingestRecord: IndexerRequest,
-  dspaceItemBucket: string,
-  openSearchEndpoint: string
+  config: Config,
+  dspaceItem: DSpaceItem
+  // ingestRecord: IndexerRequest,
+  // dspaceItemBucket: string,
+  // openSearchEndpoint: string
 ): Promise<void> => {
-  console.log(`INFO: Indexing from ingest record: ${JSON.stringify(ingestRecord)}`);
+  console.log(`INFO: Indexing DSpace item ${dspaceItem.uuid}`);
 
-  // Get the DSpace item that starts this all off.
-  const dspaceItem = await getDSpaceItemFields(
-    dspaceItemBucket,
-    `${ingestRecord.uuid}.json`
-  );
-
-  // Get the PDF source if it exists.
-  let bitstreamSource: BitstreamTextSource | undefined;
-  if (ingestRecord.bitstreamTextBucket && ingestRecord.bitstreamTextKey) {
-    bitstreamSource = await getBitstreamTextSource(
-      ingestRecord.bitstreamTextBucket,
-      ingestRecord.bitstreamTextKey
-    );
-  }
+  const { documentSourceBucket, dspaceUrl, esUrl } = config;
 
   // Promote the metadata fields to make search easier. Since the metadata
   // is dynamic we validate that the dc.title field exists.
@@ -209,9 +171,28 @@ const index = async (
 
   // Get terms.
   const title = metadataSearchFields.dc_title;
-  const contents = bitstreamSource?._bitstreamText || '';
+
+  let contents = title;
+
+  const pdfBitstream = findPDFBitstreamItem(dspaceItem.bitstreams);
+
+  if (pdfBitstream) {
+    const pdfUrl = `${dspaceUrl}${pdfBitstream.retrieveLink}`;
+
+    // TODO We are downloading this file twice here, once to parse it and again
+    // to save it to S3. Can we stream it once to two destinations?
+
+    contents = await fetchPdfText(pdfUrl);
+
+    await s3Utils.uploadStream(
+      documentSourceBucket,
+      `${dspaceItem.uuid}.pdf`,
+      got.stream(pdfUrl)
+    );
+  }
+
   const terms = await getTerms(
-    openSearchEndpoint,
+    esUrl,
     {
       title,
       contents,
@@ -220,7 +201,6 @@ const index = async (
 
   const documentItem = documentItemSchema.parse({
     ...dspaceItem,
-    ...bitstreamSource,
     ...metadataSearchFields,
     ...primaryAuthor,
     ...thumbnailRetrieveLink,
@@ -228,77 +208,30 @@ const index = async (
   });
 
   // Index our document item.
-  await osClient.putDocumentItem(openSearchEndpoint, documentItem);
+  await osClient.putDocumentItem(esUrl, documentItem);
 
   console.log(`INFO: Indexed document item ${documentItem.uuid}`);
 };
 
-const s3EventRecordToIngestRecord = (
-  record: s3Utils.S3EventRecord
-): IndexerRequest => {
-  const bitstreamTextBucket = record.s3.bucket.name;
-  const bitstreamTextKey = record.s3.object.key;
-  const [uuid] = bitstreamTextKey.split('.');
+const messageHandler = curry(
+  async (config: Config, message: SqsMessage) => {
+    const dspaceItem = dspaceItemSchema.parse(message.Body);
 
-  if (!uuid) {
-    throw new Error(`Ingest indexer event missing UUID ${JSON.stringify(record)}`);
+    await index(config, dspaceItem);
+
+    await deleteMessage(config.queueUrl, message.ReceiptHandle);
   }
+);
 
-  return {
-    bitstreamTextBucket,
-    bitstreamTextKey,
-    uuid,
-  };
-};
-
-const parseSqsMessageBody = (body: string): IndexerRequest[] => {
-  const messageBody = JSON.parse(body);
-
-  if (isExplicitInvokeMessage(messageBody)) {
-    return [{ uuid: messageBody.uuid }];
-  }
-
-  if (s3Utils.isS3Event(messageBody)) {
-    return messageBody.Records.map((r) => s3EventRecordToIngestRecord(r));
-  }
-
-  throw new Error(`Unparsable message body: ${body}`);
-};
-
-interface SqsMessageHandlerConfig {
-  dspaceItemBucket: string,
-  esUrl: string,
-  indexerQueueUrl: string
-}
-
-const sqsMessageHandler = async (
-  config: SqsMessageHandlerConfig,
-  sqsMessage: SqsMessage
-) => {
-  const ingestRecords = parseSqsMessageBody(sqsMessage.Body);
-
-  await pMap(
-    ingestRecords,
-    (record) => index(record, config.dspaceItemBucket, config.esUrl),
-    { concurrency: 1 }
-  );
-
-  await deleteMessage(config.indexerQueueUrl, sqsMessage.ReceiptHandle);
-};
-
-const processIndexerQueue = async (config: Config): Promise<void> => {
-  await createIndexes(config.esUrl);
-
+const processIngestQueue = async (config: Config): Promise<void> => {
   let messages: SqsMessage[];
   do {
     /* eslint-disable no-await-in-loop */
-    messages = await getMessages(config.indexerQueueUrl);
-
-    console.log('>>> messages:', JSON.stringify(messages, undefined, 2));
+    messages = await getMessages(config.queueUrl);
 
     await pMap(
       messages,
-      sqsMessageHandler.bind(undefined, config),
+      messageHandler(config),
       { concurrency: 1 }
     );
     /* eslint-enable no-await-in-loop */
@@ -306,23 +239,27 @@ const processIndexerQueue = async (config: Config): Promise<void> => {
 };
 
 const envSchema = z.object({
-  DOCUMENT_METADATA_BUCKET: z.string().min(1),
+  DOCUMENT_SOURCE_BUCKET: z.string().min(1),
+  DSPACE_ITEM_INGEST_QUEUE_URL: z.string().url(),
+  DSPACE_URL: z.string().url(),
   OPEN_SEARCH_ENDPOINT: z.string().url(),
-  INDEXER_QUEUE_URL: z.string().url(),
 });
 
 const loadConfigFromEnv = (): Config => {
   const env = envSchema.parse(process.env);
 
   return {
-    dspaceItemBucket: env.DOCUMENT_METADATA_BUCKET,
+    documentSourceBucket: env.DOCUMENT_SOURCE_BUCKET,
+    dspaceUrl: env.DSPACE_URL,
     esUrl: env.OPEN_SEARCH_ENDPOINT,
-    indexerQueueUrl: env.INDEXER_QUEUE_URL,
+    queueUrl: env.DSPACE_ITEM_INGEST_QUEUE_URL,
   };
 };
 
 export const handler = async () => {
   const config = loadConfigFromEnv();
 
-  await processIndexerQueue(config);
+  await createIndexes(config.esUrl);
+
+  await processIngestQueue(config);
 };

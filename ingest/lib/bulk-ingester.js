@@ -2,7 +2,7 @@
 const pMap = require('p-map');
 
 const dspaceClient = require('../../lib/dspace-client');
-const utils = require('./ingest-queue');
+const { sendMessage } = require('../../lib/sqs-utils');
 
 /**
  * @typedef BulkIngesterResult
@@ -15,13 +15,13 @@ const utils = require('./ingest-queue');
  * Fetches all available items from DSpace and queues them for ingest.
  *
  * @param {string} dspaceEndpoint The DSpace endpoint from which to fetch items.
- * @param {string} ingestTopicArn SNS Topic ARN where ingest items are queued.
+ * @param {string} itemIngestQueueUrl SQS queue to write the dspace item to
  *
  * @returns {Promise<BulkIngesterResult>}
  * Result of ingest queueing. Includes the UUIDs of successful and failed item
  * queues.
  */
-const bulkIngester = async (dspaceEndpoint, ingestTopicArn) => {
+const bulkIngester = async (dspaceEndpoint, itemIngestQueueUrl) => {
   /** @type BulkIngesterResult */
   const result = {
     success: {
@@ -48,11 +48,7 @@ const bulkIngester = async (dspaceEndpoint, ingestTopicArn) => {
           result.total += 1;
           console.log(`INFO: Queuing ${dspaceItem.uuid} (${result.total}) for ingest.`);
 
-          // Queue the DSpace item for ingest.
-          await utils.queueIngestDocument(
-            dspaceItem.uuid,
-            ingestTopicArn
-          );
+          await sendMessage(itemIngestQueueUrl, dspaceItem);
 
           result.success.ids.push(dspaceItem.uuid);
           result.success.count += 1;

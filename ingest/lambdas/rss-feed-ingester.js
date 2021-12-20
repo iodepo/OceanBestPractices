@@ -1,9 +1,8 @@
 /* eslint-disable import/no-unresolved, import/extensions */
 const pMap = require('p-map');
-
 const dspaceClient = require('../../lib/dspace-client');
-const ingestQueue = require('../lib/ingest-queue');
 const { getIntFromEnv, getStringFromEnv } = require('../../lib/env-utils');
+const { sendMessage } = require('../../lib/sqs-utils');
 
 /**
  * Fetches a DSpace RSS feed and determines whether or not the documents
@@ -13,7 +12,7 @@ const { getIntFromEnv, getStringFromEnv } = require('../../lib/env-utils');
  */
 const handler = async () => {
   const dspaceEndpoint = getStringFromEnv('DSPACE_ENDPOINT');
-  const ingestTopicArn = getStringFromEnv('INGEST_TOPIC_ARN');
+  const itemIngestQueueUrl = getStringFromEnv('DSPACE_ITEM_INGEST_QUEUE_URL');
   const dspaceFeedReadInterval = getIntFromEnv('DSPACE_FEED_READ_INTERVAL', 300);
 
   const forcePublishing = dspaceFeedReadInterval === -1;
@@ -51,10 +50,7 @@ const handler = async () => {
 
         if (dspaceItem === undefined) return;
 
-        await ingestQueue.queueIngestDocument(
-          dspaceItem.uuid,
-          ingestTopicArn
-        );
+        await sendMessage(itemIngestQueueUrl, dspaceItem);
 
         console.log(`INFO: Queued item ${dspaceItem.uuid} for ingest.`);
       },

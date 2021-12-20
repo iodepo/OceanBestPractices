@@ -108,11 +108,16 @@ export const deleteMessage = (
     ReceiptHandle: receiptHandle,
   }).promise().then(noop);
 
-export const sendMessage = (
-  queueUrl: string,
-  messageBody: string
-): Promise<void> =>
-  sqs().sendMessage({
-    QueueUrl: queueUrl,
-    MessageBody: messageBody,
-  }).promise().then(noop);
+export const sendMessage = async (
+  QueueUrl: string,
+  message: unknown
+): Promise<void> => {
+  const MessageBody = typeof message === 'string'
+    ? message
+    : JSON.stringify(message);
+
+  await sqs().sendMessage({
+    QueueUrl,
+    MessageBody,
+  }).promise();
+};

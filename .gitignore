@@ -23,3 +23,5 @@ deployment-config.json
 cdk.context.json
 
 /dist/
+
+test.ts

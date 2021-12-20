@@ -10,7 +10,7 @@ import {
   DocumentItem,
   documentItemSchema,
 } from '../../lib/open-search-schemas';
-import { queueIngestDocument } from './ingest-queue';
+import { sendMessage } from '../../lib/sqs-utils';
 
 /**
  * Commits index items that have been marked as out of date by
@@ -23,21 +23,16 @@ import { queueIngestDocument } from './ingest-queue';
  * @returns
  */
 export const commitUpdatedItems = async (
-  ids: string[],
-  ingestTopicArn: string,
-  region = 'us-east-1'
+  items: DSpaceItem[],
+  dspaceItemIngestQueue: string
 ): Promise<void> => {
   await pMap(
-    ids,
-    async (id) => {
+    items,
+    async (item) => {
       try {
-        await queueIngestDocument(
-          id,
-          ingestTopicArn,
-          region
-        );
+        await sendMessage(dspaceItemIngestQueue, item);
       } catch (error) {
-        console.log(`ERROR: Failed to queue updated document ${JSON.stringify(id)} with error: ${error}`);
+        console.log(`ERROR: Failed to queue updated item ${item.uuid} with error: ${error}`);
       }
     },
     { concurrency: 5 }
@@ -122,7 +117,7 @@ export const isUpdated = (
 
 type IndexRectifierDiffResult = {
   removed: string[],
-  updated: string[]
+  updated: DSpaceItem[]
 }
 
 /**
@@ -172,7 +167,7 @@ export const diff = async (
         if (dspaceItem === undefined) {
           diffResult.removed.push(hit._source.uuid);
         } else if (isUpdated(hit, dspaceItem)) {
-          diffResult.updated.push(hit._source.uuid);
+          diffResult.updated.push(dspaceItem);
         }
       } catch (error) {
         console.log(`ERROR: Encountered error: ${error} for diff of item: ${JSON.stringify(rawHit)}`);
