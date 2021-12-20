@@ -10,7 +10,16 @@ const esUrl = 'http://localhost:9200';
 const documentsIndexName = `index-${cryptoRandomString({ length: 6 })}`;
 
 describe('search-by-keywords.handler', () => {
+  let awsAccessKeyIdBefore: string | undefined;
+  let awsSecretAccessKey: string | undefined;
+
   beforeAll(async () => {
+    awsAccessKeyIdBefore = process.env['AWS_ACCESS_KEY_ID'];
+    process.env['AWS_ACCESS_KEY_ID'] = 'test-key-id';
+
+    awsSecretAccessKey = process.env['AWS_SECRET_ACCESS_KEY'];
+    process.env['AWS_SECRET_ACCESS_KEY'] = 'test-access-key';
+
     process.env['DOCUMENTS_INDEX_NAME'] = documentsIndexName;
     process.env['OPEN_SEARCH_ENDPOINT'] = esUrl;
 
@@ -24,6 +33,9 @@ describe('search-by-keywords.handler', () => {
     await osClient.deleteIndex(esUrl, documentsIndexName);
 
     nock.enableNetConnect();
+
+    process.env['AWS_ACCESS_KEY_ID'] = awsAccessKeyIdBefore;
+    process.env['AWS_SECRET_ACCESS_KEY'] = awsSecretAccessKey;
   });
 
   describe('when filtering by endorsed', () => {
