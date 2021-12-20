@@ -34,6 +34,16 @@ const initialState = [
     help_text: 'Enter if possible at least the first five words of the <b>title</b> (try all title if you have it)',
   },
   {
+    title: 'Endorsed',
+    id: 'endorsed',
+    value: [
+      'obps_endorsementExternal_externalEndorsedBy'
+    ],
+    active_search: false,
+    autocomplete: false,
+    help_text: 'Enter the name of the <b>Endorsing Group</b> eg. GOOS'
+  },
+  {
     title: 'EOV',
     id: 'eov',
     value: [
@@ -106,6 +116,24 @@ const initialState = [
     active_search: false,
     help_text: 'Search for the <b>full name of the EBV</b> eg.  Ecosystem Vertical Profile',
   },
+  {
+    title: 'Funders',
+    id: 'funders',
+    value: [
+      'dc_description_sponsorship',
+    ],
+    active_search: false,
+    help_text: 'Search for the <b>Funders/Sponsors name</b> eg. European Commission'
+  },
+  {
+    title: 'Adoption Level',
+    id: 'adoption',
+    value: [
+      'dc_description_adoption',
+    ],
+    active_search: false,
+    help_text: 'Search for the following <b>Adoption terms</b>: Novel (no adoption outside originators); Validated (tested by third parties); Organizational; Multi-Organizational; National; International'
+  }
 ];
 
 export default (state = initialState, action) => {
