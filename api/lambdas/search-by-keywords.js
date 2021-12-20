@@ -5,8 +5,8 @@ const osClient = require('../../lib/open-search-client');
 const { defaultSearchFields } = require('../lib/search-fields');
 
 const ontOpts = {
-  host: process.env.ONTOLOGY_STORE_HOST,
-  port: process.env.ONTOLOGY_STORE_PORT,
+  host: process.env['ONTOLOGY_STORE_HOST'],
+  port: process.env['ONTOLOGY_STORE_PORT'],
   path: '/sparql',
 };
 
@@ -176,6 +176,8 @@ function parseParams(params) {
  * inserting/removing any necessary or unnecessary quotes.
  *
  * e.g. "+ocean current" becomes "AND \"ocean current\""
+ *
+ * @param {string} k
  * */
 function formatKeyword(k) {
   // Map the UI operators to ES operators.
