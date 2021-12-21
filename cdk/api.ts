@@ -103,8 +103,8 @@ export default class Api extends Construct {
       },
       vpc,
     });
-    openSearch.connections.allowFrom(getStatistics, ec2.Port.tcp(443));
-    openSearch.grantRead(getStatistics);
+    openSearch.connections.allowFrom(searchAutocomplete, ec2.Port.tcp(443));
+    openSearch.grantRead(searchAutocomplete);
 
     const searchByKeywords = new Function(this, 'SearchByKeywords', {
       allowPublicSubnet: true,
