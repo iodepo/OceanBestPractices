@@ -24,9 +24,20 @@ const termsFactory = (label: string) => ({
 });
 
 describe('search-autocomplete.handler()', () => {
+  let awsAccessKeyIdBefore: string | undefined;
+  let awsSecretAccessKey: string | undefined;
   const termsIndexName = `index-${cryptoRandomString({ length: 6 })}`;
 
   beforeAll(async () => {
+    awsAccessKeyIdBefore = process.env['AWS_ACCESS_KEY_ID'];
+    process.env['AWS_ACCESS_KEY_ID'] = 'test-key-id';
+
+    awsSecretAccessKey = process.env['AWS_SECRET_ACCESS_KEY'];
+    process.env['AWS_SECRET_ACCESS_KEY'] = 'test-access-key';
+
+    process.env['OPEN_SEARCH_ENDPOINT'] = esUrl;
+    process.env['TERMS_INDEX_NAME'] = termsIndexName;
+
     nock.disableNetConnect();
     nock.enableNetConnect('localhost');
 
@@ -44,9 +55,22 @@ describe('search-autocomplete.handler()', () => {
     await osClient.deleteIndex(esUrl, termsIndexName);
 
     nock.enableNetConnect();
+
+    process.env['AWS_ACCESS_KEY_ID'] = awsAccessKeyIdBefore;
+    process.env['AWS_SECRET_ACCESS_KEY'] = awsSecretAccessKey;
   });
 
-  test('should return a list of suggested words', async () => {
+  test('should return a bad response if there is no input query string parameter', async () => {
+    const proxyEvent = {
+      queryStringParameters: {},
+    };
+
+    const response = await handler(proxyEvent);
+    expect(response.statusCode).toEqual(400);
+    expect(response.body).toEqual('No input specified in the query string parameters');
+  });
+
+  test('should return a list of suggested words based on input', async () => {
     const proxyEvent = {
       queryStringParameters: {
         input: 'oce',
@@ -56,6 +80,6 @@ describe('search-autocomplete.handler()', () => {
     const response = await handler(proxyEvent);
     const results = JSON.parse(response.body);
 
-    expect(results).toEqual(['ocean', 'ocean wave', 'ocean wave']);
+    expect(results).toEqual(['ocean', 'ocean wave', 'oceanic']);
   });
 });

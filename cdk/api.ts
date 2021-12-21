@@ -98,8 +98,8 @@ export default class Api extends Construct {
       description: 'Returns a subset of ontology terms that complete the given keyword.',
       timeout: Duration.seconds(100),
       environment: {
-        ONTOLOGY_STORE_HOST: neptuneHostname,
-        ONTOLOGY_STORE_PORT: neptunePort,
+        OPEN_SEARCH_ENDPOINT: openSearchEndpoint,
+        TERMS_INDEX_NAME: 'terms',
       },
       vpc,
     });

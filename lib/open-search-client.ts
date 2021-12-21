@@ -12,6 +12,7 @@ import {
   countResponseSchema,
   percolateResponseSchema,
   putDocumentItemResponseSchema,
+  suggestTermsResponseSchema,
 } from './open-search-schemas';
 import { documentsMapping } from './documents-mapping';
 import { termsMapping } from './terms-mapping';
@@ -470,3 +471,33 @@ export const searchByQuery = async (
   `${index}/_search`,
   { json: query }
 );
+
+export const suggestTerms = async (
+  prefixUrl: string,
+  termsIndexName: string,
+  input: string
+): Promise<string[]> => {
+  const suggest = {
+    termSuggest: {
+      prefix: input,
+      completion: {
+        field: 'suggest',
+      },
+    },
+  };
+
+  const rawResponse = await searchByQuery(
+    prefixUrl,
+    termsIndexName,
+    { suggest }
+  );
+
+  const suggestResponse = suggestTermsResponseSchema.parse(rawResponse);
+  const [suggestions] = suggestResponse.suggest.termSuggest;
+
+  if (!suggestions) {
+    return [];
+  }
+
+  return suggestions.options.map((s) => (s.text));
+};

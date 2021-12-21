@@ -1,6 +1,11 @@
-import { APIGatewayProxyEventV2 } from 'aws-lambda';
 import { z } from 'zod';
 import * as osClient from '../../lib/open-search-client';
+import { badRequestResponse, okResponse } from '../lib/responses';
+
+interface Config {
+  openSearchEndpoint: string;
+  termsIndexName: string;
+}
 
 const searchAutocompleteEventSchema = z.object({
   queryStringParameters: z.object({
@@ -8,42 +13,38 @@ const searchAutocompleteEventSchema = z.object({
   }),
 });
 
+const envSchema = z.object({
+  OPEN_SEARCH_ENDPOINT: z.string().url(),
+  TERMS_INDEX_NAME: z.string().min(1),
+});
+
+const loadConfigFromEnv = (): Config => {
+  const env = envSchema.parse(process.env);
+
+  return {
+    openSearchEndpoint: env.OPEN_SEARCH_ENDPOINT,
+    termsIndexName: env.TERMS_INDEX_NAME,
+  };
+};
+
 export const handler = async (event: unknown) => {
-  const searchAutocompleteEvent = searchAutocompleteEventSchema.parse(event);
-  const { input } = searchAutocompleteEvent.queryStringParameters;
+  const config = loadConfigFromEnv();
 
-  if (queryParams === undefined || queryParams === null) {
-    callback(null, {
-      statusCode: 200,
-      body: JSON.stringify([]),
-      headers: responseHeaders(),
-    });
-  } else if (queryParams.input === undefined || queryParams.input === null) {
-    callback(null, {
-      statusCode: 200,
-      body: JSON.stringify([]),
-      headers: responseHeaders(),
-    });
-  } else {
-    const opts = {
-      input: queryParams.input,
-      synonyms: queryParams.synonyms || false,
-    };
+  const searchAutocompleteEvent = searchAutocompleteEventSchema.safeParse(
+    event
+  );
 
-    getFuzzySemanticTerms(opts, (err, results) => {
-      if (err !== null) {
-        callback(err, {
-          statusCode: 500,
-          body: JSON.stringify({ err }),
-          headers: responseHeaders(),
-        });
-      } else {
-        callback(null, {
-          statusCode: 200,
-          body: JSON.stringify(results),
-          headers: responseHeaders(),
-        });
-      }
-    });
+  if (!searchAutocompleteEvent.success) {
+    return badRequestResponse('No input specified in the query string parameters');
   }
+
+  const { input } = searchAutocompleteEvent.data.queryStringParameters;
+
+  const results = await osClient.suggestTerms(
+    config.openSearchEndpoint,
+    config.termsIndexName,
+    input
+  );
+
+  return okResponse('application/json', JSON.stringify(results));
 };

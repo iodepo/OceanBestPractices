@@ -84,3 +84,15 @@ export type CloseScrollResponse = z.infer<typeof closeScrollResponseSchema>;
 export const countResponseSchema = z.object({
   count: z.number(),
 });
+
+export const suggestTermsResponseSchema = z.object({
+  suggest: z.object({
+    termSuggest: z.array(
+      z.object({
+        options: z.array(z.object({
+          text: z.string().min(1),
+        })),
+      })
+    ).min(1),
+  }),
+});

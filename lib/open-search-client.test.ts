@@ -16,6 +16,24 @@ const esUrl = 'http://localhost:9200';
 
 const randomIndexName = () => `index-${cryptoRandomString({ length: 6 })}`;
 
+const termsFactory = (label: string) => ({
+  label,
+  suggest: [label],
+  uri: `http://example.com/tf/TF_${label}`,
+  query: {
+    multi_match: {
+      query: label,
+      type: 'phrase',
+      fields: [
+        'contents',
+        'title',
+      ],
+    },
+  },
+  source_terminology: 'Terms Factory',
+  namedGraphUri: 'http://example.com/tf/TF',
+});
+
 describe('open-search-client', () => {
   let awsAccessKeyIdBefore: string | undefined;
   let awsSecretAccessKey: string | undefined;
@@ -293,7 +311,7 @@ describe('open-search-client', () => {
   });
 
   describe('createDocumentsIndex()', () => {
-    it.only('creates the expected index mappings', async () => {
+    it('creates the expected index mappings', async () => {
       const indexName = randomIndexName();
       await osClient.createDocumentsIndex(esUrl, indexName);
 
@@ -615,6 +633,33 @@ describe('open-search-client', () => {
         fail('Expected result but got none');
       }
       expect(result._source.foo).toBe('bar');
+    });
+  });
+
+  describe('suggestTerms', () => {
+    const termsIndexName = randomIndexName();
+
+    beforeAll(async () => {
+      await osClient.createTermsIndex(esUrl, termsIndexName);
+
+      await osClient.addDocument(esUrl, termsIndexName, termsFactory('ocean'));
+      await osClient.addDocument(esUrl, termsIndexName, termsFactory('ocean wave'));
+      await osClient.addDocument(esUrl, termsIndexName, termsFactory('oceanic'));
+
+      await osClient.refreshIndex(esUrl, termsIndexName);
+    });
+
+    afterAll(async () => {
+      await osClient.deleteIndex(esUrl, termsIndexName);
+    });
+
+    test.only('should return a list of suggested terms', async () => {
+      const results = await osClient.suggestTerms(
+        esUrl,
+        termsIndexName,
+        'oce'
+      );
+      expect(results).toEqual(['ocean', 'ocean wave', 'oceanic']);
     });
   });
 });
