@@ -12,8 +12,10 @@ import {
   countResponseSchema,
   percolateResponseSchema,
   putDocumentItemResponseSchema,
+  suggestTermsResponseSchema,
 } from './open-search-schemas';
 import { documentsMapping } from './documents-mapping';
+import { termsMapping } from './terms-mapping';
 import { isHTTPError } from './got-utils';
 
 const gotEs = (prefixUrl: string) => got4aws().extend({
@@ -176,6 +178,7 @@ export interface PercolateDocumentFieldsOptions {
  */
 export const percolateDocumentFields = async (
   prefixUrl: string,
+  termsIndexName: string,
   fields: { title: string, contents: string },
   options: PercolateDocumentFieldsOptions = {}
 ): Promise<DocumentItemTerm[]> => {
@@ -196,7 +199,7 @@ export const percolateDocumentFields = async (
   };
 
   const rawPercolateResponse = await gotEs(prefixUrl).post(
-    'terms/_search',
+    `${termsIndexName}/_search`,
     {
       json: body,
     }
@@ -227,6 +230,7 @@ export const percolateDocumentFields = async (
     label: h._source.query.multi_match.query,
     uri: h._source.uri,
     source_terminology: h._source.source_terminology,
+    namedGraphUri: h._source.namedGraphUri,
   }));
 };
 
@@ -314,30 +318,7 @@ export const createDocumentsIndex = (
 export const createTermsIndex = (
   prefixUrl: string,
   index: string
-): Promise<unknown> => createIndex(prefixUrl, index, {
-  mappings: {
-    properties: {
-      contents: {
-        type: 'text',
-      },
-      query: {
-        type: 'percolator',
-      },
-      title: {
-        type: 'text',
-      },
-      source_terminology: {
-        type: 'keyword',
-      },
-      namedGraphUri: {
-        type: 'keyword',
-      },
-      uri: {
-        type: 'keyword',
-      },
-    },
-  },
-});
+): Promise<unknown> => createIndex(prefixUrl, index, termsMapping);
 
 /**
  * @param prefixUrl
@@ -490,3 +471,33 @@ export const searchByQuery = async (
   `${index}/_search`,
   { json: query }
 );
+
+export const suggestTerms = async (
+  prefixUrl: string,
+  termsIndexName: string,
+  input: string
+): Promise<string[]> => {
+  const suggest = {
+    termSuggest: {
+      prefix: input,
+      completion: {
+        field: 'suggest',
+      },
+    },
+  };
+
+  const rawResponse = await searchByQuery(
+    prefixUrl,
+    termsIndexName,
+    { suggest }
+  );
+
+  const suggestResponse = suggestTermsResponseSchema.parse(rawResponse);
+  const [suggestions] = suggestResponse.suggest.termSuggest;
+
+  if (!suggestions) {
+    return [];
+  }
+
+  return suggestions.options.map((s) => (s.text));
+};

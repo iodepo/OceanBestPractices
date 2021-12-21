@@ -28,6 +28,9 @@ export const documentsMapping = {
           source_terminology: {
             type: 'keyword',
           },
+          namedGraphUri: {
+            type: 'keyword',
+          },
         },
       },
       _thumbnailRetrieveLink: {

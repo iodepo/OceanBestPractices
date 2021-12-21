@@ -134,6 +134,7 @@ export const getTerms = async (
 ) => {
   const terms = await osClient.percolateDocumentFields(
     openSearchEndpoint,
+    'terms',
     percolateFields
   );
 
