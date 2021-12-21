@@ -78,6 +78,8 @@ const queryForTerm = (
   terminologyTitle: string,
   namedGraphUri: string
 ): unknown => ({
+  label: term.label,
+  suggest: [term.label],
   query: {
     multi_match: {
       query: term.label,

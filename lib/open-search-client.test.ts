@@ -149,85 +149,57 @@ describe('open-search-client', () => {
   });
 
   describe('percolateDocumentFields', () => {
-    test('should query the terms index with the given document fields', async () => {
-      const mockPercolatorResponse = {
-        took: 133,
-        timed_out: false,
-        _shards: {
-          total: 5,
-          successful: 5,
-          skipped: 0,
-          failed: 0,
-        },
-        hits: {
-          total: 2,
-          max_score: 0.287_682_1,
-          hits: [
-            {
-              _index: 'terms',
-              _type: 'doc',
-              _id: 'ENVO_00000016',
-              _score: 0.287_682_1,
-              _source: {
-                query: {
-                  multi_match: {
-                    query: 'sea',
-                    type: 'phrase',
-                    fields: [
-                      'contents',
-                      'title',
-                    ],
-                  },
-                },
-                source_terminology: 'Environmental Ontology',
-                uri: 'http://purl.obolibrary.org/obo/ENVO_00000016',
-              },
-            },
-            {
-              _index: 'terms',
-              _type: 'doc',
-              _id: 'ENVO_00000015',
-              _score: 0.287_682_1,
-              _source: {
-                query: {
-                  multi_match: {
-                    query: 'ocean',
-                    type: 'phrase',
-                    fields: [
-                      'contents',
-                      'title',
-                    ],
-                  },
-                },
-                source_terminology: 'Environmental Ontology',
-                namedGraphUri: {
-                  type: 'keyword',
-                },
-                uri: 'http://purl.obolibrary.org/obo/ENVO_00000015',
-              },
-            },
-          ],
-        },
-      };
+    const termsIndexName = `index-${cryptoRandomString({ length: 6 })}`;
 
-      nock('https://open-search.example.com')
-        .post('/terms/_search', {
-          query: {
-            percolate: {
-              field: 'query',
-              document: {
-                title: 'Ocean Stuff',
-                contents: 'This is super important stuff from the ocean and sea.',
-              },
-            },
+    beforeAll(async () => {
+      await osClient.createTermsIndex(esUrl, termsIndexName);
+
+      await osClient.addDocument(esUrl, termsIndexName, {
+        label: 'sea',
+        suggest: ['sea'],
+        query: {
+          multi_match: {
+            query: 'sea',
+            type: 'phrase',
+            fields: [
+              'contents',
+              'title',
+            ],
           },
-          from: 0,
-          size: 300,
-        })
-        .reply(200, mockPercolatorResponse);
+        },
+        source_terminology: 'Environmental Ontology',
+        uri: 'http://purl.obolibrary.org/obo/ENVO_00000016',
+        namedGraphUri: 'http://purl.obolibrary.org/obo/ENVO',
+      });
 
+      await osClient.addDocument(esUrl, termsIndexName, {
+        label: 'ocean',
+        suggest: ['ocean'],
+        query: {
+          multi_match: {
+            query: 'ocean',
+            type: 'phrase',
+            fields: [
+              'contents',
+              'title',
+            ],
+          },
+        },
+        source_terminology: 'Environmental Ontology',
+        uri: 'http://purl.obolibrary.org/obo/ENVO_00000017',
+        namedGraphUri: 'http://purl.obolibrary.org/obo/ENVO',
+      });
+      await osClient.refreshIndex(esUrl, termsIndexName);
+    });
+
+    afterAll(async () => {
+      await osClient.deleteIndex(esUrl, termsIndexName);
+    });
+
+    test('should query the terms index with the given document fields', async () => {
       const result = await osClient.percolateDocumentFields(
-        'https://open-search.example.com',
+        esUrl,
+        termsIndexName,
         {
           title: 'Ocean Stuff',
           contents: 'This is super important stuff from the ocean and sea.',
@@ -239,11 +211,13 @@ describe('open-search-client', () => {
           label: 'sea',
           uri: 'http://purl.obolibrary.org/obo/ENVO_00000016',
           source_terminology: 'Environmental Ontology',
+          namedGraphUri: 'http://purl.obolibrary.org/obo/ENVO',
         },
         {
           label: 'ocean',
-          uri: 'http://purl.obolibrary.org/obo/ENVO_00000015',
+          uri: 'http://purl.obolibrary.org/obo/ENVO_00000017',
           source_terminology: 'Environmental Ontology',
+          namedGraphUri: 'http://purl.obolibrary.org/obo/ENVO',
         },
       ]);
     });
@@ -318,6 +292,100 @@ describe('open-search-client', () => {
     });
   });
 
+  describe('createDocumentsIndex()', () => {
+    it.only('creates the expected index mappings', async () => {
+      const indexName = randomIndexName();
+      await osClient.createDocumentsIndex(esUrl, indexName);
+
+      const createdIndex = await osClient.getIndex(esUrl, indexName);
+
+      const createdMappings = get(createdIndex, [indexName, 'mappings']);
+      expect(createdMappings).toEqual({
+        date_detection: false,
+        properties: {
+          _bitstreamText: {
+            type: 'text',
+          },
+          _bitstreamTextKey: {
+            type: 'keyword',
+          },
+          _primaryAuthor: {
+            fields: {
+              keyword: {
+                type: 'keyword',
+              },
+            },
+            type: 'text',
+          },
+          _terms: {
+            properties: {
+              label: {
+                type: 'text',
+              },
+              namedGraphUri: {
+                type: 'keyword',
+              },
+              source_terminology: {
+                type: 'keyword',
+              },
+              uri: {
+                type: 'keyword',
+              },
+            },
+            type: 'nested',
+          },
+          _thumbnailRetrieveLink: {
+            type: 'keyword',
+          },
+          bitstreams: {
+            dynamic: 'true',
+            type: 'nested',
+          },
+          dc_abstract: {
+            type: 'text',
+          },
+          dc_date_issued: {
+            format: 'yyyy',
+            type: 'date',
+          },
+          dc_description_notes: {
+            type: 'text',
+          },
+          dc_title: {
+            fields: {
+              keyword: {
+                ignore_above: 256,
+                type: 'keyword',
+              },
+            },
+            type: 'text',
+          },
+          dc_title_alternative: {
+            type: 'text',
+          },
+          handle: {
+            type: 'keyword',
+          },
+          lastModified: {
+            format: 'yyyy-MM-dd H:m:s.SSS',
+            type: 'date',
+          },
+          metadata: {
+            properties: {
+              value: {
+                type: 'keyword',
+              },
+            },
+            type: 'nested',
+          },
+          uuid: {
+            type: 'keyword',
+          },
+        },
+      });
+    });
+  });
+
   describe('createTermsIndex()', () => {
     it('creates the expected index mappings', async () => {
       const indexName = randomIndexName();
@@ -329,14 +397,23 @@ describe('open-search-client', () => {
 
       expect(createdMappings).toEqual({
         properties: {
-          contents: {
+          suggest: {
+            type: 'completion',
+            analyzer: 'simple',
+            max_input_length: 50,
+            preserve_position_increments: true,
+            preserve_separators: true,
+          },
+          label: {
             type: 'text',
+            fields: {
+              keyword: {
+                type: 'keyword',
+              },
+            },
           },
           query: {
             type: 'percolator',
-          },
-          title: {
-            type: 'text',
           },
           source_terminology: {
             type: 'keyword',
@@ -346,6 +423,12 @@ describe('open-search-client', () => {
           },
           uri: {
             type: 'keyword',
+          },
+          contents: {
+            type: 'text',
+          },
+          title: {
+            type: 'text',
           },
         },
       });

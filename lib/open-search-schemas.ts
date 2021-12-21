@@ -9,6 +9,9 @@ export const termsItemSchema = z.object({
   }),
   source_terminology: z.string(),
   uri: z.string().url(),
+  namedGraphUri: z.string().url(),
+  label: z.string().min(1),
+  suggest: z.array(z.string().min(1)).min(1),
 });
 
 export type TermItem = z.infer<typeof termsItemSchema>;
