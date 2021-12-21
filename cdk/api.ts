@@ -103,7 +103,8 @@ export default class Api extends Construct {
       },
       vpc,
     });
-    neptuneCluster.connections.allowDefaultPortFrom(searchAutocomplete);
+    openSearch.connections.allowFrom(getStatistics, ec2.Port.tcp(443));
+    openSearch.grantRead(getStatistics);
 
     const searchByKeywords = new Function(this, 'SearchByKeywords', {
       allowPublicSubnet: true,
