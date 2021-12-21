@@ -96,7 +96,7 @@ export default class Api extends Construct {
       runtime: Runtime.NODEJS_14_X,
       code: Code.fromAsset(path.join(lambdasPath, 'search-autocomplete')),
       description: 'Returns a subset of ontology terms that complete the given keyword.',
-      timeout: Duration.seconds(100),
+      timeout: Duration.seconds(30),
       environment: {
         OPEN_SEARCH_ENDPOINT: openSearchEndpoint,
         TERMS_INDEX_NAME: 'terms',
@@ -104,7 +104,7 @@ export default class Api extends Construct {
       vpc,
     });
     openSearch.connections.allowFrom(searchAutocomplete, ec2.Port.tcp(443));
-    openSearch.grantRead(searchAutocomplete);
+    openSearch.grantReadWrite(searchAutocomplete);
 
     const searchByKeywords = new Function(this, 'SearchByKeywords', {
       allowPublicSubnet: true,

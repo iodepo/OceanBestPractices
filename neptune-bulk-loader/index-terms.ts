@@ -39,7 +39,7 @@ const fetchTerms = async (params: FetchTermsParams): Promise<FetchedTerm[]> => {
 
   const query = `
 ${sparqlQuery}
-LIMIT 1000
+LIMIT 500
 OFFSET ${offset}`;
 
   const response = await got.post(
