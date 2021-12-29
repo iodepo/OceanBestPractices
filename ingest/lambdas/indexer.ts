@@ -16,7 +16,6 @@ import {
 } from '../../lib/dspace-item';
 import * as s3Utils from '../../lib/s3-utils';
 import { deleteMessage, receiveMessage, SqsMessage } from '../../lib/sqs-utils';
-import { zodTypeGuard } from '../../lib/zod-utils';
 
 const lastModifiedRegex = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/;
 
@@ -143,12 +142,6 @@ export const getTerms = async (
   };
 };
 
-const justUuidMessageSchema = z.object({
-  uuid: z.string().uuid(),
-});
-
-const isExplicitInvokeMessage = zodTypeGuard(justUuidMessageSchema);
-
 const createIndexes = (esUrl: string) => Promise.all([
   osClient.createDocumentsIndex(esUrl, 'documents'),
   osClient.createTermsIndex(esUrl, 'terms'),
@@ -238,37 +231,8 @@ const index = async (
   console.log(`INFO: Indexed document item ${documentItem.uuid}`);
 };
 
-const s3EventRecordToIngestRecord = (
-  record: s3Utils.S3EventRecord
-): IndexerRequest => {
-  const bitstreamTextBucket = record.s3.bucket.name;
-  const bitstreamTextKey = record.s3.object.key;
-  const [uuid] = bitstreamTextKey.split('.');
-
-  if (!uuid) {
-    throw new Error(`Ingest indexer event missing UUID ${JSON.stringify(record)}`);
-  }
-
-  return {
-    bitstreamTextBucket,
-    bitstreamTextKey,
-    uuid,
-  };
-};
-
-const parseSqsMessageBody = (body: string): IndexerRequest[] => {
-  const messageBody = JSON.parse(body);
-
-  if (isExplicitInvokeMessage(messageBody)) {
-    return [{ uuid: messageBody.uuid }];
-  }
-
-  if (s3Utils.isS3Event(messageBody)) {
-    return messageBody.Records.map((r) => s3EventRecordToIngestRecord(r));
-  }
-
-  throw new Error(`Unparsable message body: ${body}`);
-};
+const parseSqsMessageBody = (body: string): IndexerRequest =>
+  ingestRecordSchema.parse(JSON.parse(body));
 
 interface SqsMessageHandlerConfig {
   dspaceItemBucket: string,
@@ -280,13 +244,9 @@ const sqsMessageHandler = async (
   config: SqsMessageHandlerConfig,
   sqsMessage: SqsMessage
 ) => {
-  const ingestRecords = parseSqsMessageBody(sqsMessage.Body);
+  const ingestRecord = parseSqsMessageBody(sqsMessage.Body);
 
-  await pMap(
-    ingestRecords,
-    (record) => index(record, config.dspaceItemBucket, config.esUrl),
-    { concurrency: 1 }
-  );
+  await index(ingestRecord, config.dspaceItemBucket, config.esUrl);
 
   await deleteMessage(config.indexerQueueUrl, sqsMessage.ReceiptHandle);
 };

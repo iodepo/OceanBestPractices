@@ -2,10 +2,7 @@ import { Construct, Duration } from '@aws-cdk/core';
 import * as events from '@aws-cdk/aws-events';
 import * as eventTargets from '@aws-cdk/aws-events-targets';
 import { LambdaSubscription } from '@aws-cdk/aws-sns-subscriptions';
-import {
-  LambdaDestination,
-  SqsDestination,
-} from '@aws-cdk/aws-s3-notifications';
+import { LambdaDestination } from '@aws-cdk/aws-s3-notifications';
 import { Function, IFunction } from '@aws-cdk/aws-lambda';
 import { IDistribution } from '@aws-cdk/aws-cloudfront';
 import { IDomain } from '@aws-cdk/aws-opensearchservice';
@@ -92,18 +89,6 @@ export default class Ingest extends Construct {
     );
     // The "bitstreams downloader" lambda writes an object to the
     // "document source" bucket
-
-    // The "invoke extractor" lambda is triggered when an object is created in
-    // the "document source" bucket
-    buckets.documentSource.addObjectCreatedNotification(new LambdaDestination(
-      lambdas.invokeExtractor
-    ));
-
-    // The text extractor writes to S3. When an object is created put
-    // a message on the indexer queue.
-    buckets.textExtractorDestination.addObjectCreatedNotification(
-      new SqsDestination(sqsQueues.indexerQueue)
-    );
 
     // The bitstreams downloader should be able to put a message on the queue.
     // This happens if there we skip text extraction.

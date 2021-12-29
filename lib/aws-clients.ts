@@ -30,6 +30,7 @@ export const lambda = (options?: Lambda.Types.ClientConfiguration): Lambda => {
   const overrides = useLocalStack() ? defaultLocalstackOverrides() : {};
 
   return new Lambda({
+    region: 'us-east-1',
     ...overrides,
     ...options,
   });

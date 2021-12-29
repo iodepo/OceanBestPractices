@@ -1,18 +1,7 @@
 import { IDistribution } from '@aws-cdk/aws-cloudfront';
-import {
-  AnyPrincipal,
-  PolicyStatement,
-} from '@aws-cdk/aws-iam';
-import {
-  Bucket,
-  BucketAccessControl,
-  HttpMethods,
-} from '@aws-cdk/aws-s3';
-import {
-  Construct,
-  Duration,
-  RemovalPolicy,
-} from '@aws-cdk/core';
+import { AnyPrincipal, PolicyStatement } from '@aws-cdk/aws-iam';
+import { Bucket, BucketAccessControl, HttpMethods } from '@aws-cdk/aws-s3';
+import { Construct, Duration, RemovalPolicy } from '@aws-cdk/core';
 
 interface BucketsProps {
   stackName: string
@@ -23,8 +12,6 @@ export default class IngestBuckets extends Construct {
   public readonly documentMetadata: Bucket;
 
   public readonly documentSource: Bucket;
-
-  public readonly textExtractorDestination: Bucket;
 
   public readonly textExtractorTemp: Bucket;
 
@@ -67,13 +54,6 @@ export default class IngestBuckets extends Construct {
     this.textExtractorTemp = new Bucket(this, 'TextExtractorTemp', {
       bucketName: `${stackName}-doc-extracted-temp`,
       lifecycleRules: [{ expiration: Duration.days(5) }],
-      removalPolicy: RemovalPolicy.DESTROY,
-      autoDeleteObjects: true,
-    });
-
-    this.textExtractorDestination = new Bucket(this, 'TextExtractorDestination', {
-      bucketName: `${stackName}-doc-extracted`,
-      lifecycleRules: [{ expiration: Duration.days(15) }],
       removalPolicy: RemovalPolicy.DESTROY,
       autoDeleteObjects: true,
     });

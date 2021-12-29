@@ -30,8 +30,6 @@ export default class IngestLambdas extends Construct {
 
   public readonly indexer: Function;
 
-  public readonly invokeExtractor: Function;
-
   public readonly metadataDownloader: Function;
 
   public readonly feedIngester: Function;
@@ -73,7 +71,7 @@ export default class IngestLambdas extends Construct {
       vpc,
     });
     buckets.documentMetadata.grantRead(this.indexer);
-    buckets.textExtractorDestination.grantRead(this.indexer);
+    buckets.documentSource.grantRead(this.indexer);
     elasticsearchDomain.connections.allowFrom(this.indexer, Port.tcp(443));
     elasticsearchDomain.grantWrite(this.indexer);
 
@@ -89,25 +87,12 @@ export default class IngestLambdas extends Construct {
         DSPACE_ENDPOINT: dspaceEndpoint,
         DOCUMENT_BINARY_BUCKET: buckets.documentSource.bucketName,
         INDEXER_QUEUE_URL: sqsQueues.indexerQueue.queueUrl,
+        TEXTRACTOR_FUNCTION: textExtractorFunction.functionName,
+        TEXTRACTOR_TEMP_BUCKET: buckets.textExtractorTemp.bucketName,
       },
     });
     buckets.documentMetadata.grantRead(this.bitstreamsDownloader);
     buckets.documentSource.grantWrite(this.bitstreamsDownloader);
-
-    this.invokeExtractor = new Function(this, 'InvokeExtractor', {
-      functionName: `${stackName}-ingest-invoke-extractor`,
-      handler: 'lambda.handler',
-      runtime: Runtime.NODEJS_14_X,
-      code: Code.fromAsset(path.join(lambdasPath, 'invoke-extractor')),
-      description: 'Invokes the text extractor (3rd party library) functions for a given document UID',
-      timeout: Duration.seconds(20),
-      environment: {
-        TEXT_EXTRACTOR_FUNCTION_NAME: textExtractorFunction.functionName,
-        TEXT_EXTRACTOR_TEMP_BUCKET: buckets.textExtractorTemp.bucketName,
-        TEXT_EXTRACTOR_BUCKET: buckets.textExtractorDestination.bucketName,
-      },
-    });
-    textExtractorFunction.grantInvoke(this.invokeExtractor);
 
     this.metadataDownloader = new Function(this, 'MetadataDownloader', {
       functionName: `${stackName}-ingest-metadata-downloader`,
