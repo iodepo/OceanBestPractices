@@ -26,22 +26,21 @@ const invokeAsync = (lambda: Lambda) =>
       InvocationType: 'Event',
     }).promise().then(() => undefined);
 
+const buildClient = (lambda: Lambda): LambdaClient => ({
+  invoke: invoke(lambda),
+  invokeAsync: invokeAsync(lambda),
+});
+
 export const localStackLambdaClient = (): LambdaClient => {
   const lambda = new Lambda(localStackParams());
 
-  return {
-    invoke: invoke(lambda),
-    invokeAsync: invokeAsync(lambda),
-  };
+  return buildClient(lambda);
 };
 
 export const awsLambdaClient = (): LambdaClient => {
   const lambda = new Lambda();
 
-  return {
-    invoke: invoke(lambda),
-    invokeAsync: invokeAsync(lambda),
-  };
+  return buildClient(lambda);
 };
 
 export const nullLambdaClient = {
