@@ -16,5 +16,8 @@
   },
   "typescript.tsdk": "node_modules/typescript/lib",
   "eslint.format.enable": true,
-  "eslint.packageManager": "npm"
+  "eslint.packageManager": "npm",
+  "editor.rulers": [
+    90
+  ],
 }
