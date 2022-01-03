@@ -31,17 +31,9 @@ const buildClient = (lambda: Lambda): LambdaClient => ({
   invokeAsync: invokeAsync(lambda),
 });
 
-export const localStackLambdaClient = (): LambdaClient => {
-  const lambda = new Lambda(localStackParams());
+export const localStackLambdaClient = () => buildClient(new Lambda(localStackParams()));
 
-  return buildClient(lambda);
-};
-
-export const awsLambdaClient = (): LambdaClient => {
-  const lambda = new Lambda();
-
-  return buildClient(lambda);
-};
+export const awsLambdaClient = () => buildClient(new Lambda());
 
 export const nullLambdaClient = {
   invoke: () => Promise.resolve(''),
