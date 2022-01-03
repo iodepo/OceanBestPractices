@@ -30,8 +30,11 @@ const fakeInvokeSuccessLambda: LambdaClient = {
 };
 
 describe('bitstreams-downloader.main', () => {
-  let indexerQueue: { arn: string, url: string };
+  let context: MainContext;
   let config: MainContext['config'];
+  let event: unknown;
+  let indexerQueue: { arn: string, url: string };
+  let uuid: string;
 
   beforeAll(async () => {
     process.env['AWS_ACCESS_KEY_ID'] = 'test-key-id';
@@ -44,6 +47,8 @@ describe('bitstreams-downloader.main', () => {
   });
 
   beforeEach(async () => {
+    uuid = randomUUID();
+
     nock.cleanAll();
 
     indexerQueue = await sqsUtils.createSQSQueue(randomId('queue'));
@@ -55,6 +60,8 @@ describe('bitstreams-downloader.main', () => {
       textractorFunction: 'SET-ME',
       textractorTempBucket: buckets.textractorTemp,
     };
+
+    event = s3EventFactory(buckets.dspaceItems, `${uuid}.json`);
   });
 
   afterEach(async () => {
@@ -69,124 +76,132 @@ describe('bitstreams-downloader.main', () => {
     nock.enableNetConnect();
   });
 
-  it('copies the PDF from dspace to S3', async () => {
-    const uuid = randomUUID();
+  describe('with a PDF', () => {
+    beforeEach(async () => {
+      nock('https://dspace.local')
+        .get('/rest/abc/bitstreams/pdf')
+        .reply(200, 'Mock bitstream.');
 
-    nock('https://dspace.local')
-      .get('/rest/abc/bitstreams/pdf')
-      .reply(200, 'Mock bitstream.');
-
-    await s3Utils.putJson(
-      new s3Utils.S3ObjectLocation(buckets.dspaceItems, `${uuid}.json`),
-      {
-        uuid,
-        handle: 'handle/abc',
-        lastModified: '2021-11-15 11:30:57.109',
-        metadata: [],
-        bitstreams: [
-          {
-            bundleName: 'ORIGINAL',
-            mimeType: 'application/pdf',
-            retrieveLink: '/rest/abc/bitstreams/pdf',
-            checkSum: {
-              value: 'abc',
+      await s3Utils.putJson(
+        new s3Utils.S3ObjectLocation(buckets.dspaceItems, `${uuid}.json`),
+        {
+          uuid,
+          handle: 'handle/abc',
+          lastModified: '2021-11-15 11:30:57.109',
+          metadata: [],
+          bitstreams: [
+            {
+              bundleName: 'ORIGINAL',
+              mimeType: 'application/pdf',
+              retrieveLink: '/rest/abc/bitstreams/pdf',
+              checkSum: {
+                value: 'abc',
+              },
             },
-          },
-        ],
-      }
-    );
+          ],
+        }
+      );
 
-    const event = s3EventFactory(buckets.dspaceItems, `${uuid}.json`);
+      context = {
+        config,
+        lambda: fakeInvokeSuccessLambda,
+      };
+    });
 
-    const context = {
-      config,
-      lambda: fakeInvokeSuccessLambda,
-    };
+    it('copies the PDF from dspace to S3', async () => {
+      await main(event, context);
 
-    await main(event, context);
+      const pdfObjectBody = await s3Utils.getObjectText(
+        new s3Utils.S3ObjectLocation(buckets.bitstreams, `pdf/${uuid}.pdf`)
+      );
 
-    const pdfObjectBody = await s3Utils.getObjectText(
-      new s3Utils.S3ObjectLocation(buckets.bitstreams, `pdf/${uuid}.pdf`)
-    );
+      expect(pdfObjectBody).toEqual('Mock bitstream.');
+    });
 
-    expect(pdfObjectBody).toEqual('Mock bitstream.');
-  });
+    it('invokes the textractor function', async () => {
+      const mockInvoke = jest.fn(
+        async (name, payload) => {
+          expect(name).toBe(config.textractorFunction);
 
-  it('writes to the indexer queue if there is a bitstream PDF', async () => {
-    const uuid = randomUUID();
+          if (payload === undefined) fail('payload is undefined');
 
-    nock('https://dspace.local')
-      .get('/rest/abc/bitstreams/pdf')
-      .reply(200, 'Mock bitstream.');
+          expect(JSON.parse(payload)).toEqual({
+            document_uri: `s3://${config.documentsBucket}/pdf/${uuid}.pdf`,
+            temp_uri_prefix: `s3://${config.textractorTempBucket}/`,
+            text_uri: `s3://${config.documentsBucket}/txt/${uuid}.txt`,
+          });
 
-    await s3Utils.putJson(
-      new s3Utils.S3ObjectLocation(buckets.dspaceItems, `${uuid}.json`),
-      {
+          return JSON.stringify(fakeTextractorSuccessResponse);
+        }
+      ) as jest.MockedFunction<LambdaClient['invoke']>;
+
+      context.lambda = {
+        ...nullLambdaClient,
+        invoke: mockInvoke,
+      };
+
+      await main(event, context);
+
+      expect(mockInvoke.mock.calls.length).toBe(1);
+    });
+
+    it('writes to the indexer queue', async () => {
+      await main(event, context);
+
+      const [message] = await sqsUtils.waitForMessages(indexerQueue.url, 1);
+
+      const body = JSON.parse(message?.Body || '{}');
+
+      expect(body).toEqual({
         uuid,
-        handle: 'handle/abc',
-        lastModified: '2021-11-15 11:30:57.109',
-        metadata: [],
-        bitstreams: [
-          {
-            bundleName: 'ORIGINAL',
-            mimeType: 'application/pdf',
-            retrieveLink: '/rest/abc/bitstreams/pdf',
-            checkSum: {
-              value: 'abc',
-            },
-          },
-        ],
-      }
-    );
-
-    const event = s3EventFactory(buckets.dspaceItems, `${uuid}.json`);
-
-    const context = {
-      config,
-      lambda: fakeInvokeSuccessLambda,
-    };
-
-    await main(event, context);
-
-    const [message] = await sqsUtils.waitForMessages(indexerQueue.url, 1);
-
-    const body = JSON.parse(message?.Body || '{}');
-
-    expect(body).toEqual({
-      uuid,
-      bitstreamTextBucket: config.documentsBucket,
-      bitstreamTextKey: `txt/${uuid}.txt`,
+        bitstreamTextBucket: config.documentsBucket,
+        bitstreamTextKey: `txt/${uuid}.txt`,
+      });
     });
   });
 
-  it('writes to the indexer queue if there is no bitstream PDF', async () => {
-    const uuid = randomUUID();
+  describe('without a PDF', () => {
+    beforeEach(async () => {
+      await s3Utils.putJson(
+        new s3Utils.S3ObjectLocation(buckets.dspaceItems, `${uuid}.json`),
+        {
+          uuid,
+          handle: 'handle/abc',
+          lastModified: '2021-11-15 11:30:57.109',
+          metadata: [],
+          bitstreams: [],
+        }
+      );
 
-    await s3Utils.putJson(
-      new s3Utils.S3ObjectLocation(buckets.dspaceItems, `${uuid}.json`),
-      {
-        uuid,
-        handle: 'handle/abc',
-        lastModified: '2021-11-15 11:30:57.109',
-        metadata: [],
-        bitstreams: [],
-      }
-    );
+      context = {
+        config,
+        lambda: nullLambdaClient,
+      };
+    });
 
-    const event = s3EventFactory(buckets.dspaceItems, `${uuid}.json`);
+    it('does not invoke the textractor function', async () => {
+      const mockInvoke = jest.fn(
+        async (_name, _payload) => JSON.stringify(fakeTextractorSuccessResponse)
+      ) as jest.MockedFunction<LambdaClient['invoke']>;
 
-    const context = {
-      config,
-      lambda: nullLambdaClient,
-    };
+      context.lambda = {
+        ...nullLambdaClient,
+        invoke: mockInvoke,
+      };
 
-    await main(event, context);
+      await main(event, context);
 
-    const [message] = await sqsUtils.waitForMessages(indexerQueue.url, 1);
+      expect(mockInvoke.mock.calls.length).toBe(0);
+    });
 
-    const body = JSON.parse(message?.Body || '{}');
-    expect(body).toEqual({
-      uuid,
+    it('writes to the indexer queue', async () => {
+      await main(event, context);
+
+      const [message] = await sqsUtils.waitForMessages(indexerQueue.url, 1);
+
+      const body = JSON.parse(message?.Body || '{}');
+
+      expect(body).toEqual({ uuid });
     });
   });
 });
