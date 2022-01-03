@@ -84,11 +84,11 @@ export default class IngestLambdas extends Construct {
       timeout: Duration.minutes(5),
       memorySize: 1024,
       environment: {
-        DSPACE_ENDPOINT: dspaceEndpoint,
-        DOCUMENT_BINARY_BUCKET: buckets.documentSource.bucketName,
-        INDEXER_QUEUE_URL: sqsQueues.indexerQueue.queueUrl,
-        TEXTRACTOR_FUNCTION: textExtractorFunction.functionName,
-        TEXTRACTOR_TEMP_BUCKET: buckets.textExtractorTemp.bucketName,
+        documentsBucket: buckets.documentSource.bucketName,
+        dspaceUrl: dspaceEndpoint,
+        indexerQueueUrl: sqsQueues.indexerQueue.queueUrl,
+        textractorFunction: textExtractorFunction.functionName,
+        textractorTempBucket: buckets.textExtractorTemp.bucketName,
       },
     });
     buckets.documentMetadata.grantRead(this.bitstreamsDownloader);

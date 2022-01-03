@@ -1,3 +1,4 @@
+import { z } from 'zod';
 import pMap from 'p-map';
 import got from 'got/dist/source';
 import {
@@ -7,17 +8,33 @@ import {
   uploadStream,
 } from '../../lib/s3-utils';
 import { dspaceItemSchema } from '../../lib/dspace-schemas';
-import { getStringFromEnv } from '../../lib/env-utils';
 import { findPDFBitstreamItem } from '../../lib/dspace-item';
 import { sendMessage } from '../../lib/sqs-utils';
 import * as pdfParser from '../../lib/pdf-parser';
+import { awsLambdaClient, LambdaClient } from '../../lib/lambda-client';
 
-export const handler = async (event: unknown) => {
-  const dspaceEndpoint = getStringFromEnv('DSPACE_ENDPOINT');
-  const documentsBucket = getStringFromEnv('DOCUMENT_BINARY_BUCKET');
-  const indexerQueueUrl = getStringFromEnv('INDEXER_QUEUE_URL');
-  const textractorFunction = getStringFromEnv('TEXTRACTOR_FUNCTION');
-  const textractorTempBucket = getStringFromEnv('TEXTRACTOR_TEMP_BUCKET');
+export interface MainContext {
+  config: {
+    documentsBucket: string;
+    dspaceUrl: string;
+    indexerQueueUrl: string;
+    textractorFunction: string;
+    textractorTempBucket: string;
+  },
+  lambda: LambdaClient;
+}
+
+export const main = async (event: unknown, context: MainContext) => {
+  const {
+    config: {
+      documentsBucket,
+      dspaceUrl,
+      indexerQueueUrl,
+      textractorFunction,
+      textractorTempBucket,
+    },
+    lambda,
+  } = context;
 
   const s3Event = s3EventSchema.parse(event);
 
@@ -46,7 +63,7 @@ export const handler = async (event: unknown) => {
           await uploadStream(
             documentsBucket,
             pdfKey,
-            got.stream(`${dspaceEndpoint}${pdfBitstreamItem.retrieveLink}`)
+            got.stream(`${dspaceUrl}${pdfBitstreamItem.retrieveLink}`)
           );
 
           console.log(`INFO: Uploaded PDF for DSpace item ${uuid}`);
@@ -58,6 +75,7 @@ export const handler = async (event: unknown) => {
             destination: `s3://${documentsBucket}/${txtKey}`,
             tempBucket: textractorTempBucket,
             textractorFunction,
+            lambda,
           });
 
           await sendMessage(
@@ -69,7 +87,7 @@ export const handler = async (event: unknown) => {
             })
           );
         } else {
-          // No PDF so just invoke the indexer.
+          // No PDF
           console.log(`INFO: DSpace item ${uuid} has no PDF. Skipping upload and queuing it for indexing.`);
 
           // Write to SQS.
@@ -85,4 +103,22 @@ export const handler = async (event: unknown) => {
     },
     { concurrency: 1 }
   );
+};
+
+const loadConfigFromEnv = (env: NodeJS.ProcessEnv) =>
+  z.object({
+    documentsBucket: z.string().min(1),
+    dspaceUrl: z.string().url(),
+    indexerQueueUrl: z.string().url(),
+    textractorFunction: z.string().min(1),
+    textractorTempBucket: z.string().min(1),
+  }).parse(env);
+
+export const handler = async (event: unknown) => {
+  const context: MainContext = {
+    config: loadConfigFromEnv(process.env),
+    lambda: awsLambdaClient(),
+  };
+
+  await main(event, context);
 };

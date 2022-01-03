@@ -1,78 +1,83 @@
-import cryptoRandomString from 'crypto-random-string';
 import { randomUUID } from 'crypto';
 import nock from 'nock';
-import { handler } from './bitstreams-downloader';
+import { values } from 'lodash';
+import { main, MainContext } from './bitstreams-downloader';
 import * as s3Utils from '../../lib/s3-utils';
 import * as sqsUtils from '../../lib/sqs-utils';
+import { s3EventFactory } from '../../lib/test-utils';
+import { randomId } from '../../lib/string-utils';
+import { TextractorSuccessResponse } from '../../lib/pdf-parser';
+import { LambdaClient, nullLambdaClient } from '../../lib/lambda-client';
 
-const dspaceItemBucket = `bucket-${cryptoRandomString({ length: 6 })}`;
-const bitstreamSourceBucket = `bucket-${cryptoRandomString({ length: 6 })}`;
-let indexerQueue: { arn: string, url: string };
+const buckets = {
+  bitstreams: randomId('bucket'),
+  dspaceItems: randomId('bucket'),
+  textractorTemp: randomId('bucket'),
+};
 
-const s3EventFactory = (bucket: string, key: string) => ({
-  Records: [
-    {
-      s3: {
-        bucket: {
-          name: bucket,
-        },
-        object: {
-          key,
-        },
-      },
+const fakeTextractorSuccessResponse: TextractorSuccessResponse = {
+  text_uri: 's3://some-bucket/txt/some-uuid.txt',
+  results: {
+    textractor: {
+      success: true,
     },
-  ],
-});
+  },
+};
 
-describe('bitstreams-downloader.handler', () => {
-  let awsAccessKeyIdBefore: string | undefined;
-  let awsSecretAccessKey: string | undefined;
+const fakeInvokeSuccessLambda: LambdaClient = {
+  ...nullLambdaClient,
+  invoke: () => Promise.resolve(JSON.stringify(fakeTextractorSuccessResponse)),
+};
+
+describe('bitstreams-downloader.main', () => {
+  let indexerQueue: { arn: string, url: string };
+  let config: MainContext['config'];
 
   beforeAll(async () => {
-    awsAccessKeyIdBefore = process.env['AWS_ACCESS_KEY_ID'];
     process.env['AWS_ACCESS_KEY_ID'] = 'test-key-id';
-
-    awsSecretAccessKey = process.env['AWS_SECRET_ACCESS_KEY'];
     process.env['AWS_SECRET_ACCESS_KEY'] = 'test-access-key';
 
     nock.disableNetConnect();
     nock.enableNetConnect('localhost');
 
-    await s3Utils.createBucket(dspaceItemBucket);
-    await s3Utils.createBucket(bitstreamSourceBucket);
-
-    const indexerQueueName = `queue-${cryptoRandomString({ length: 6 })}`;
-    indexerQueue = await sqsUtils.createSQSQueue(indexerQueueName);
+    await Promise.all(values(buckets).map((b) => s3Utils.createBucket(b)));
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     nock.cleanAll();
 
-    process.env['DSPACE_ENDPOINT'] = 'https://dspace.test.com';
-    process.env['DOCUMENT_BINARY_BUCKET'] = bitstreamSourceBucket;
-    process.env['INDEXER_QUEUE_URL'] = indexerQueue.url;
+    indexerQueue = await sqsUtils.createSQSQueue(randomId('queue'));
+
+    config = {
+      documentsBucket: buckets.bitstreams,
+      dspaceUrl: 'https://dspace.local',
+      indexerQueueUrl: indexerQueue.url,
+      textractorFunction: 'SET-ME',
+      textractorTempBucket: buckets.textractorTemp,
+    };
+  });
+
+  afterEach(async () => {
+    await sqsUtils.deleteSqsQueue(indexerQueue.url);
   });
 
   afterAll(async () => {
-    await s3Utils.deleteBucket(dspaceItemBucket, true);
-    await s3Utils.deleteBucket(bitstreamSourceBucket, true);
-    await sqsUtils.deleteSqsQueue(indexerQueue.url);
+    await Promise.all(
+      values(buckets).map((b) => s3Utils.deleteBucket(b, true))
+    );
 
     nock.enableNetConnect();
-
-    process.env['AWS_ACCESS_KEY_ID'] = awsAccessKeyIdBefore;
-    process.env['AWS_SECRET_ACCESS_KEY'] = awsSecretAccessKey;
   });
 
-  test('should upload the PDF bitstream from a DSpace item to S3', async () => {
+  it('copies the PDF from dspace to S3', async () => {
     const uuid = randomUUID();
 
-    nock('https://dspace.test.com')
+    nock('https://dspace.local')
       .get('/rest/abc/bitstreams/pdf')
       .reply(200, 'Mock bitstream.');
 
     await s3Utils.putJson(
-      new s3Utils.S3ObjectLocation(dspaceItemBucket, `${uuid}.json`),
+      new s3Utils.S3ObjectLocation(buckets.dspaceItems, `${uuid}.json`),
       {
         uuid,
         handle: 'handle/abc',
@@ -87,34 +92,35 @@ describe('bitstreams-downloader.handler', () => {
               value: 'abc',
             },
           },
-          {
-            bundleName: 'ORIGINAL',
-            mimeType: 'image/jpg',
-            retrieveLink: '/rest/abc/bitstreams/jpg',
-            checkSum: {
-              value: 'abc',
-            },
-          },
         ],
       }
     );
 
-    const event = s3EventFactory(dspaceItemBucket, `${uuid}.json`);
+    const event = s3EventFactory(buckets.dspaceItems, `${uuid}.json`);
 
-    await handler(event);
+    const context = {
+      config,
+      lambda: fakeInvokeSuccessLambda,
+    };
 
-    const result = await s3Utils.getObjectText(
-      new s3Utils.S3ObjectLocation(bitstreamSourceBucket, `${uuid}.pdf`)
+    await main(event, context);
+
+    const pdfObjectBody = await s3Utils.getObjectText(
+      new s3Utils.S3ObjectLocation(buckets.bitstreams, `pdf/${uuid}.pdf`)
     );
 
-    expect(result).toEqual('Mock bitstream.');
+    expect(pdfObjectBody).toEqual('Mock bitstream.');
   });
 
-  test('should directly invoke indexer function if there is no bitstream PDF', async () => {
+  it('writes to the indexer queue if there is a bitstream PDF', async () => {
     const uuid = randomUUID();
 
+    nock('https://dspace.local')
+      .get('/rest/abc/bitstreams/pdf')
+      .reply(200, 'Mock bitstream.');
+
     await s3Utils.putJson(
-      new s3Utils.S3ObjectLocation(dspaceItemBucket, `${uuid}.json`),
+      new s3Utils.S3ObjectLocation(buckets.dspaceItems, `${uuid}.json`),
       {
         uuid,
         handle: 'handle/abc',
@@ -123,8 +129,8 @@ describe('bitstreams-downloader.handler', () => {
         bitstreams: [
           {
             bundleName: 'ORIGINAL',
-            mimeType: 'image/jpg',
-            retrieveLink: '/rest/abc/bitstreams/jpg',
+            mimeType: 'application/pdf',
+            retrieveLink: '/rest/abc/bitstreams/pdf',
             checkSum: {
               value: 'abc',
             },
@@ -133,14 +139,50 @@ describe('bitstreams-downloader.handler', () => {
       }
     );
 
-    const event = s3EventFactory(dspaceItemBucket, `${uuid}.json`);
+    const event = s3EventFactory(buckets.dspaceItems, `${uuid}.json`);
 
-    await handler(event);
+    const context = {
+      config,
+      lambda: fakeInvokeSuccessLambda,
+    };
 
-    const [message] = await sqsUtils.waitForMessages(
-      indexerQueue.url,
-      1
+    await main(event, context);
+
+    const [message] = await sqsUtils.waitForMessages(indexerQueue.url, 1);
+
+    const body = JSON.parse(message?.Body || '{}');
+
+    expect(body).toEqual({
+      uuid,
+      bitstreamTextBucket: config.documentsBucket,
+      bitstreamTextKey: `txt/${uuid}.txt`,
+    });
+  });
+
+  it('writes to the indexer queue if there is no bitstream PDF', async () => {
+    const uuid = randomUUID();
+
+    await s3Utils.putJson(
+      new s3Utils.S3ObjectLocation(buckets.dspaceItems, `${uuid}.json`),
+      {
+        uuid,
+        handle: 'handle/abc',
+        lastModified: '2021-11-15 11:30:57.109',
+        metadata: [],
+        bitstreams: [],
+      }
     );
+
+    const event = s3EventFactory(buckets.dspaceItems, `${uuid}.json`);
+
+    const context = {
+      config,
+      lambda: nullLambdaClient,
+    };
+
+    await main(event, context);
+
+    const [message] = await sqsUtils.waitForMessages(indexerQueue.url, 1);
 
     const body = JSON.parse(message?.Body || '{}');
     expect(body).toEqual({

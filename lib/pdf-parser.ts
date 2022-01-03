@@ -1,17 +1,19 @@
 import { z } from 'zod';
+import { LambdaClient } from './lambda-client';
 import { zodTypeGuard } from './zod-utils';
-import { lambda } from './aws-clients';
 
-const invocationResponseSchema = z.object({ Payload: z.string() });
-
-const isSuccessResponse = zodTypeGuard(z.object({
+const textractorSuccessResponseSchema = z.object({
   text_uri: z.string().url(),
   results: z.object({
     textractor: z.object({
       success: z.literal(true),
     }),
   }),
-}));
+});
+
+export type TextractorSuccessResponse = z.infer<typeof textractorSuccessResponseSchema>;
+
+const isSuccessResponse = zodTypeGuard(textractorSuccessResponseSchema);
 
 const isErrorResponse = zodTypeGuard(
   z.object({
@@ -34,28 +36,22 @@ interface ParseObjectParams {
   source: string,
   destination: string,
   tempBucket: string,
-  textractorFunction: string
+  textractorFunction: string,
+  lambda: LambdaClient
 }
 
 /**
  * Using the textractor lambda function, extract the text from a PDF. The text
- * will be written to the specified destination object.
+ * will be written to the specified destination S3 location.
  */
-export const parseObject = async (
-  params: ParseObjectParams
-): Promise<void> => {
+export const parseObject = (params: ParseObjectParams): Promise<void> => {
   const payload = JSON.stringify({
     document_uri: params.source,
     temp_uri_prefix: `s3://${params.tempBucket}/`,
     text_uri: params.destination,
   });
 
-  const rawInvokeResponse: unknown = await lambda().invoke({
-    FunctionName: params.textractorFunction,
-    Payload: JSON.stringify(payload),
-  }).promise();
-
-  const invokeResponse = invocationResponseSchema.parse(rawInvokeResponse);
-
-  validateTextractorResponse(invokeResponse.Payload);
+  return params.lambda.invoke(params.textractorFunction, payload)
+    .then(JSON.parse)
+    .then(validateTextractorResponse);
 };
