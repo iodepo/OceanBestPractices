@@ -5,9 +5,9 @@ import { getBoolFromEnv, getStringFromEnv } from '../lib/env-utils';
 import { loadMetadata } from './metadata';
 import { indexTerms } from './index-terms';
 import { loadStopwords } from './stopwords';
-import { lambda } from '../lib/aws-clients';
+import { awsLambdaClient, LambdaClient } from '../lib/lambda-client';
 
-export const neptuneBulkLoader = async (): Promise<void> => {
+export const main = async (lambda: LambdaClient): Promise<void> => {
   const iamRoleArn = getStringFromEnv('IAM_ROLE_ARN');
   const insecureHttps = getBoolFromEnv('INSECURE_HTTPS', false);
   const metadataUrl = getStringFromEnv('S3_TRIGGER_OBJECT');
@@ -90,16 +90,13 @@ export const neptuneBulkLoader = async (): Promise<void> => {
   console.log('Finished indexTerms');
 
   console.log('Invoking bulk ingester function');
-  await lambda().invoke({
-    FunctionName: bulkIngesterFunctionName,
-    InvocationType: 'Event',
-  }).promise();
+  await lambda.invokeAsync(bulkIngesterFunctionName);
   console.log('Finished invoking bulk ingester function');
 };
 
 if (require.main === module) {
   console.time('Total');
-  neptuneBulkLoader()
+  main(awsLambdaClient())
     .then(() => console.timeEnd('Total'))
     .catch((error) => {
       console.log(error);

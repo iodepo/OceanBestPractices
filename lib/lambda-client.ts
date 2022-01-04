@@ -1,31 +1,41 @@
-import { LambdaClient, InvokeCommand } from '@aws-sdk/client-lambda';
-import { TextEncoder } from 'util';
+import { Lambda } from 'aws-sdk';
+import { localStackParams } from './aws-clients';
 
-/**
- * Invokes another Lambda function.
- *
- * @param functionName - Name of the function to invoke.
- * @param invocationType - See
- * https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-lambda/modules/invocationrequest.html#invocationtype
- * @param payload - The JSON that you want to provide
- * to your Lambda function as input.
- * @param region - AWS Region for the function.
- */
-export const invoke = async (
-  functionName: string,
-  invocationType: 'Event' | 'RequestResponse' | 'DryRun',
-  payload: unknown,
-  region = 'us-east-1'
-): Promise<void> => {
-  const lambdaClient = new LambdaClient({ region });
-  const encodedPayload = new TextEncoder().encode(
-    JSON.stringify(payload)
-  );
-  const invokeCommand = new InvokeCommand({
-    FunctionName: functionName,
-    InvocationType: invocationType,
-    Payload: encodedPayload,
-  });
+export interface LambdaClient {
+  invoke(name: string, payload?: string): Promise<string>
+  invokeAsync(name: string, payload?: string): Promise<void>
+}
 
-  await lambdaClient.send(invokeCommand);
+const invoke = (lambda: Lambda) =>
+  async (name: string, payload?: string): Promise<string> => {
+    const response = await lambda.invoke({
+      FunctionName: name,
+      Payload: payload,
+    }).promise();
+
+    if (typeof response.Payload === 'string') return response.Payload;
+
+    throw new Error(`Unexpected lambda invocation response payload: ${response.Payload}`);
+  };
+
+const invokeAsync = (lambda: Lambda) =>
+  (name: string, payload?: string): Promise<void> =>
+    lambda.invoke({
+      FunctionName: name,
+      Payload: payload,
+      InvocationType: 'Event',
+    }).promise().then(() => undefined);
+
+const buildClient = (lambda: Lambda): LambdaClient => ({
+  invoke: invoke(lambda),
+  invokeAsync: invokeAsync(lambda),
+});
+
+export const localStackLambdaClient = () => buildClient(new Lambda(localStackParams()));
+
+export const awsLambdaClient = () => buildClient(new Lambda());
+
+export const nullLambdaClient = {
+  invoke: () => Promise.resolve(''),
+  invokeAsync: () => Promise.resolve(),
 };

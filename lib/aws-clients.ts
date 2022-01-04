@@ -1,9 +1,4 @@
-import {
-  Lambda,
-  S3,
-  SNS,
-  SQS,
-} from 'aws-sdk';
+import { S3, SNS, SQS } from 'aws-sdk';
 import { getStringFromEnv } from './env-utils';
 
 const localStackEndpointEnvVar = 'LOCAL_STACK_ENDPOINT';
@@ -12,7 +7,7 @@ const localStackEndpoint = (): string =>
   getStringFromEnv(localStackEndpointEnvVar, true)
     || 'http://localhost:4566';
 
-const defaultLocalstackOverrides = () => ({
+export const localStackParams = () => ({
   credentials: {
     accessKeyId: 'accessKeyId',
     secretAccessKey: 'secretAccessKey',
@@ -26,18 +21,9 @@ const useLocalStack = (): boolean => {
   return process.env['NODE_ENV'] === 'test';
 };
 
-export const lambda = (options?: Lambda.Types.ClientConfiguration): Lambda => {
-  const overrides = useLocalStack() ? defaultLocalstackOverrides() : {};
-
-  return new Lambda({
-    ...overrides,
-    ...options,
-  });
-};
-
 export const s3 = (options?: S3.Types.ClientConfiguration): S3 => {
   const localStackOverrides = {
-    ...defaultLocalstackOverrides(),
+    ...localStackParams(),
     s3ForcePathStyle: true,
   };
 
@@ -50,7 +36,7 @@ export const s3 = (options?: S3.Types.ClientConfiguration): S3 => {
 };
 
 export const sns = (options?: SNS.Types.ClientConfiguration): SNS => {
-  const overrides = useLocalStack() ? defaultLocalstackOverrides() : {};
+  const overrides = useLocalStack() ? localStackParams() : {};
 
   return new SNS({
     ...overrides,
@@ -59,7 +45,7 @@ export const sns = (options?: SNS.Types.ClientConfiguration): SNS => {
 };
 
 export const sqs = (options?: SQS.Types.ClientConfiguration): SQS => {
-  const overrides = useLocalStack() ? defaultLocalstackOverrides() : {};
+  const overrides = useLocalStack() ? localStackParams() : {};
 
   return new SQS({
     ...overrides,

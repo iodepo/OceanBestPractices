@@ -35,7 +35,7 @@ const config = {
     'max-len': [
       'error',
       {
-        code: 80,
+        code: 90,
         tabWidth: 2,
         ignorePattern: '(test\\(|https?://|@typedef)',
         ignoreTemplateLiterals: true,
