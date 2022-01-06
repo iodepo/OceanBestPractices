@@ -1,17 +1,14 @@
-# Deployment
+# Deployments
 
-## Prerequisites
+## Text Extractor
 
-### Text Extractor
+Please refer to the [ingest README](./ingest/README.md), [TextExtractor repo](https://github.com/Element84/lambda-text-extractor) and [apex](https://apex.run/) for instrucitons on how to deploy the text extractor.
 
-`aws cloudformation deploy --template-file text-extractor-permissions.yml --stack-name obp-text-extractor-permissions-{ENVIRONMENT} --parameter-overrides Environment={ENVIRONMENT}  --capabilities CAPABILITY_NAMED_IAM --profile {AWS_PROFILE}`
+Environments can share a single text extractor deployment. If there is already one deployed in the AWS account it's easier to use that than it is to deploy a new instance.
 
-Please refer to the [oop-indexer README](./ingest/README.md), [TextExtractor repo](https://github.com/Element84/lambda-text-extractor) and [apex](https://apex.run/) for installation of textextractor.
+## Website Settings
 
-### Virtuoso Instance
-
-Refer to the instructions in [Virtuoso.md](./docs/Virtuoso.md).
-
+Environment variables for the website should be set in a `.env` file before deploying an environment. Copy the contents of [./website/dot_env_example](dot_env_example) into a new file in the same directory named `.env`. Set the values to the appropriate values depending on the target environment.
 ## Deployment Steps
 
 The Ocean Best Practices application is deployed using [AWS CDK](https://docs.aws.amazon.com/cdk/latest/guide/getting_started.html). There are currently three environments configured: `Development`, `Staging`, and `Production`.
@@ -23,19 +20,19 @@ npm install
 npm run build
 ```
 
-Deploy development environment
+**Deploy the Development Environment**
 
 ```sh
 npm run cdk:dev:deploy
 ```
 
-Deploy staging environment
+**Deploy the Staging Environment**
 
 ```sh
 npm run cdk:staging:deploy
 ```
 
-Deploy production environment
+**Deploy the Production Environment**
 
 ```sh
 npm run cdk:prod:deploy

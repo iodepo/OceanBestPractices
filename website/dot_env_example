@@ -1,17 +1,16 @@
-//this is an example of the environment file for Node.js
-//please copy this file, adapt to your needs and rename to '.env'
+// This is an example of the environment file for Node.js.
+// Please copy this file and rename it to '.env'.
 
-//to run on localhost
+// To run on localhost:
 REACT_APP_API_ENDPOINT=http://localhost/
 
-//to run on AWS
-//you can find the url via https://console.aws.amazon.com/apigateway/home and select the correct stage to deploy
-//REACT_APP_API_ENDPOINT=https://13zqmuuwz6.execute-api.us-east-1.amazonaws.com/iode
-
+// To run on AWS:
+// You can find the url via https://console.aws.amazon.com/apigateway/home and select the correct stage to deploy.
+// REACT_APP_API_ENDPOINT=https://13zqmuuwz6.execute-api.us-east-1.amazonaws.com/iode
 
 REACT_APP_RECAPTCHA_SITE_KEY=6LfvzogUAAAAALqLwHJfLFkmaJ-0uu-OEetEHGYO
-
 SKIP_PREFLIGHT_CHECK=true
 
-// document bucket stack name
+// Document bucket stack name. This value should be the name of the bucket that holds
+// the source (e.g. PDF) DSpace Item bitstream file.
 REACT_APP_STACK_NAME=env-doc-bucket-name
