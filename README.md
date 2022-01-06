@@ -1,6 +1,6 @@
 # OceanBestPractices
 
-Repository to store the OpenSource version of the code made for OceanBestPractices.org by [Element84](https://www.element84.com).
+Repository to store the OpenSource version of the code made for search.oceanbestpractices.org by [Element84](https://www.element84.com).
 
 If you wish to reuse this code:
 
@@ -9,7 +9,8 @@ If you wish to reuse this code:
 
 Documentation on each module can be found in the following READMEs:
 
-* [DEPLOYMENTS.md](./DEPLOYMENTS.md)
+* [Tests](./TESTS.md)
+* [Deployments](./DEPLOYMENTS.md)
 * [docs/Virtuoso.md](./docs/Virtuoso.md)
 * [ingest/README.md](./ingest/README.md)
 * [website/README.md](./website/README.md)
