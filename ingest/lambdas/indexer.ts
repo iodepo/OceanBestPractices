@@ -13,27 +13,10 @@ import { documentItemSchema } from '../../lib/open-search-schemas';
 import {
   findMetadataItems,
   findThumbnailBitstreamItem,
+  normalizeLastModified,
 } from '../../lib/dspace-item';
 import * as s3Utils from '../../lib/s3-utils';
 import { deleteMessage, receiveMessage, SqsMessage } from '../../lib/sqs-utils';
-
-const lastModifiedRegex = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/;
-
-/**
- * There are cases where DSpace is giving us an invalid timestamp string. The
- * milliseconds field should be three digits, but some DSpace values only
- * contain one milliseconds digit. For example: `2021-08-24 17:36:38.7`
- *
- * Because that value can't be trusted, we are setting all values to have a ms
- * of `000`.
- */
-const normalizeLastModified = (x: string): string => {
-  const match = x.match(lastModifiedRegex);
-
-  if (match === null) throw new TypeError(`Invalid lastModified: ${x}`);
-
-  return `${match[0]}.000`;
-};
 
 export const getDSpaceItemFields = async (
   dspaceItemBucket: string,

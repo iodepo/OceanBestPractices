@@ -73,6 +73,12 @@ export default class Ingest extends Construct {
       schedule: events.Schedule.rate(Duration.minutes(1)),
       targets: [new eventTargets.LambdaFunction(lambdas.indexer)],
     });
+
+    // Invoke the index rectifier every 2 days to check for updates.
+    new events.Rule(this, 'IndexRectifierRule', {
+      schedule: events.Schedule.rate(Duration.days(2)),
+      targets: [new eventTargets.LambdaFunction(lambdas.indexRectifier)],
+    });
     // Writes events to the "available document" topic
 
     // "metadata downloader" lambda is triggered by the

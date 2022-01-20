@@ -5,7 +5,10 @@ import { z } from 'zod';
 import * as dspaceClient from '../../lib/dspace-client';
 import { DSpaceItem } from '../../lib/dspace-schemas';
 import * as osClient from '../../lib/open-search-client';
-import { findPDFBitstreamItem } from '../../lib/dspace-item';
+import {
+  findPDFBitstreamItem,
+  normalizeLastModified,
+} from '../../lib/dspace-item';
 import {
   DocumentItem,
   documentItemSchema,
@@ -90,7 +93,9 @@ export const isUpdated = (
   dspaceItem: IsUpdatedDSpaceItem
 ): boolean => {
   const esLastModified = new Date(documentItem._source.lastModified);
-  const dspaceLastModified = new Date(dspaceItem.lastModified);
+  const dspaceLastModified = new Date(
+    normalizeLastModified(dspaceItem.lastModified)
+  );
 
   if (esLastModified < dspaceLastModified) return true;
 
@@ -157,6 +162,9 @@ export const diff = async (
       try {
         const hit = hitSchema.parse(rawHit);
 
+        // TODO: This will be slow because we're getting
+        // bitstreams and metadata in this call when we really
+        // only need metadata.
         const dspaceItem = await dspaceClient.getItem(
           dspaceEndpoint,
           hit._source.uuid
