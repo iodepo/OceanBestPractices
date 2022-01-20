@@ -1,23 +1,13 @@
-# OBP Infrastructure
+# Ingest
 
-This project includes all APIs, functions, queries, mappings, and resources necessary to deploy or query the OBP indexer and API infrastructure. The OBP indexer is a system which fetches existing documents from the Ocean Best Practices API; extracts text if necessary; and indexes the document metadata into an existing Elasticsearch cluster. The OBP API provides endpoints for clients to search and discover indexed documents.
+The Ocean Best Practices Ingest module is a set of resources which provide support for ingesting, tagging, indexing, and searching DSpace Item metadata and raw bitstream text. The Ingest module also includes the resources for storing and searching ontologies and vocabluries.
 
-## Table of Contents
+## Architecture
+
+The
 
 1. Prerequisites
-2. Elasticsearch Indices
-3. Deploying the Text Extractor Library
-3. Deploying the Infrastructure
-4. Configuring and Populating the Triple Store
-5. Bulk Indexing
-
 ## Prerequisites
-
-The OBP infrastructure relies heavily on AWS services. Most services can be deployed and managed via AWS Cloudformation.
-
-It'd be a good idea to install the [AWS SAM Local](https://docs.aws.amazon.com/lambda/latest/dg/test-sam-local.html) library for local Lambda testing.
-
-While you can do everything you need to do in order to deploy via the AWS console, this documentation is written as though you're deploying via the [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html).
 
 The OBP infrastructure leverages a 3rd party text extractor which can be found here: (<https://github.com/skylander86/lambda-text-extractor>). There is also a fork available at the Element 84 organization in case anything were to change with the original repository: (<https://github.com/Element84/lambda-text-extractor>).
 
