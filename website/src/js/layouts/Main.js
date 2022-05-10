@@ -95,10 +95,13 @@ class Main extends Component {
                     <Superlink to="https://repository.oceanbestpractices.org/handle/11329/1243" event_category="header" event_action="link" event_label="Sensors template">
                       Sensors
                     </Superlink>
-                    <Superlink to="https://repository.oceanbestpractices.org/handle/11329/1246" event_category="header" event_action="link" event_label="Sensors template">
+                    <Superlink to="https://repository.oceanbestpractices.org/handle/11329/1246" event_category="header" event_action="link" event_label="Ocean Applciations template">
                       Ocean Applications
                     </Superlink>
-                    <Superlink to="https://repository.oceanbestpractices.org/handle/11329/1245" event_category="header" event_action="link" event_label="Sensors template">
+                    <Superlink to="https://repository.oceanbestpractices.org/handle/11329/1649" event_category="header" event_action="link" event_label="Ocean Modeling template">
+                      Ocean Modeling
+                    </Superlink>
+                    <Superlink to="https://repository.oceanbestpractices.org/handle/11329/1245" event_category="header" event_action="link" event_label="Data Management template">
                       Data Management
                     </Superlink>
                   </div>
@@ -144,15 +147,15 @@ class Main extends Component {
           >
             <div className="link__list-toggle-modal welcome-modal">
               <p>
-                OceanBestPractices (OBP) is a secure, permanent document (and other objects) repository. 
-                It aims to provide a discovery point for research groups to search and find community accepted existing ocean best practices. 
+                OceanBestPractices (OBP) is a secure, permanent document (and other objects) repository.
+                It aims to provide a discovery point for research groups to search and find community accepted existing ocean best practices.
                 This service also invites the ocean research, observation and data/information management communities to submit their own best practice documents to share globally with their colleagues.
               </p>
               <p>
                 The OBPS-Repository is a global repository of ocean research, operations and applications  methods (also known as “Best Practices”) <b>*</b>
               </p>
               <p className="foot-notes">
-                <b>*</b> A Best Practice is defined as  “a methodology that has repeatedly produced superior results relative to other methodologies with the same objective”. 
+                <b>*</b> A Best Practice is defined as  “a methodology that has repeatedly produced superior results relative to other methodologies with the same objective”.
                 To be fully elevated to a best practice, a promising method will have been adopted and employed by multiple organizations.
               </p>
               <p className="highlighted">
