@@ -13,13 +13,15 @@ const handler = async () => {
   const env = parseEnv();
 
   // Perform an Index and DSpace diff.
-  const result = await ir.diff(env.OPEN_SEARCH_ENDPOINT, env.DSPACE_ENDPOINT);
+  const result = await ir.diff(
+    env.OPEN_SEARCH_ENDPOINT,
+    env.DSPACE_ENDPOINT
+  );
 
   // Queue updated items for re-ingest.
   await ir.commitUpdatedItems(
     result.updated,
-    env.INGEST_TOPIC_ARN,
-    env.AWS_REGION
+    env.INGEST_TOPIC_ARN
   );
 
   // Remove deleted items from the index.

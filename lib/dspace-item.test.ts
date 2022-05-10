@@ -95,4 +95,16 @@ describe('dspace-item', () => {
       expect(pdfBitstreamItem.retrieveLink).toEqual('/rest/bitstreams/a7df78b6-9d29-4919-a920-c1bddf7be7b0/retrieve');
     });
   });
+
+  describe('normalizedLastModified', () => {
+    it('normalizes a lastModified date with a 3-digit ms value', async () => {
+      const result = dspaceItem.normalizeLastModified('2021-08-24 17:36:38.123');
+      expect(result).toBe('2021-08-24 17:36:38.000');
+    });
+
+    it('normalizes a lastModified date with a 1-digit ms value', async () => {
+      const result = dspaceItem.normalizeLastModified('2021-08-24 17:36:38.1');
+      expect(result).toBe('2021-08-24 17:36:38.000');
+    });
+  });
 });
