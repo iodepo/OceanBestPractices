@@ -76,7 +76,7 @@ class SearchBar extends Component {
     }
 
     if ( starting_query ) {
-      this.props.dispatch(getSearch({resetTerms: true}));
+      this.props.dispatch(getSearch(null, {resetTerms: true}));
     }
 
   }
@@ -159,6 +159,7 @@ class SearchBar extends Component {
    */
 
   onChange(event) {
+    console.log('🚀 ~ file: SearchBar.js ~ line 162 ~ SearchBar ~ onChange ~ event', event.target.value)
     this.props.dispatch(setSearch(event.target.value));
     this.props.dispatch(getAutocomplete(event.target.value));
   }

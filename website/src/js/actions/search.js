@@ -77,6 +77,7 @@ export const getSearch = (query, options = {}) => {
   let searchOptions = {
     termURI: false,
     term: false,
+    dontClear: false,
     ...options
   }
 
@@ -118,7 +119,9 @@ export const getSearch = (query, options = {}) => {
     if(searchOptions.resetTerms === true) {
       dispatch(resetTerms());
     }
-    dispatch(setSearch('', search_group));
+    if (!searchOptions.dontClear) {
+      dispatch(setSearch('', search_group));
+    }
     dispatch(searchIsLoading(true));
 
     fetch(url)

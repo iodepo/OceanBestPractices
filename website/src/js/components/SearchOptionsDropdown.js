@@ -78,7 +78,10 @@ const mapDispatchToProps = ( dispatch ) => {
 
   return {
     setOption: (id, value) => dispatch( setOption(id, value) ),
-    getSearch: () => dispatch( getSearch({resetTerms: true}) ),
+    getSearch: () => dispatch( getSearch(null, {
+      resetTerms: true,
+      dontClear: true
+    }) ),
     trackEvent: (settings) => dispatch( trackEvent(settings) ),
   };
 
