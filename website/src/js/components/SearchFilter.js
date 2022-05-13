@@ -13,7 +13,7 @@ class SearchFilter extends Component {
   onSortSelect(label, direction, sortFilter) {
 
     this.props.dispatch(setOption('sort', sortFilter));
-    this.props.dispatch(getSearch(null, {resetTerms: true}));
+    this.props.dispatch(getSearch(null, { resetTerms: true }));
 
     this.props.trackEvent({
       category: 'dropdown',

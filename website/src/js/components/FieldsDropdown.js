@@ -65,7 +65,7 @@ const mapDispatchToProps = ( dispatch ) => {
   return {
     setActiveFields: field_id => dispatch( setActiveFields(field_id) ),
     clearActiveSearch: () => dispatch( clearActiveSearch() ),
-    getSearch: () => dispatch( getSearch(null, {resetTerms: false}) ),
+    getSearch: () => dispatch( getSearch(null, { resetTerms: false }) ),
     trackEvent: (settings) => dispatch( trackEvent(settings) ),
   };
 

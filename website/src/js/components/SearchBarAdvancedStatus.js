@@ -63,7 +63,7 @@ const mapStateToProps = ( state ) => {
 const mapDispatchToProps = ( dispatch ) => {
 
   return {
-    getSearch: () => dispatch( getSearch(null, {resetTerms: true}) ),
+    getSearch: () => dispatch( getSearch(null, { resetTerms: true }) ),
     clearAllSearch: () => dispatch( clearAllSearch() ),
     setActiveFields: field_id => dispatch( setActiveFields(field_id) ),
     resetTerms: () => dispatch( resetTerms() ),

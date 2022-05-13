@@ -32,13 +32,13 @@ class SearchResults extends Component {
     // This only happens when the user is moving over from the landing page
 
     if (this.props.searchReducer.search) {
-      this.props.dispatch(getSearch(null,{resetTerms: true}));
+      this.props.dispatch(getSearch(null, { resetTerms: true }));
     }
   }
 
   onSetPage(page) {
     this.props.dispatch(setOption('offset', page * defaultQuerySize));
-    this.props.dispatch(getSearch(null, {resetTerms: true}));
+    this.props.dispatch(getSearch(null, { resetTerms: true }));
   }
 
   onSetTerms(terms) {
