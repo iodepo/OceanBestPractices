@@ -43,7 +43,7 @@ class SearchOptionsDropdown extends Component {
 
     this.props.trackEvent({
       category: 'dropdown',
-      action: 'toggle | Search Options',
+      action: 'toggle | Filter Options',
       label: `${id} | ${!(option.value)}`,
     });
 
@@ -59,7 +59,7 @@ class SearchOptionsDropdown extends Component {
 
   render() {
     return (
-      <Dropdown label="Search Options" items={this.options()} item_component={DropdownToggle} has_active_items={this.hasActiveOptions()} item_onClick={this.handleItemClick} />
+      <Dropdown label="Filter Options" items={this.options()} item_component={DropdownToggle} has_active_items={this.hasActiveOptions()} item_onClick={this.handleItemClick} />
     );
   }
 
