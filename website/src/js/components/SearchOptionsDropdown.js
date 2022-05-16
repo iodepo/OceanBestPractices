@@ -39,7 +39,7 @@ class SearchOptionsDropdown extends Component {
     let option = this.props.options.filter(option => option.id === id)[0];
 
     this.props.setOption(id, !(option.value));
-    this.props.getSearch();
+    this.props.getSearch(null, { preserveSearch: true });
 
     this.props.trackEvent({
       category: 'dropdown',
@@ -78,7 +78,7 @@ const mapDispatchToProps = ( dispatch ) => {
 
   return {
     setOption: (id, value) => dispatch( setOption(id, value) ),
-    getSearch: () => dispatch( getSearch({resetTerms: true}) ),
+    getSearch: (query, options) => dispatch(getSearch(query, { resetTerms: true, ...options })),
     trackEvent: (settings) => dispatch( trackEvent(settings) ),
   };
 

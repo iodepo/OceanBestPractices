@@ -77,6 +77,7 @@ export const getSearch = (query, options = {}) => {
   let searchOptions = {
     termURI: false,
     term: false,
+    preserveSearch: false,
     ...options
   }
 
@@ -114,11 +115,17 @@ export const getSearch = (query, options = {}) => {
     searchOptions.fields = active_field && active_field.value;
 
     const url = createAPISearchURL(search_group, searchOptions);
-    
-    if(searchOptions.resetTerms === true) {
+
+    // Clear any fetched autocompleted terms.
+    if (searchOptions.resetTerms) {
       dispatch(resetTerms());
     }
-    dispatch(setSearch('', search_group));
+
+    // Clear the search field.
+    if (!searchOptions.preserveSearch) {
+      dispatch(setSearch('', search_group));
+    }
+
     dispatch(searchIsLoading(true));
 
     fetch(url)

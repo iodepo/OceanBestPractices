@@ -76,7 +76,7 @@ class SearchBar extends Component {
     }
 
     if ( starting_query ) {
-      this.props.dispatch(getSearch({resetTerms: true}));
+      this.props.dispatch(getSearch(null, { resetTerms: true }));
     }
 
   }
