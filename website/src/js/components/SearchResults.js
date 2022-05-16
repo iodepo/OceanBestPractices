@@ -326,7 +326,7 @@ class SearchResults extends Component {
                   <Superlink to='/' class_name='search-results__breadcrumbs-home' event_category="results" event_action="link" event_label="Home">
                     <li>Home</li>
                   </Superlink>
-                  <li><strong>Search OBP</strong></li>
+                  <li><strong>Search OBPS</strong></li>
                   {
                     this.renderSelectResultsLink(results)
                   }
