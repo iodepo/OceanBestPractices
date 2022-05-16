@@ -21,8 +21,12 @@ class Footer extends Component {
       <footer className="footer">
         <section className="footer__info">
         <div className="footer__logos">
-            <img className="footer__iode-logo"src={iodeLogo} alt="IODE Logo"/>
-            <img className="footer__goos-logo"src={goosLogo} alt="GOOS Logo" height="23px"/>
+            <Superlink to="https://iode.org" target="_blank" event_category="footer" event_action="link" event_label="IODE Logo">
+              <img className="footer__iode-logo"src={iodeLogo} alt="IODE Logo"/>
+            </Superlink>
+            <Superlink to="https://goosocean.org" target="_blank" event_category="footer" event_action="link" event_label="GOOS Logo">
+              <img className="footer__goos-logo"src={goosLogo} alt="GOOS Logo" height="23px"/>
+            </Superlink>
           </div>
           <span className="footer__text">&copy; {(new Date().getFullYear())}. UNESCO/IOC Project office for <a className="footer__link" href="https://www.iode.org">IODE</a> Oostende, Belgium.</span>
 
