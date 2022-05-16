@@ -50,6 +50,9 @@ class FooterLinks extends Component {
                   <Superlink to="https://repository.oceanbestpractices.org/handle/11329/1246" event_category="header" event_action="link" event_label="Sensors template">
                     Ocean Applications
                   </Superlink>
+                  <Superlink to="https://repository.oceanbestpractices.org/handle/11329/1649" event_category="header" event_action="link" event_label="Ocean Modeling template">
+                    Ocean Modeling
+                  </Superlink>
                   <Superlink to="https://repository.oceanbestpractices.org/handle/11329/1245" event_category="header" event_action="link" event_label="Sensors template">
                   Data Management
                 </Superlink>

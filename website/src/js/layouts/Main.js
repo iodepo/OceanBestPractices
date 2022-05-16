@@ -95,10 +95,13 @@ class Main extends Component {
                     <Superlink to="https://repository.oceanbestpractices.org/handle/11329/1243" event_category="header" event_action="link" event_label="Sensors template">
                       Sensors
                     </Superlink>
-                    <Superlink to="https://repository.oceanbestpractices.org/handle/11329/1246" event_category="header" event_action="link" event_label="Sensors template">
+                    <Superlink to="https://repository.oceanbestpractices.org/handle/11329/1246" event_category="header" event_action="link" event_label="Ocean Applciations template">
                       Ocean Applications
                     </Superlink>
-                    <Superlink to="https://repository.oceanbestpractices.org/handle/11329/1245" event_category="header" event_action="link" event_label="Sensors template">
+                    <Superlink to="https://repository.oceanbestpractices.org/handle/11329/1649" event_category="header" event_action="link" event_label="Ocean Modeling template">
+                      Ocean Modeling
+                    </Superlink>
+                    <Superlink to="https://repository.oceanbestpractices.org/handle/11329/1245" event_category="header" event_action="link" event_label="Data Management template">
                       Data Management
                     </Superlink>
                   </div>
