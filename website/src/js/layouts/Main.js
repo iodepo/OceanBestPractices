@@ -109,9 +109,6 @@ class Main extends Component {
                 <Superlink class_name="link-list__link" to="https://repository.oceanbestpractices.org/submissions" event_category="header" event_action="link" event_label="Submit a new Best Practice">
                   Go to Submission Site
                 </Superlink>
-                <Superlink class_name="link-list__link" to="/tagger" event_category="header" event_action="link" event_label="Ocean Knowledge Tagger">
-                  OceanKnowledge Tagger
-                </Superlink>
               </LinkListItemToggle>
             </span>
           </div>
