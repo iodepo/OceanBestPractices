@@ -38,51 +38,102 @@ describe('search-by-keywords.handler', () => {
     process.env['AWS_SECRET_ACCESS_KEY'] = awsSecretAccessKey;
   });
 
-  describe('when filtering by endorsed', () => {
-    const uuid1 = randomUUID();
-    const uuid2 = randomUUID();
+  describe('when using a filter option', () => {
+    describe('and filtering by endorsed', () => {
+      const uuid1 = randomUUID();
+      const uuid2 = randomUUID();
 
-    beforeEach(async () => {
-      // Index two documents. One should have a value for endorsed and the
-      // other should not. Otherwise they're identical.
-      const doc1 = {
-        uuid: uuid1,
-        dc_title: 'Test Document 1',
-        obps_endorsementExternal_externalEndorsedBy: 'GOOS Panel',
-      };
+      beforeEach(async () => {
+        // Index two documents. One should have a value for endorsed and the
+        // other should not. Otherwise they're identical.
+        const doc1 = {
+          uuid: uuid1,
+          dc_title: 'Test Document 1',
+          obps_endorsementExternal_externalEndorsedBy: 'GOOS Panel',
+        };
 
-      const doc2 = {
-        uuid: uuid2,
-        dc_title: 'Test Document 2',
-      };
+        const doc2 = {
+          uuid: uuid2,
+          dc_title: 'Test Document 2',
+        };
 
-      await osClient.addDocument(esUrl, documentsIndexName, doc1);
-      await osClient.addDocument(esUrl, documentsIndexName, doc2);
-      await osClient.refreshIndex(esUrl, documentsIndexName);
+        await osClient.addDocument(esUrl, documentsIndexName, doc1);
+        await osClient.addDocument(esUrl, documentsIndexName, doc2);
+        await osClient.refreshIndex(esUrl, documentsIndexName);
+      });
+
+      test('should return matching documents that have a non-null value for obps.endorsementExternal.externalEndorsedBy field', (done) => {
+        const proxyEvent = {
+          queryStringParameters: {
+            keywords: 'Test',
+            endorsed: 'true',
+          },
+        };
+
+        // @ts-expect-error Eventually refactor this handler to be an async
+        // function. Let's not worry about typing these arguments now.
+        handler(proxyEvent, undefined, (_error, response) => {
+          try {
+            const results = JSON.parse(response.body);
+            expect(results.hits.total.value).toEqual(1);
+
+            const [result] = results.hits.hits;
+            expect(result._source.uuid).toEqual(uuid1);
+
+            done();
+          } catch (error) {
+            done(error);
+          }
+        });
+      });
     });
 
-    test('should return matching documents that have a non-null value for obps.endorsementExternal.externalEndorsedBy field', (done) => {
-      const proxyEvent = {
-        queryStringParameters: {
-          keywords: 'Test',
-          endorsed: 'true',
-        },
-      };
+    describe('and filtering by refereed', () => {
+      const uuid1 = randomUUID();
+      const uuid2 = randomUUID();
 
-      // @ts-expect-error Eventually refactor this handler to be an async
-      // function. Let's not worry about typing these arguments now.
-      handler(proxyEvent, undefined, (_error, response) => {
-        try {
-          const results = JSON.parse(response.body);
-          expect(results.hits.total.value).toEqual(1);
+      beforeEach(async () => {
+        // Index two documents. One should have a value for refereed and the
+        // other should not. Otherwise they're identical.
+        const doc1 = {
+          uuid: uuid1,
+          dc_title: 'Test Document 1',
+          dc_description_refereed: 'Refereed',
+        };
 
-          const [result] = results.hits.hits;
-          expect(result._source.uuid).toEqual(uuid1);
+        const doc2 = {
+          uuid: uuid2,
+          dc_title: 'Test Document 2',
+        };
 
-          done();
-        } catch (error) {
-          done(error);
-        }
+        await osClient.addDocument(esUrl, documentsIndexName, doc1);
+        await osClient.addDocument(esUrl, documentsIndexName, doc2);
+        await osClient.refreshIndex(esUrl, documentsIndexName);
+      });
+
+      test('should return matching documents that have a non-null value for dc.description.refereed field', (done) => {
+        const proxyEvent = {
+          queryStringParameters: {
+            keywords: 'Test',
+            refereed: 'true',
+          },
+        };
+
+        // @ts-expect-error Eventually refactor this handler to be an async
+        // function. Let's not worry about typing these arguments now.
+        handler(proxyEvent, undefined, (_error, response) => {
+          try {
+            const results = JSON.parse(response.body);
+            expect(results.hits.total.value).toEqual(1);
+
+            const [result] = results.hits.hits;
+            expect(result._source.uuid).toEqual(uuid1);
+
+            done();
+          } catch (error) {
+            done(error);
+          }
+        });
       });
     });
   });

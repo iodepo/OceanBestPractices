@@ -288,7 +288,11 @@ function buildElasticsearchQuery(
   }
 
   if (refereed) {
-    filter.push({ term: { refereed: 'Refereed' } });
+    filter.push({
+      exists: {
+        field: 'dc_description_refereed',
+      },
+    });
   }
 
   if (endorsed) {
