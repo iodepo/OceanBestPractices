@@ -158,7 +158,9 @@ function executeSearch(openSearchEndpoint, documentsIndexName, options) {
 function parseParams(params) {
   return {
     keywords: params.keywords !== undefined && params.keywords.length > 0 ? params.keywords.split(',') : [],
+    // TODO: Rename this parameter to be plural.
     terms: params.term === undefined ? [] : params.term.split(','),
+    // TODO: Rename this parameter to be plural.
     termURIs: params.termURI === undefined ? [] : params.termURI.split(','),
     from: params.from === undefined ? DEFAULT_FROM : params.from,
     size: params.size === undefined ? DEFAULT_SIZE : params.size,
@@ -224,13 +226,9 @@ function formatKeyword(k) {
 function nestedQuery(termPhrase) {
   return {
     nested: {
-      path: 'terms',
+      path: '_terms',
       query: {
-        bool: {
-          must: {
-            match_phrase: termPhrase,
-          },
-        },
+        match: termPhrase,
       },
     },
   };
@@ -274,16 +272,16 @@ function buildElasticsearchQuery(
     },
   };
 
-  console.log(`Keywords:${JSON.stringify(keywords)}`);
+  console.log(`Keywords: ${JSON.stringify(keywords)}`);
 
   const filter = [];
   if (terms.length > 0 || termURIs.length > 0) {
     for (const t of terms) {
-      filter.push(nestedQuery({ 'terms.label': t }));
+      filter.push(nestedQuery({ '_terms.label': t }));
     }
 
     for (const t of termURIs) {
-      filter.push(nestedQuery({ 'terms.uri': t }));
+      filter.push(nestedQuery({ '_terms.uri': t }));
     }
   }
 

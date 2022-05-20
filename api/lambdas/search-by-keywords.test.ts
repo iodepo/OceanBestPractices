@@ -413,7 +413,7 @@ describe('search-by-keywords.handler', () => {
     });
 
     // FIXME: This is failing. https://github.com/iodepo/OceanBestPractices/issues/191
-    test.skip('should filter matched documents by term label', (done) => {
+    test('should filter matched documents by term label', (done) => {
       const proxyEvent = {
         queryStringParameters: {
           keywords: 'ocean',
@@ -434,7 +434,7 @@ describe('search-by-keywords.handler', () => {
     });
 
     // FIXME: This is failing. https://github.com/iodepo/OceanBestPractices/issues/191
-    test.skip('should filter matched documents by term URI', (done) => {
+    test('should filter matched documents by term URI', (done) => {
       const proxyEvent = {
         queryStringParameters: {
           keywords: 'ocean',
