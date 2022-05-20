@@ -92,8 +92,8 @@ exports.handler = (event, context, callback) => {
  *
  * @param {string} openSearchEndpoint
  * @param {string} documentsIndexName
- * @param {Object} options An object defining the search options to use when
- * building the search query.
+ * @param {import('../lib/search-document-builder').SearchDocumentBuilderOptions} options
+ * An object defining the search options to use when building the search query.
  */
 function executeSearch(openSearchEndpoint, documentsIndexName, options) {
   const searchBody = buildSearchDocument(options);

@@ -22,17 +22,17 @@ export const nestedQuery = (termPhrase: unknown) => ({
  * */
 export const formatKeyword = (k: string) => {
   // Map the UI operators to ES operators.
-  const opTransforms = {
+  const opTransforms: Record<string, string> = {
     '+': 'AND',
     '-': 'NOT',
   };
 
   // Extract the operator from the keyword.
-  let op = ''; let
-    fk = k;
+  let op = '';
+  let fk = k;
   if (Object.keys(opTransforms).includes(fk.slice(0, 1))) {
-    op = opTransforms[fk.slice(0, 1)];
-    fk = fk.substring(1, fk.length);
+    op = opTransforms[fk.slice(0, 1)] || '';
+    fk = fk.slice(1, fk.length);
   }
 
   // Strip all double quotes from the keyword since we're
@@ -41,18 +41,22 @@ export const formatKeyword = (k: string) => {
 
   // Optional: try splitting the search term on a space. If it's a multi-
   // word search term we'll append each term as OR'd AND searches.
-  const fk_comps = fk.split(' ');
-  const opt_t = fk_comps.map((t) => `\"${t}\"`);
+  const fkComps = fk.split(' ');
 
-  console.log(`opt_t:\n${JSON.stringify(opt_t)}`);
+  // Need to determine what this escaped value should look like.
+
+  // eslint-disable-next-line no-useless-escape
+  const optT = fkComps.map((t) => `\"${t}\"`);
+
+  console.log(`optT:\n${JSON.stringify(optT)}`);
 
   // Construct the query for the primary keyword.
   fk = `${op} "${fk}"`;
 
   // It's a multi-word keyword. Append a grouped AND for each word in the term
   // and boost the original keyword.
-  if (opt_t.length > 1) {
-    fk = `${fk}^2 OR ( ${opt_t.join(' AND ')} )`;
+  if (optT.length > 1) {
+    fk = `${fk}^2 OR ( ${optT.join(' AND ')} )`;
   }
 
   return fk;
@@ -64,7 +68,11 @@ export const sortQuery = (sortParams: string[] = []) => {
     if (keyAndDirection.length < 2) {
       return keyAndDirection[0];
     }
+
     const param = {};
+
+    // @ts-expect-error This will be fixed when a test is written
+    // eslint-disable-next-line prefer-destructuring
     param[keyAndDirection[0]] = keyAndDirection[1];
 
     return param;
@@ -95,14 +103,14 @@ export const sortQuery = (sortParams: string[] = []) => {
  * search document `query` field.
  */
 export const buildElasticsearchQuery = (
-  keywords: unknown = [],
-  terms: unknown = [],
-  termURIs: unknown = [],
-  fields: unknown = [],
-  refereed: unknown = false,
-  endorsed: unknown = false
+  keywords: string[] = [],
+  terms: string[] = [],
+  termURIs: string[] = [],
+  fields: string[] = [],
+  refereed = false,
+  endorsed = false
 ) => {
-  const boolQuery = {
+  const boolQuery: Record<string, unknown> = {
     must: {
       query_string: {
         fields,
@@ -155,6 +163,20 @@ export const buildElasticsearchQuery = (
   return query;
 };
 
+// TODO: These are marked as optional simply because I had to default them above. Working
+// on improving all of this in small increments.
+export interface SearchDocumentBuilderOptions {
+  from: number
+  size: number
+  keywords?: string[]
+  terms?: string[]
+  termURIs?: string[]
+  fields?: string[]
+  refereed?: boolean
+  endorsed?: boolean
+  sort: string[]
+}
+
 /**
  * Builds an Elasticsearch search document object that can be used in an
  * Elasctsearch search request. Specifically, this function sets the fields to
@@ -162,34 +184,34 @@ export const buildElasticsearchQuery = (
  * highlight information. It also builds the query string value based on
  * keywords provided in the `opts` argument.
  *
- * @param {object} opts Search options to include in the search document. At a
- * minimum this object should contain a from, size, keywords, terms | termsURI,
- * fields, and whether or not `refereed` should be checked.
+ * @param {SearchDocumentBuilderOptions} options Search options to include in the search
+ * document. At a minimum this object should contain a from, size, keywords,
+ * terms | termsURI, fields, and whether or not `refereed` should be checked.
  *
  * @returns {Record<string, unknown>} A search document object that can be
  * used directly by an Elasticsearch search request.
  */
-export const buildSearchDocument = (opts: any) => {
+export const buildSearchDocument = (options: SearchDocumentBuilderOptions) => {
   const searchDoc = {
     _source: {
       excludes: ['_bitstreamText', 'bitstreams', 'metadata'],
     },
-    from: opts.from,
-    size: opts.size,
+    from: options.from,
+    size: options.size,
     query: buildElasticsearchQuery(
-      opts.keywords,
-      opts.terms,
-      opts.termURIs,
-      opts.fields,
-      opts.refereed,
-      opts.endorsed
+      options.keywords,
+      options.terms,
+      options.termURIs,
+      options.fields,
+      options.refereed,
+      options.endorsed
     ),
     highlight: {
       fields: {
         _bitstreamText: {},
       },
     },
-    sort: sortQuery(opts.sort),
+    sort: sortQuery(options.sort),
   };
 
   console.log(`Search document: ${JSON.stringify(searchDoc)}`);
