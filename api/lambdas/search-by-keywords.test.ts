@@ -3,11 +3,31 @@ import { randomUUID } from 'crypto';
 import cryptoRandomString from 'crypto-random-string';
 import nock from 'nock';
 import * as osClient from '../../lib/open-search-client';
+import { DocumentsSearchResponse } from '../../lib/open-search-schemas';
 import { handler } from './search-by-keywords';
 
 const esUrl = 'http://localhost:9200';
 
 const documentsIndexName = `index-${cryptoRandomString({ length: 6 })}`;
+
+const searchHandler = (
+  proxyEvent: unknown,
+  expectCallback: (results: DocumentsSearchResponse) => void,
+  done: (error?: unknown) => void
+) => {
+  // @ts-expect-error Eventually refactor this handler to be an async
+  // function. Let's not worry about typing these arguments now.
+  handler(proxyEvent, undefined, (_error, response) => {
+    try {
+      const results = JSON.parse(response.body);
+      expectCallback(results);
+
+      done();
+    } catch (error) {
+      done(error);
+    }
+  });
+};
 
 describe('search-by-keywords.handler', () => {
   let awsAccessKeyIdBefore: string | undefined;
@@ -38,12 +58,200 @@ describe('search-by-keywords.handler', () => {
     process.env['AWS_SECRET_ACCESS_KEY'] = awsSecretAccessKey;
   });
 
-  describe('when using a filter option', () => {
+  describe('when searching by keywords', () => {
+    const uuid1 = randomUUID();
+    const uuid2 = randomUUID();
+    const uuid3 = randomUUID();
+
+    beforeAll(async () => {
+      const doc1 = {
+        uuid: uuid1,
+        dc_title: 'This is a very specific ocean and sea document.',
+      };
+
+      const doc2 = {
+        uuid: uuid2,
+        dc_title: 'This is a document with bitstream text.',
+        _bitstreamText: 'This is the body. In this body we talk about ocean stuff.',
+      };
+
+      const doc3 = {
+        uuid: uuid3,
+        dc_title: 'This is a document with author text.',
+        dc_contributor_author: 'Ocean Sea',
+      };
+
+      await osClient.addDocument(esUrl, documentsIndexName, doc1);
+      await osClient.addDocument(esUrl, documentsIndexName, doc2);
+      await osClient.addDocument(esUrl, documentsIndexName, doc3);
+      await osClient.refreshIndex(esUrl, documentsIndexName);
+    });
+
+    afterAll(async () => {
+      await osClient.deleteByQuery(esUrl, documentsIndexName, { match: { uuid: uuid1 } });
+      await osClient.deleteByQuery(esUrl, documentsIndexName, { match: { uuid: uuid2 } });
+      await osClient.deleteByQuery(esUrl, documentsIndexName, { match: { uuid: uuid3 } });
+      await osClient.refreshIndex(esUrl, documentsIndexName);
+    });
+
+    test('should find documents across multiple fields', (done) => {
+      const proxyEvent = {
+        queryStringParameters: {
+          keywords: 'ocean',
+        },
+      };
+
+      searchHandler(
+        proxyEvent,
+        (results) => {
+          expect(results.hits.total.value).toEqual(3);
+
+          const uuids = results.hits.hits.map(
+            (h) => h._source.uuid
+          );
+          expect(uuids).toEqual([uuid1, uuid2, uuid3]);
+        },
+        done
+      );
+    });
+
+    test('should find documents that match a single targeted field', (done) => {
+      const proxyEvent = {
+        queryStringParameters: {
+          keywords: 'ocean',
+          fields: '_bitstreamText',
+        },
+      };
+
+      searchHandler(
+        proxyEvent,
+        (results) => {
+          expect(results.hits.total.value).toEqual(1);
+
+          const uuids = results.hits.hits.map(
+            (h) => h._source.uuid
+          );
+          expect(uuids).toEqual([uuid2]);
+        },
+        done
+      );
+    });
+
+    // FIXME: This is failing. https://github.com/iodepo/OceanBestPractices/issues/190
+    test.skip('should find documents that match a mix of targeted fields', (done) => {
+      // This is broken. The hope here is that this would find document 2. However,
+      // it won't because we don't actually know that 'bitstream' is an all fields search.
+      // The way we do fields is broken...
+      const proxyEvent = {
+        queryStringParameters: {
+          keywords: 'bitstream,+body',
+          fields: '_bitstreamText',
+        },
+      };
+
+      searchHandler(
+        proxyEvent,
+        (results) => {
+          expect(results.hits.total.value).toEqual(1);
+
+          const uuids = results.hits.hits.map(
+            (h) => h._source.uuid
+          );
+          expect(uuids).toEqual([uuid2]);
+        },
+        done
+      );
+    });
+
+    describe('and using boolean operators', () => {
+      test('should find matching documents using the OR boolean operator', (done) => {
+        const proxyEvent = {
+          queryStringParameters: {
+            keywords: 'ocean,specific',
+          },
+        };
+
+        searchHandler(
+          proxyEvent,
+          (results) => {
+            expect(results.hits.total.value).toEqual(3);
+
+            const uuids = results.hits.hits.map(
+              (h) => h._source.uuid
+            );
+            expect(uuids).toEqual([uuid1, uuid2, uuid3]);
+          },
+          done
+        );
+      });
+
+      test('should find matching documents using the AND boolean operator', (done) => {
+        const proxyEvent = {
+          queryStringParameters: {
+            keywords: 'ocean,+specific',
+          },
+        };
+
+        searchHandler(
+          proxyEvent,
+          (results) => {
+            expect(results.hits.total.value).toEqual(1);
+
+            const [result] = results.hits.hits;
+            expect(result?._source.uuid).toEqual(uuid1);
+          },
+          done
+        );
+      });
+
+      test('should find matching documents using the NOT boolean operator', (done) => {
+        const proxyEvent = {
+          queryStringParameters: {
+            keywords: 'ocean,-specific',
+          },
+        };
+
+        searchHandler(
+          proxyEvent,
+          (results) => {
+            expect(results.hits.total.value).toEqual(2);
+
+            const uuids = results.hits.hits.map(
+              (h: { _source: { uuid: string } }) => h._source.uuid
+            );
+            expect(uuids).toEqual([uuid2, uuid3]);
+          },
+          done
+        );
+      });
+
+      test('should find matching documents with a mix of boolean operators', (done) => {
+        const proxyEvent = {
+          queryStringParameters: {
+            keywords: 'ocean,+sea,-specific',
+          },
+        };
+
+        searchHandler(
+          proxyEvent,
+          (results) => {
+            expect(results.hits.total.value).toEqual(1);
+
+            const [result] = results.hits.hits;
+            expect(result?._source.uuid).toEqual(uuid3);
+          },
+          done
+        );
+      });
+    });
+  });
+
+  describe('when searching with a filter option', () => {
     describe('and filtering by endorsed', () => {
       const uuid1 = randomUUID();
       const uuid2 = randomUUID();
 
-      beforeEach(async () => {
+      beforeAll(async () => {
         // Index two documents. One should have a value for endorsed and the
         // other should not. Otherwise they're identical.
         const doc1 = {
@@ -59,6 +267,20 @@ describe('search-by-keywords.handler', () => {
 
         await osClient.addDocument(esUrl, documentsIndexName, doc1);
         await osClient.addDocument(esUrl, documentsIndexName, doc2);
+        await osClient.refreshIndex(esUrl, documentsIndexName);
+      });
+
+      afterAll(async () => {
+        await osClient.deleteByQuery(
+          esUrl,
+          documentsIndexName,
+          { match: { uuid: uuid1 } }
+        );
+        await osClient.deleteByQuery(
+          esUrl,
+          documentsIndexName,
+          { match: { uuid: uuid2 } }
+        );
         await osClient.refreshIndex(esUrl, documentsIndexName);
       });
 
@@ -92,7 +314,7 @@ describe('search-by-keywords.handler', () => {
       const uuid1 = randomUUID();
       const uuid2 = randomUUID();
 
-      beforeEach(async () => {
+      beforeAll(async () => {
         // Index two documents. One should have a value for refereed and the
         // other should not. Otherwise they're identical.
         const doc1 = {
@@ -108,6 +330,20 @@ describe('search-by-keywords.handler', () => {
 
         await osClient.addDocument(esUrl, documentsIndexName, doc1);
         await osClient.addDocument(esUrl, documentsIndexName, doc2);
+        await osClient.refreshIndex(esUrl, documentsIndexName);
+      });
+
+      afterAll(async () => {
+        await osClient.deleteByQuery(
+          esUrl,
+          documentsIndexName,
+          { match: { uuid: uuid1 } }
+        );
+        await osClient.deleteByQuery(
+          esUrl,
+          documentsIndexName,
+          { match: { uuid: uuid2 } }
+        );
         await osClient.refreshIndex(esUrl, documentsIndexName);
       });
 
@@ -135,6 +371,87 @@ describe('search-by-keywords.handler', () => {
           }
         });
       });
+    });
+
+    describe('and filtering by synonyms and like words', () => {
+      test.todo('should match documents using keywords including ontological synonyms');
+    });
+  });
+
+  describe('when searching with a term', () => {
+    const uuid1 = randomUUID();
+    const uuid2 = randomUUID();
+
+    beforeAll(async () => {
+      const doc1 = {
+        uuid: uuid1,
+        dc_title: 'This is a very specific ocean and sea document.',
+        _terms: [{
+          label: 'alpha',
+          uri: 'uri://a.l.p.h.a',
+        }],
+      };
+
+      const doc2 = {
+        uuid: uuid2,
+        dc_title: 'This is another very specific ocean and sea document.',
+        _terms: [{
+          label: 'bravo',
+          uri: 'uri://b.r.a.v.o',
+        }],
+      };
+
+      await osClient.addDocument(esUrl, documentsIndexName, doc1);
+      await osClient.addDocument(esUrl, documentsIndexName, doc2);
+      await osClient.refreshIndex(esUrl, documentsIndexName);
+    });
+
+    afterAll(async () => {
+      await osClient.deleteByQuery(esUrl, documentsIndexName, { match: { uuid: uuid1 } });
+      await osClient.deleteByQuery(esUrl, documentsIndexName, { match: { uuid: uuid2 } });
+      await osClient.refreshIndex(esUrl, documentsIndexName);
+    });
+
+    // FIXME: This is failing. https://github.com/iodepo/OceanBestPractices/issues/191
+    test.skip('should filter matched documents by term label', (done) => {
+      const proxyEvent = {
+        queryStringParameters: {
+          keywords: 'ocean',
+          term: 'bravo',
+        },
+      };
+
+      searchHandler(
+        proxyEvent,
+        (results) => {
+          expect(results.hits.total.value).toEqual(1);
+
+          const [result] = results.hits.hits;
+          expect(result?._source.uuid).toEqual(uuid2);
+        },
+        done
+      );
+    });
+
+    // FIXME: This is failing. https://github.com/iodepo/OceanBestPractices/issues/191
+    test.skip('should filter matched documents by term URI', (done) => {
+      const proxyEvent = {
+        queryStringParameters: {
+          keywords: 'ocean',
+          termURI: 'uri://b.r.a.v.o',
+        },
+      };
+
+      searchHandler(
+        proxyEvent,
+        (results) => {
+          expect(results.hits.total.value).toEqual(1);
+
+          const [result] = results.hits.hits;
+          expect(result?._source.uuid).toEqual(uuid2);
+        },
+        done
+      );
     });
   });
 });

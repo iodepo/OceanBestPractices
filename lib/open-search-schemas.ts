@@ -37,6 +37,9 @@ export const openSearchResultsSchema = <T extends z.ZodTypeAny>(
   sourceSchema: T
 ) => z.object({
     hits: z.object({
+      total: z.object({
+        value: z.number(),
+      }),
       hits: z.array(
         z.object({
           _id: z.string(),
@@ -51,6 +54,10 @@ export const openSearchScrollDocumentsResponseSchema = openSearchResultsSchema(
 ).extend({
   _scroll_id: z.string(),
 });
+
+export const documentsSearchResponseSchema = openSearchResultsSchema(documentItemSchema);
+
+export type DocumentsSearchResponse = z.infer<typeof documentsSearchResponseSchema>;
 
 export const percolateResponseSchema = openSearchResultsSchema(termsItemSchema);
 
