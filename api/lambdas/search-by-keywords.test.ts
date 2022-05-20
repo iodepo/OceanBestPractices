@@ -412,7 +412,6 @@ describe('search-by-keywords.handler', () => {
       await osClient.refreshIndex(esUrl, documentsIndexName);
     });
 
-    // FIXME: This is failing. https://github.com/iodepo/OceanBestPractices/issues/191
     test('should filter matched documents by term label', (done) => {
       const proxyEvent = {
         queryStringParameters: {
@@ -433,7 +432,6 @@ describe('search-by-keywords.handler', () => {
       );
     });
 
-    // FIXME: This is failing. https://github.com/iodepo/OceanBestPractices/issues/191
     test('should filter matched documents by term URI', (done) => {
       const proxyEvent = {
         queryStringParameters: {
