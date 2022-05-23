@@ -452,4 +452,8 @@ describe('search-by-keywords.handler', () => {
       );
     });
   });
+
+  describe('when sorting results', () => {
+    test.todo('should sort results by a field and direction');
+  });
 });
