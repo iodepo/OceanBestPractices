@@ -1,7 +1,7 @@
 const https = require('https');
 const { getStringFromEnv } = require('../../lib/env-utils');
 const osClient = require('../../lib/open-search-client');
-const { buildSearchDocument } = require('../lib/search-document-builder');
+const { buildDocumentSearchQuery } = require('../lib/search-query-builder');
 
 const { defaultSearchFields } = require('../lib/search-fields');
 
@@ -92,11 +92,12 @@ exports.handler = (event, context, callback) => {
  *
  * @param {string} openSearchEndpoint
  * @param {string} documentsIndexName
- * @param {import('../lib/search-document-builder').SearchDocumentBuilderOptions} options
+ * @param {import('../lib/search-query-builder')
+ *  .DocumentSearchQueryBuilderOptions} options
  * An object defining the search options to use when building the search query.
  */
 function executeSearch(openSearchEndpoint, documentsIndexName, options) {
-  const searchBody = buildSearchDocument(options);
+  const searchBody = buildDocumentSearchQuery(options);
 
   return osClient.searchByQuery(
     openSearchEndpoint,

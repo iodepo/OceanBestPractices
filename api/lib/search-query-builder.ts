@@ -1,3 +1,20 @@
+// TODO: Improve this as we define what a SearchDocument looks like.
+export type DocumentSearchQuery = Record<string, unknown>;
+
+// TODO: These are marked as optional simply because I had to default them above. Working
+// on improving all of this in small increments.
+export interface DocumentSearchQueryBuilderOptions {
+  from: number
+  size: number
+  keywords?: string[]
+  terms?: string[]
+  termURIs?: string[]
+  fields?: string[]
+  refereed?: boolean
+  endorsed?: boolean
+  sort: string[]
+}
+
 /**
  * @param {Object} termPhrase
  * @returns {Object}
@@ -62,7 +79,7 @@ export const formatKeyword = (k: string) => {
   return fk;
 };
 
-export const sortQuery = (sortParams: string[] = []) => {
+export const buildSort = (sortParams: string[] = []) => {
   const query = sortParams.map((s) => {
     const keyAndDirection = s.split(':');
     if (keyAndDirection.length < 2) {
@@ -87,29 +104,29 @@ export const sortQuery = (sortParams: string[] = []) => {
  * Helper function that builds the `query` field of the Elasticsearch search
  * document.
  *
- * @param {string[]} keywords An array of search keywords.
- * @param {string[]} terms An array of terms that will be used as filters in the
+ * @param keywords An array of search keywords.
+ * @param terms An array of terms that will be used as filters in the
  * query.
- * @param {string[]} termURIs A list of term URIs (ontology URIs) that can be
+ * @param termURIs A list of term URIs (ontology URIs) that can be
  * used as filters in the query.
- * @param {string[]} fields An array of field names to be searched against by
+ * @param fields An array of field names to be searched against by
  * the query.
- * @param {boolean} refereed Whether or not `refereed` should be used as a
+ * @param refereed Whether or not `refereed` should be used as a
  * filter.
- * @param {boolean} endorsed Whether or not to filter by a document being
+ * @param endorsed Whether or not to filter by a document being
  * endorsed.
  *
- * @returns {Object} The query object that can be used in an Elasticsearch
+ * @returns The query object that can be used in an Elasticsearch
  * search document `query` field.
  */
-export const buildElasticsearchQuery = (
+export const buildQuery = (
   keywords: string[] = [],
   terms: string[] = [],
   termURIs: string[] = [],
   fields: string[] = [],
   refereed = false,
   endorsed = false
-) => {
+): Record<string, unknown> => {
   const boolQuery: Record<string, unknown> = {
     must: {
       query_string: {
@@ -163,42 +180,34 @@ export const buildElasticsearchQuery = (
   return query;
 };
 
-// TODO: These are marked as optional simply because I had to default them above. Working
-// on improving all of this in small increments.
-export interface SearchDocumentBuilderOptions {
-  from: number
-  size: number
-  keywords?: string[]
-  terms?: string[]
-  termURIs?: string[]
-  fields?: string[]
-  refereed?: boolean
-  endorsed?: boolean
-  sort: string[]
-}
-
 /**
  * Builds an Elasticsearch search document object that can be used in an
  * Elasctsearch search request. Specifically, this function sets the fields to
  * include, options like from and size, and which fields should provide the
  * highlight information. It also builds the query string value based on
- * keywords provided in the `opts` argument.
+ * keywords provided in the `options` argument.
  *
- * @param {SearchDocumentBuilderOptions} options Search options to include in the search
+ * @param options Search options to include in the search
  * document. At a minimum this object should contain a from, size, keywords,
  * terms | termsURI, fields, and whether or not `refereed` should be checked.
  *
- * @returns {Record<string, unknown>} A search document object that can be
- * used directly by an Elasticsearch search request.
+ * @returns A search document object that can be used directly by an Elasticsearch search
+ * request.
  */
-export const buildSearchDocument = (options: SearchDocumentBuilderOptions) => {
-  const searchDoc = {
+export const buildDocumentSearchQuery = (
+  options: DocumentSearchQueryBuilderOptions
+): DocumentSearchQuery => {
+  const searchDoc: DocumentSearchQuery = {
     _source: {
-      excludes: ['_bitstreamText', 'bitstreams', 'metadata'],
+      excludes: [
+        '_bitstreamText',
+        'bitstreams',
+        'metadata',
+      ],
     },
     from: options.from,
     size: options.size,
-    query: buildElasticsearchQuery(
+    query: buildQuery(
       options.keywords,
       options.terms,
       options.termURIs,
@@ -211,7 +220,7 @@ export const buildSearchDocument = (options: SearchDocumentBuilderOptions) => {
         _bitstreamText: {},
       },
     },
-    sort: sortQuery(options.sort),
+    sort: buildSort(options.sort),
   };
 
   console.log(`Search document: ${JSON.stringify(searchDoc)}`);
