@@ -1,5 +1,5 @@
 export const defaultSearchFields = [
-  '_bitstreamText',
+  'bitstreamText',
   'dc_title^2',
   'dc_publisher',
   'dc_contributor_author',

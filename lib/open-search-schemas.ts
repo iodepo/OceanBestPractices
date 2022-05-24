@@ -25,9 +25,9 @@ export const documentItemTermSchema = z.object({
 export type DocumentItemTerm = z.infer<typeof documentItemTermSchema>;
 
 export const documentItemSchema = dspaceItemSchema.extend({
-  _bitstreamText: z.string().optional(),
-  _primaryAuthor: z.string().optional(),
-  _terms: z.array(documentItemTermSchema).optional(),
+  bitstreamText: z.string().optional(),
+  primaryAuthor: z.string().optional(),
+  terms: z.array(documentItemTermSchema).optional(),
   dc_title: z.string(),
 });
 

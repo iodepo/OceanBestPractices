@@ -65,7 +65,7 @@ const initialState = [
     title: 'Document Body',
     id: 'content',
     value: [
-      '_bitstreamText',
+      'bitstreamText',
     ],
     active_search: false,
     autocomplete: true,

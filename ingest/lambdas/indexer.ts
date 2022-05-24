@@ -39,8 +39,8 @@ export const getDSpaceItemFields = async (
 };
 
 interface BitstreamTextSource {
-  _bitstreamText: string
-  _bitstreamTextKey: string
+  bitstreamText: string
+  bitstreamTextKey: string
 }
 
 export const getBitstreamTextSource = async (
@@ -52,8 +52,8 @@ export const getBitstreamTextSource = async (
   );
 
   return {
-    _bitstreamText: bitstreamText,
-    _bitstreamTextKey: bitstreamTextKey,
+    bitstreamText,
+    bitstreamTextKey,
   };
 };
 
@@ -77,7 +77,7 @@ export const getMetadataSearchFields = (
 };
 
 export interface PrimaryAuthor {
-  _primaryAuthor: string
+  primaryAuthor: string
 }
 
 export const getPrimaryAuthor = (
@@ -86,7 +86,7 @@ export const getPrimaryAuthor = (
   const [primaryAuthor] = findMetadataItems(metadata, 'dc.contributor.author');
   if (primaryAuthor) {
     return {
-      _primaryAuthor: primaryAuthor.value,
+      primaryAuthor: primaryAuthor.value,
     };
   }
 
@@ -94,7 +94,7 @@ export const getPrimaryAuthor = (
 };
 
 interface ThumbnailRetrieveLink {
-  _thumbnailRetrieveLink: string
+  thumbnailRetrieveLink: string
 }
 
 export const getThumbnailRetrieveLink = (
@@ -103,7 +103,7 @@ export const getThumbnailRetrieveLink = (
   const thumbnailBitstream = findThumbnailBitstreamItem(bitstreams);
   if (thumbnailBitstream) {
     return {
-      _thumbnailRetrieveLink: thumbnailBitstream.retrieveLink,
+      thumbnailRetrieveLink: thumbnailBitstream.retrieveLink,
     };
   }
 
@@ -121,7 +121,7 @@ export const getTerms = async (
   );
 
   return {
-    _terms: terms,
+    terms,
   };
 };
 
@@ -186,7 +186,7 @@ const index = async (
 
   // Get terms.
   const title = metadataSearchFields.dc_title;
-  const contents = bitstreamSource?._bitstreamText || '';
+  const contents = bitstreamSource?.bitstreamText || '';
   const terms = await getTerms(
     openSearchEndpoint,
     {
@@ -196,7 +196,7 @@ const index = async (
   );
 
   const { uuid } = dspaceItem;
-  const termNames = terms._terms.map((t) => t.label);
+  const termNames = terms.terms.map((t) => t.label);
   console.log(`${uuid} matched terms ${JSON.stringify(termNames)}`);
 
   const documentItem = documentItemSchema.parse({

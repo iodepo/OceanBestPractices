@@ -7,12 +7,12 @@
   {
     "label": "AUTHOR",
     "direction": "asc",
-    "filter": "_primaryAuthor.keyword:asc"
+    "filter": "primaryAuthor.keyword:asc"
   },
   {
     "label": "AUTHOR",
     "direction": "desc",
-    "filter": "_primaryAuthor.keyword:desc"
+    "filter": "primaryAuthor.keyword:desc"
   },
   {
     "label": "PUBLISHER",

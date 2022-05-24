@@ -21,7 +21,7 @@ export interface DocumentSearchQueryBuilderOptions {
  */
 export const nestedQuery = (termPhrase: unknown) => ({
   nested: {
-    path: '_terms',
+    path: 'terms',
     query: {
       match: termPhrase,
     },
@@ -143,11 +143,11 @@ export const buildQuery = (
   const filter = [];
   if (terms.length > 0 || termURIs.length > 0) {
     for (const t of terms) {
-      filter.push(nestedQuery({ '_terms.label': t }));
+      filter.push(nestedQuery({ 'terms.label': t }));
     }
 
     for (const t of termURIs) {
-      filter.push(nestedQuery({ '_terms.uri': t }));
+      filter.push(nestedQuery({ 'terms.uri': t }));
     }
   }
 
@@ -200,7 +200,7 @@ export const buildDocumentSearchQuery = (
   const searchDoc: DocumentSearchQuery = {
     _source: {
       excludes: [
-        '_bitstreamText',
+        'bitstreamText',
         'bitstreams',
         'metadata',
       ],
@@ -217,7 +217,7 @@ export const buildDocumentSearchQuery = (
     ),
     highlight: {
       fields: {
-        _bitstreamText: {},
+        bitstreamText: {},
       },
     },
     sort: buildSort(options.sort),

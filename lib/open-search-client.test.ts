@@ -321,13 +321,13 @@ describe('open-search-client', () => {
       expect(createdMappings).toEqual({
         date_detection: false,
         properties: {
-          _bitstreamText: {
+          bitstreamText: {
             type: 'text',
           },
-          _bitstreamTextKey: {
+          bitstreamTextKey: {
             type: 'keyword',
           },
-          _primaryAuthor: {
+          primaryAuthor: {
             fields: {
               keyword: {
                 type: 'keyword',
@@ -335,7 +335,7 @@ describe('open-search-client', () => {
             },
             type: 'text',
           },
-          _terms: {
+          terms: {
             properties: {
               label: {
                 type: 'text',
@@ -352,7 +352,7 @@ describe('open-search-client', () => {
             },
             type: 'nested',
           },
-          _thumbnailRetrieveLink: {
+          thumbnailRetrieveLink: {
             type: 'keyword',
           },
           bitstreams: {
