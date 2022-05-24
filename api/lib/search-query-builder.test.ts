@@ -66,7 +66,7 @@ describe('search-document-builder', () => {
         },
         highlight: {
           fields: {
-            _bitstreamText: {},
+            bitstreamText: {},
           },
         },
         sort: [
@@ -77,7 +77,7 @@ describe('search-document-builder', () => {
         ],
         _source: {
           excludes: [
-            '_bitstreamText',
+            'bitstreamText',
             'bitstreams',
             'metadata',
           ],

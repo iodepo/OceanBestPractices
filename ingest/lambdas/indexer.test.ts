@@ -157,8 +157,8 @@ describe('indexer', () => {
       );
 
       expect(result).toEqual({
-        _bitstreamText: 'Hello world!',
-        _bitstreamTextKey: bitstreamTextKey,
+        bitstreamText: 'Hello world!',
+        bitstreamTextKey,
       });
     });
   });
@@ -265,7 +265,7 @@ describe('indexer', () => {
 
       const result = indexer.getPrimaryAuthor(metadata);
       expect(result).toEqual({
-        _primaryAuthor: 'Paul Pilone',
+        primaryAuthor: 'Paul Pilone',
       });
     });
 
@@ -354,7 +354,7 @@ describe('indexer', () => {
       );
 
       expect(result).toEqual({
-        _thumbnailRetrieveLink: '/rest/bitstreams/5940f3b4-5dd3-4230-ae4e-28b2e2b47339/retrieve',
+        thumbnailRetrieveLink: '/rest/bitstreams/5940f3b4-5dd3-4230-ae4e-28b2e2b47339/retrieve',
       });
     });
 
@@ -677,17 +677,17 @@ describe('indexer', () => {
   //           dc_title: 'Hello document with a PDF!',
   //           dc_date_accessioned: '2021-07-05T19:56:13Z',
   //           dc_contributor_author: ['Paul Pilone', 'Marc Huffnagle'],
-  //           _bitstreamText: 'Bitstream text for 01ebed91-218a-4465-8a67-f6712ff3cfb7.',
-  //           _bitstreamTextKey: '01ebed91-218a-4465-8a67-f6712ff3cfb7.txt',
-  //           _primaryAuthor: 'Paul Pilone',
-  //           _terms: [
+  //           bitstreamText: 'Bitstream text for 01ebed91-218a-4465-8a67-f6712ff3cfb7.',
+  //           bitstreamTextKey: '01ebed91-218a-4465-8a67-f6712ff3cfb7.txt',
+  //           primaryAuthor: 'Paul Pilone',
+  //           terms: [
   //             {
   //               label: 'Hello',
   //               source_terminology: 'Test Terminology',
   //               uri: 'http://test-terminology.owl/1234',
   //             },
   //           ],
-  //           _thumbnailRetrieveLink: '/rest/bitstreams/da66b42c-b435-4c47-981c-44da170a1018/retrieve',
+  //           thumbnailRetrieveLink: '/rest/bitstreams/da66b42c-b435-4c47-981c-44da170a1018/retrieve',
   //         });
 
   //         const result2 = await osClient.getDocument(
@@ -734,16 +734,16 @@ describe('indexer', () => {
   //           ],
   //           dc_title: 'Hello another document with a PDF!',
   //           dc_date_accessioned: '2021-07-05T19:56:13Z',
-  //           _bitstreamText: 'Bitstream text for 9c404a3c-a09a-44f9-b27b-67c8ec2b95bc.',
-  //           _bitstreamTextKey: '9c404a3c-a09a-44f9-b27b-67c8ec2b95bc.txt',
-  //           _terms: [
+  //           bitstreamText: 'Bitstream text for 9c404a3c-a09a-44f9-b27b-67c8ec2b95bc.',
+  //           bitstreamTextKey: '9c404a3c-a09a-44f9-b27b-67c8ec2b95bc.txt',
+  //           terms: [
   //             {
   //               label: 'Hello',
   //               source_terminology: 'Test Terminology',
   //               uri: 'http://test-terminology.owl/1234',
   //             },
   //           ],
-  //           _thumbnailRetrieveLink: '/rest/bitstreams/da66b42c-b435-4c47-981c-44da170a1018/retrieve',
+  //           thumbnailRetrieveLink: '/rest/bitstreams/da66b42c-b435-4c47-981c-44da170a1018/retrieve',
   //         });
   //       });
   //     });
@@ -792,14 +792,14 @@ describe('indexer', () => {
   //           ],
   //           dc_title: 'Hello document without a PDF!',
   //           dc_date_accessioned: '2021-07-05T19:56:13Z',
-  //           _terms: [
+  //           terms: [
   //             {
   //               label: 'Hello',
   //               source_terminology: 'Test Terminology',
   //               uri: 'http://test-terminology.owl/1234',
   //             },
   //           ],
-  //           _thumbnailRetrieveLink: '/rest/bitstreams/da66b42c-b435-4c47-981c-44da170a1018/retrieve',
+  //           thumbnailRetrieveLink: '/rest/bitstreams/da66b42c-b435-4c47-981c-44da170a1018/retrieve',
   //         });
   //       });
   //     });

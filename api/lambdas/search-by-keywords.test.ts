@@ -72,7 +72,7 @@ describe('search-by-keywords.handler', () => {
       const doc2 = {
         uuid: uuid2,
         dc_title: 'This is a document with bitstream text.',
-        _bitstreamText: 'This is the body. In this body we talk about ocean stuff.',
+        bitstreamText: 'This is the body. In this body we talk about ocean stuff.',
       };
 
       const doc3 = {
@@ -119,7 +119,7 @@ describe('search-by-keywords.handler', () => {
       const proxyEvent = {
         queryStringParameters: {
           keywords: 'ocean',
-          fields: '_bitstreamText',
+          fields: 'bitstreamText',
         },
       };
 
@@ -145,7 +145,7 @@ describe('search-by-keywords.handler', () => {
       const proxyEvent = {
         queryStringParameters: {
           keywords: 'bitstream,+body',
-          fields: '_bitstreamText',
+          fields: 'bitstreamText',
         },
       };
 
@@ -386,7 +386,7 @@ describe('search-by-keywords.handler', () => {
       const doc1 = {
         uuid: uuid1,
         dc_title: 'This is a very specific ocean and sea document.',
-        _terms: [{
+        terms: [{
           label: 'alpha',
           uri: 'uri://a.l.p.h.a',
         }],
@@ -395,7 +395,7 @@ describe('search-by-keywords.handler', () => {
       const doc2 = {
         uuid: uuid2,
         dc_title: 'This is another very specific ocean and sea document.',
-        _terms: [{
+        terms: [{
           label: 'bravo',
           uri: 'uri://b.r.a.v.o',
         }],

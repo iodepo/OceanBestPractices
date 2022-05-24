@@ -182,12 +182,12 @@ class SearchResults extends Component {
     let results = this.props.searchReducer.items.map((result) => {
       return {
         date: result._source.dc_date_issued,
-        highlight: result.highlight && result.highlight._bitstreamText,
+        highlight: result.highlight && result.highlight.bitstreamText,
         id: result._id,
         language: result._source.dc_language_iso,
         publisher: result._source.dc_publisher,
         author: result._source.dc_contributor_author,
-        terms: result._source._terms,
+        terms: result._source.terms,
         title: result._source.dc_title,
         handle: result._source.handle,
         thumbnail: result._source.thumbnailRetrieveLink,
@@ -198,7 +198,7 @@ class SearchResults extends Component {
           ? result._source.dc_description_bptype.join(', ')
           : result._source.dc_description_bptype,
         uuid: result._source.uuid,
-        sourceKey: result._source._bitstreamTextKey
+        sourceKey: result._source.bitstreamTextKey
       }
     });
 

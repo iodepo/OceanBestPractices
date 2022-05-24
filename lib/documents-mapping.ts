@@ -2,13 +2,13 @@ export const documentsMapping = {
   mappings: {
     date_detection: false,
     properties: {
-      _bitstreamTextKey: {
+      bitstreamTextKey: {
         type: 'keyword',
       },
-      _bitstreamText: {
+      bitstreamText: {
         type: 'text',
       },
-      _primaryAuthor: {
+      primaryAuthor: {
         type: 'text',
         fields: {
           keyword: {
@@ -16,7 +16,7 @@ export const documentsMapping = {
           },
         },
       },
-      _terms: {
+      terms: {
         type: 'nested',
         properties: {
           uri: {
@@ -33,7 +33,7 @@ export const documentsMapping = {
           },
         },
       },
-      _thumbnailRetrieveLink: {
+      thumbnailRetrieveLink: {
         type: 'keyword',
       },
       bitstreams: {
