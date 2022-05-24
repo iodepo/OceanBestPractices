@@ -33,20 +33,20 @@ describe('search-document-builder', () => {
             filter: [
               {
                 nested: {
-                  path: '_terms',
+                  path: 'terms',
                   query: {
                     match: {
-                      '_terms.label': 'alpha',
+                      'terms.label': 'alpha',
                     },
                   },
                 },
               },
               {
                 nested: {
-                  path: '_terms',
+                  path: 'terms',
                   query: {
                     match: {
-                      '_terms.uri': 'uri://alpha',
+                      'terms.uri': 'uri://alpha',
                     },
                   },
                 },
