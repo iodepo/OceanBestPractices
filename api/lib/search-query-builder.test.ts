@@ -123,5 +123,9 @@ describe('search-document-builder', () => {
 
       expect(result).toEqual('*:(or term) NOT title:(not term) AND title:(and term)');
     });
+
+    test.todo('should boost the dc_title keyword field if searching all fields');
+
+    test.todo('shoudl boost the dc_description_abstract field if searching all fields');
   });
 });
