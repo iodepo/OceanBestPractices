@@ -1,6 +1,7 @@
-const OPERATORS = [
+export const OPERATORS = [
   {
     name: 'OR',
+    value: '',
   },
   {
     name: 'AND',
@@ -12,18 +13,18 @@ const OPERATORS = [
   },
 ];
 
-const OPERATORS_EXCLUDE_FROM_VIEWER = [
+export const OPERATORS_EXCLUDE_FROM_VIEWER = [
   'NOT',
 ];
 
-const DEFAULT_OPERATOR = 'OR';
+export const DEFAULT_OPERATOR = 'OR';
 
 /**
  * deconstructQuery
  * @description Transforms the active search term into an array of objects
  */
 
-export function deconstructQuery(query, query_group = []) {
+export function deconstructQuery(query, fieldId = 'all', query_group = []) {
 
   if ( typeof query !== 'string' || query.length === 0 ) return query_group;
 
@@ -35,6 +36,7 @@ export function deconstructQuery(query, query_group = []) {
     value: query,
     type: 'term',
     operator: DEFAULT_OPERATOR,
+    fieldId,
   };
 
   query_group.push(term);
@@ -48,12 +50,10 @@ export function deconstructQuery(query, query_group = []) {
 
 }
 
-
 /**
  * constructQuery
  * @description Transforms a search group into a contructed API query
- */
-
+  */
 export function constructQuery(query) {
 
   if ( typeof query === 'string' ) return encodeURIComponent(query);
@@ -82,7 +82,6 @@ export function constructQuery(query) {
   }).filter(segment => !!(segment)).join(',');
 
 }
-
 
 /**
  * constructViewerQuery
@@ -119,16 +118,16 @@ export function constructViewerQuery(query) {
  * @description Transforms an Elastic Serach formulated query into a deconstructed query
  */
 
-export function parseQuery(string) {
-
+export function parseQuery(keywords, fields = 'all') {
+  // FIXME: https://github.com/iodepo/OceanBestPractices/issues/199
   let query = [];
 
-  if ( typeof string !== 'string' ) return query;
+  if ( typeof keywords !== 'string' ) return query;
 
-  let split_string = string.split(',');
+  const splitKeywords = keywords.split(',');
+  const splitFields = fields.split(',');
 
-  return split_string.map((segment, index) => {
-
+  return splitKeywords.map((segment, index) => {
     let query = segment;
     let first_char = query.charAt(0);
     let operator = OPERATORS.find((operator) => operator.value === first_char);
@@ -143,6 +142,7 @@ export function parseQuery(string) {
     return {
       value: query,
       type: 'term',
+      fieldId: index < splitFields.length ? splitFields[index] : splitFields.slice(-1).pop(),
       operator,
       index,
     }

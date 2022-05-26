@@ -1,3 +1,5 @@
+import { SearchKeywordComps } from './search-keyword-comps';
+
 // TODO: Improve this as we define what a SearchDocument looks like.
 export type DocumentSearchQuery = Record<string, unknown>;
 
@@ -6,10 +8,9 @@ export type DocumentSearchQuery = Record<string, unknown>;
 export interface DocumentSearchQueryBuilderOptions {
   from: number
   size: number
-  keywords?: string[]
+  keywordComps?: SearchKeywordComps[]
   terms?: string[]
   termURIs?: string[]
-  fields?: string[]
   refereed?: boolean
   endorsed?: boolean
   sort: string[]
@@ -28,55 +29,40 @@ export const nestedQuery = (termPhrase: unknown) => ({
   },
 });
 
+const formatKeywordComp = (keywordComp: SearchKeywordComps) => {
+  let openSearchOperator;
+
+  switch (keywordComp.operator) {
+    case '-':
+      openSearchOperator = 'NOT';
+      break;
+    case '+':
+      openSearchOperator = 'AND';
+      break;
+    default:
+      openSearchOperator = 'OR';
+  }
+
+  return `${openSearchOperator} ${keywordComp.field}:(${keywordComp.term})`;
+};
+
 /**
- * This function takes a valid keyword string and formats it specifically for
- * our Elasticsearch query. It's responsible for parsing logical operators and
- * inserting/removing any necessary or unnecessary quotes.
+ * This function takes a valid keyword and formats it specifically for our Opensearch
+ * query string.
  *
- * e.g. "+ocean current" becomes "AND \"ocean current\""
- *
- * @param {string} k
+ * @param keywordComps
  * */
-export const formatKeyword = (k: string) => {
-  // Map the UI operators to ES operators.
-  const opTransforms: Record<string, string> = {
-    '+': 'AND',
-    '-': 'NOT',
-  };
-
-  // Extract the operator from the keyword.
-  let op = '';
-  let fk = k;
-  if (Object.keys(opTransforms).includes(fk.slice(0, 1))) {
-    op = opTransforms[fk.slice(0, 1)] || '';
-    fk = fk.slice(1, fk.length);
+export const formatQueryString = (keywordComps: SearchKeywordComps[]): string => {
+  if (keywordComps.length === 0) {
+    return '*:(*)';
   }
 
-  // Strip all double quotes from the keyword since we're
-  // performing a quoted query in ES.
-  fk = fk.replace(/"/g, '');
-
-  // Optional: try splitting the search term on a space. If it's a multi-
-  // word search term we'll append each term as OR'd AND searches.
-  const fkComps = fk.split(' ');
-
-  // Need to determine what this escaped value should look like.
-
-  // eslint-disable-next-line no-useless-escape
-  const optT = fkComps.map((t) => `\"${t}\"`);
-
-  console.log(`optT:\n${JSON.stringify(optT)}`);
-
-  // Construct the query for the primary keyword.
-  fk = `${op} "${fk}"`;
-
-  // It's a multi-word keyword. Append a grouped AND for each word in the term
-  // and boost the original keyword.
-  if (optT.length > 1) {
-    fk = `${fk}^2 OR ( ${optT.join(' AND ')} )`;
-  }
-
-  return fk;
+  // Create the query string from the given keywords. Query strings can
+  // not start with an operator so we remove it and any extra whitespace.
+  return keywordComps.map((kc) => formatKeywordComp(kc))
+    .join(' ')
+    .trim()
+    .replace(/^(OR|AND|NOT)\s+/, '');
 };
 
 export const buildSort = (sortParams: string[] = []) => {
@@ -104,41 +90,35 @@ export const buildSort = (sortParams: string[] = []) => {
  * Helper function that builds the `query` field of the Elasticsearch search
  * document.
  *
- * @param keywords An array of search keywords.
+ * @param keywords An array of search keyword components.
  * @param terms An array of terms that will be used as filters in the
  * query.
  * @param termURIs A list of term URIs (ontology URIs) that can be
  * used as filters in the query.
- * @param fields An array of field names to be searched against by
- * the query.
  * @param refereed Whether or not `refereed` should be used as a
  * filter.
  * @param endorsed Whether or not to filter by a document being
  * endorsed.
  *
- * @returns The query object that can be used in an Elasticsearch
+ * @returns The query object that can be used in an OpenSearch
  * search document `query` field.
  */
 export const buildQuery = (
-  keywords: string[] = [],
+  keywordComps: SearchKeywordComps[] = [],
   terms: string[] = [],
   termURIs: string[] = [],
-  fields: string[] = [],
   refereed = false,
   endorsed = false
 ): Record<string, unknown> => {
   const boolQuery: Record<string, unknown> = {
     must: {
       query_string: {
-        fields,
-        query: keywords.length > 0
-          ? keywords.map((k) => formatKeyword(k)).join(' ')
-          : '*',
+        query: formatQueryString(keywordComps),
       },
     },
   };
 
-  console.log(`Keywords:${JSON.stringify(keywords)}`);
+  console.log(`Keywords:${JSON.stringify(keywordComps)}`);
 
   const filter = [];
   if (terms.length > 0 || termURIs.length > 0) {
@@ -189,9 +169,9 @@ export const buildQuery = (
  *
  * @param options Search options to include in the search
  * document. At a minimum this object should contain a from, size, keywords,
- * terms | termsURI, fields, and whether or not `refereed` should be checked.
+ * terms | termsURI, and whether or not `refereed` should be checked.
  *
- * @returns A search document object that can be used directly by an Elasticsearch search
+ * @returns A search document object that can be used directly by an OpenSearch search
  * request.
  */
 export const buildDocumentSearchQuery = (
@@ -208,10 +188,9 @@ export const buildDocumentSearchQuery = (
     from: options.from,
     size: options.size,
     query: buildQuery(
-      options.keywords,
+      options.keywordComps,
       options.terms,
       options.termURIs,
-      options.fields,
       options.refereed,
       options.endorsed
     ),

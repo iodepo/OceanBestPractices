@@ -3,7 +3,7 @@ const { getStringFromEnv } = require('../../lib/env-utils');
 const osClient = require('../../lib/open-search-client');
 const { buildDocumentSearchQuery } = require('../lib/search-query-builder');
 
-const { defaultSearchFields } = require('../lib/search-fields');
+const { parseSearchKeyword } = require('../lib/search-keyword-comps');
 
 const ontOpts = {
   host: process.env['ONTOLOGY_STORE_HOST'],
@@ -46,11 +46,22 @@ exports.handler = (event, context, callback) => {
   } else {
     const opts = parseParams(params);
     if (opts.synonyms) {
-      getSynonyms(opts.keywords, callback)
+      // TODO: Synonyms doesn't really work. We also want to make sure
+      // that synonyms get the same field and operator as the originating keyword.
+      // https://github.com/iodepo/OceanBestPractices/issues/197
+      getSynonyms(opts.keywordComps, callback)
         .then((results) => {
-          let keywords = [opts.keywords].flat();
-          for (const r of results) { keywords = keywords.concat(r); }
-          opts.keywords = keywords;
+          const keywords = [opts.keywords].flat();
+          for (const r of results) {
+            opts.keywordComps = [
+              {
+                operator: '',
+                field: '*',
+                term: r,
+              },
+              ...opts.keywords,
+            ];
+          }
 
           executeSearch(openSearchEndpoint, documentsIndexName, opts)
             .then((searchResults) => {
@@ -117,7 +128,9 @@ function executeSearch(openSearchEndpoint, documentsIndexName, options) {
  */
 function parseParams(params) {
   return {
-    keywords: params.keywords !== undefined && params.keywords.length > 0 ? params.keywords.split(',') : [],
+    keywordComps: params.keywords !== undefined && params.keywords.length > 0
+      ? params.keywords.split(',').map((k) => parseSearchKeyword(k))
+      : [],
     // TODO: Rename this parameter to be plural.
     terms: params.term === undefined ? [] : params.term.split(','),
     // TODO: Rename this parameter to be plural.
@@ -125,13 +138,17 @@ function parseParams(params) {
     from: params.from === undefined ? DEFAULT_FROM : params.from,
     size: params.size === undefined ? DEFAULT_SIZE : params.size,
     sort: params.sort === undefined ? [] : params.sort.split(','),
-    fields: params.fields === undefined ? defaultSearchFields : params.fields.split(','),
     synonyms: params.synonyms === undefined ? false : params.synonyms,
     refereed: params.refereed === undefined ? false : params.refereed,
     endorsed: params.endorsed === 'true',
   };
 }
 
+/**
+ *
+ * @param {string} term
+ * @returns
+ */
 function buildSynonymsQuery(term) {
   const query = `PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \
                PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \
@@ -170,6 +187,11 @@ function buildSynonymsQuery(term) {
   return query;
 }
 
+/**
+ *
+ * @param {string} query
+ * @returns
+ */
 function buildSynonymsQueryOpts(query) {
   return {
     hostname: ontOpts.host,
@@ -181,11 +203,38 @@ function buildSynonymsQueryOpts(query) {
   };
 }
 
-function getSynonyms(keywords) {
+/**
+ *
+ * @param {{ results: { bindings: any }}} body
+ * @returns
+ */
+function parseSynonymsResponse(body) {
+  const results = body.results.bindings; const
+    synonyms = [];
+  console.log(JSON.stringify(body));
+  for (const r of results) {
+    if (r['annotatedPropertyLabel'] !== undefined) {
+      if (r['annotatedPropertyLabel']['value'] === 'has_exact_synonym' || r['annotatedPropertyLabel']['value'] === 'alternative_label') {
+        synonyms.push(r['annotatedTarget']['value']);
+      }
+    } else if (r['sameAsLabel'] !== undefined) {
+      synonyms.push(r['sameAsLabel']['value']);
+    }
+  }
+
+  return synonyms;
+}
+
+/**
+ *
+ * @param {import('../lib/search-keyword-comps').SearchKeywordComps[]} keywordComps
+ * @returns
+ */
+function getSynonyms(keywordComps) {
   const promises = [];
-  for (const k of keywords) {
+  for (const kc of keywordComps) {
     const queryPromise = new Promise((resolve, reject) => {
-      https.get(buildSynonymsQueryOpts(buildSynonymsQuery(k)), (res) => {
+      https.get(buildSynonymsQueryOpts(buildSynonymsQuery(kc.term)), (res) => {
         let body = '';
 
         res.on('data', (chunk) => {
@@ -207,21 +256,4 @@ function getSynonyms(keywords) {
   }
 
   return Promise.all(promises);
-}
-
-function parseSynonymsResponse(body) {
-  const results = body.results.bindings; const
-    synonyms = [];
-  console.log(JSON.stringify(body));
-  for (const r of results) {
-    if (r['annotatedPropertyLabel'] !== undefined) {
-      if (r['annotatedPropertyLabel']['value'] === 'has_exact_synonym' || r['annotatedPropertyLabel']['value'] === 'alternative_label') {
-        synonyms.push(r['annotatedTarget']['value']);
-      }
-    } else if (r['sameAsLabel'] !== undefined) {
-      synonyms.push(r['sameAsLabel']['value']);
-    }
-  }
-
-  return synonyms;
 }

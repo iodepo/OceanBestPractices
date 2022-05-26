@@ -1,4 +1,4 @@
-import { constructQuery } from './query';
+import { OPERATORS } from '../helpers/query';
 
 export const baseAPIURL = process.env.REACT_APP_API_ENDPOINT;
 export const defaultQuerySize = 50;
@@ -27,23 +27,18 @@ export const createAPIAutocompleteURL = (query, synonyms = false) => {
 
 // Creates the search url based on the provided params
 
-export const createAPISearchURL = (query, options) => {
+export const createAPISearchURL = (searchGroups, options) => {
 
-  let url = `${ baseAPIURL }/documents?keywords=${ constructQuery(query) }`;
+  let url = `${ baseAPIURL }/documents?keywords=${ buildKeywordsQueryParameter(searchGroups, options.fields) }`;
 
   let size = options.size || defaultQuerySize;
   let offset = options.offset || defaultQueryOffset;
   let sort = options.sort;
   let term = options.term;
   let termURI = options.termURI;
-  let fields = options.fields;
   let synonyms = options.synonyms;
   let refereed = options.refereed;
   let endorsed = options.endorsed;
-
-  if ( Array.isArray(fields) ) {
-    url = addParam(url, 'fields', fields.join(','));
-  }
 
   if ( size ) {
     url = addParam(url, 'size', size);
@@ -113,4 +108,30 @@ export const createAPITaggerCSVURL = () => {
 
 export const addParam = (url, paramType, paramValue) => {
   return `${url}&${paramType}=${paramValue}`;
+}
+
+/**
+ * Builds a URL query parameter
+ */
+
+ export function buildKeywordsQueryParameter(searchGroups, fields) {
+  if ( typeof searchGroups === 'string' ) return encodeURIComponent(searchGroups);
+
+  return searchGroups.map((searchGroup, index) => {
+    if (searchGroup.type !== 'term' || typeof searchGroup.value !== 'string') return undefined;
+
+    const operator = OPERATORS.find((operator) => operator.name === searchGroup.operator);
+
+    // Get the fields we're targeting with this keyword. Fields can have multiple
+    // values so we might end up appending multiple keywords for this searchGroup.
+    const field = fields.find((f) => f.id === searchGroup.fieldId) || { value: ['*'] };
+
+    const keywords = field.value.map((v) => {
+      return encodeURI(`${operator.value}:${v}:${searchGroup.value.trim()}`);
+    });
+
+    return keywords.join(',');
+
+  }).filter(searchGroup => !!(searchGroup)).join(',');
+
 }

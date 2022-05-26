@@ -97,18 +97,21 @@ describe('search-by-keywords.handler', () => {
     test('should find documents across multiple fields', (done) => {
       const proxyEvent = {
         queryStringParameters: {
-          keywords: 'ocean',
+          keywords: '::ocean',
         },
       };
 
       searchHandler(
         proxyEvent,
         (results) => {
+          console.log(`Results ${JSON.stringify(results)}`);
+
           expect(results.hits.total.value).toEqual(3);
 
           const uuids = results.hits.hits.map(
             (h) => h._source.uuid
           );
+
           expect(uuids).toEqual([uuid1, uuid2, uuid3]);
         },
         done
@@ -118,8 +121,7 @@ describe('search-by-keywords.handler', () => {
     test('should find documents that match a single targeted field', (done) => {
       const proxyEvent = {
         queryStringParameters: {
-          keywords: 'ocean',
-          fields: 'bitstreamText',
+          keywords: ':bitstreamText:ocean',
         },
       };
 
@@ -137,15 +139,10 @@ describe('search-by-keywords.handler', () => {
       );
     });
 
-    // FIXME: This is failing. https://github.com/iodepo/OceanBestPractices/issues/190
-    test.skip('should find documents that match a mix of targeted fields', (done) => {
-      // This is broken. The hope here is that this would find document 2. However,
-      // it won't because we don't actually know that 'bitstream' is an all fields search.
-      // The way we do fields is broken...
+    test('should find documents that match a mix of targeted fields', (done) => {
       const proxyEvent = {
         queryStringParameters: {
-          keywords: 'bitstream,+body',
-          fields: 'bitstreamText',
+          keywords: '::bitstream,+:bitstreamText:body we talk',
         },
       };
 
@@ -167,7 +164,7 @@ describe('search-by-keywords.handler', () => {
       test('should find matching documents using the OR boolean operator', (done) => {
         const proxyEvent = {
           queryStringParameters: {
-            keywords: 'ocean,specific',
+            keywords: '::ocean,::specific',
           },
         };
 
@@ -188,7 +185,7 @@ describe('search-by-keywords.handler', () => {
       test('should find matching documents using the AND boolean operator', (done) => {
         const proxyEvent = {
           queryStringParameters: {
-            keywords: 'ocean,+specific',
+            keywords: '::ocean,+::specific',
           },
         };
 
@@ -207,7 +204,7 @@ describe('search-by-keywords.handler', () => {
       test('should find matching documents using the NOT boolean operator', (done) => {
         const proxyEvent = {
           queryStringParameters: {
-            keywords: 'ocean,-specific',
+            keywords: '::ocean,-::specific',
           },
         };
 
@@ -228,7 +225,7 @@ describe('search-by-keywords.handler', () => {
       test('should find matching documents with a mix of boolean operators', (done) => {
         const proxyEvent = {
           queryStringParameters: {
-            keywords: 'ocean,+sea,-specific',
+            keywords: '::ocean,+::sea,-::specific',
           },
         };
 
@@ -287,7 +284,7 @@ describe('search-by-keywords.handler', () => {
       test('should return matching documents that have a non-null value for obps.endorsementExternal.externalEndorsedBy field', (done) => {
         const proxyEvent = {
           queryStringParameters: {
-            keywords: 'Test',
+            keywords: '::Test',
             endorsed: 'true',
           },
         };
@@ -350,7 +347,7 @@ describe('search-by-keywords.handler', () => {
       test('should return matching documents that have a non-null value for dc.description.refereed field', (done) => {
         const proxyEvent = {
           queryStringParameters: {
-            keywords: 'Test',
+            keywords: '::Test',
             refereed: 'true',
           },
         };
@@ -415,7 +412,7 @@ describe('search-by-keywords.handler', () => {
     test('should filter matched documents by term label', (done) => {
       const proxyEvent = {
         queryStringParameters: {
-          keywords: 'ocean',
+          keywords: '::ocean',
           term: 'bravo',
         },
       };
@@ -435,7 +432,7 @@ describe('search-by-keywords.handler', () => {
     test('should filter matched documents by term URI', (done) => {
       const proxyEvent = {
         queryStringParameters: {
-          keywords: 'ocean',
+          keywords: '::ocean',
           termURI: 'uri://b.r.a.v.o',
         },
       };
