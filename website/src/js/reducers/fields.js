@@ -10,6 +10,9 @@ const initialState = [
     active_search: true,
     autocomplete: true,
     help_text: 'Enter any term or phrase and the search will look in ALL metadata fields AND the full text document',
+    value: [
+      '*'
+    ],
   },
   {
     title: 'Author',

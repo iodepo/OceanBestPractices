@@ -73,7 +73,6 @@ export const searchUpdateOperator = (tag_index, operator) => {
 // Hit the api for the search term(s)
 
 export const getSearch = (query, options = {}) => {
-
   let searchOptions = {
     termURI: false,
     term: false,
@@ -82,11 +81,10 @@ export const getSearch = (query, options = {}) => {
   }
 
   return (dispatch, getState) => {
-
     const state = getState();
     const search = query || state.searchReducer.search;
-    const search_group = deconstructQuery(search, state.searchReducer.activeSearch);
-    const active_field = state.fields.filter(field => !!(field.active_search))[0];
+    const activeField = state.fields.filter(field => !!(field.active_search))[0];
+    const searchGroup = deconstructQuery(search, activeField.id, state.searchReducer.activeSearch);
 
     let options = {};
 
@@ -94,7 +92,7 @@ export const getSearch = (query, options = {}) => {
     // anything as there's nothing to request. Let's return out of this and also clean up
     // our app state to make sure we don't have stale data hanging around
 
-    if ( !search && search_group.length === 0 ) {
+    if ( !search && searchGroup.length === 0 ) {
       dispatch(resetTerms());
       dispatch(clearAllSearch());
       return;
@@ -112,9 +110,10 @@ export const getSearch = (query, options = {}) => {
     }
 
     searchOptions.termURI = convertFiltersToString(state.searchReducer.activeFilters);
-    searchOptions.fields = active_field && active_field.value;
+    searchOptions.activeFields = activeField && activeField.value;
+    searchOptions.fields = state.fields;
 
-    const url = createAPISearchURL(search_group, searchOptions);
+    const url = createAPISearchURL(searchGroup, searchOptions);
 
     // Clear any fetched autocompleted terms.
     if (searchOptions.resetTerms) {
@@ -123,7 +122,7 @@ export const getSearch = (query, options = {}) => {
 
     // Clear the search field.
     if (!searchOptions.preserveSearch) {
-      dispatch(setSearch('', search_group));
+      dispatch(setSearch('', searchGroup));
     }
 
     dispatch(searchIsLoading(true));

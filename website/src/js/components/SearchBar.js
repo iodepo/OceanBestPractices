@@ -55,9 +55,8 @@ class SearchBar extends Component {
     }
 
     if ( params ) {
-
       if ( params.q && params.q.length > 0 ) {
-        starting_query = parseQuery(params.q);
+        starting_query = parseQuery(params.q, params.fields);
         this.props.dispatch(setSearch('', starting_query));
       }
 
@@ -94,7 +93,7 @@ class SearchBar extends Component {
     let query;
 
     if ( activeSearch.length > 0 ) {
-      query = constructQuery(activeSearch);
+      query = constructQuery(activeSearch, this.props.fields);
     }
 
     this.navigateToSearch(query);
@@ -109,8 +108,8 @@ class SearchBar extends Component {
   navigateToSearch(active_search) {
 
     const active_sort = activeSortOption(this.props.options);
-
     const route = formSearchRoute({
+      // FIXME: https://github.com/iodepo/OceanBestPractices/issues/199
       active_fields: activeFieldsString(this.props.fields),
       active_tags: activeTagsString(this.props.searchReducer.activeFilters),
       active_options: activeAdvancedOptionsString(this.props.options),
