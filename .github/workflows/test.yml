@@ -22,7 +22,7 @@ jobs:
         ports:
           - 1111:1111
           - 8890:8890
-        environment:
+        env:
           - DBA_PASSWORD=obptest
         volumes:
           - ./.virtuoso-db:/opt/virtuoso-opensource/database
