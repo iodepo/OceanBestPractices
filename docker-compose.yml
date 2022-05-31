@@ -23,5 +23,5 @@ services:
     environment:
       - DBA_PASSWORD=obptest
     volumes:
-      - ./.virtuoso-db:/opt/virtuoso-opensource/database
-      - ./.virtuoso-data:/usr/share/proj
+      - ./virtuoso/db:/opt/virtuoso-opensource/database
+      - ./virtuoso/data:/usr/share/proj

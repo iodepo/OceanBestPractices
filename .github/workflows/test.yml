@@ -27,6 +27,7 @@ jobs:
         volumes:
           - /virtuoso/db:/opt/virtuoso-opensource/database
           - /virtuoso/data:/usr/share/proj
+        options: --name oceanbestpractices_virtuoso_1
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
