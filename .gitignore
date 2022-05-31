@@ -13,7 +13,7 @@ keys/
 
 # Testing directory.
 /coverage
-/.virtuoso-db
+/virtuoso/db
 
 tmp/
 deployment-config.json

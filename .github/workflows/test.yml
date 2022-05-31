@@ -25,8 +25,8 @@ jobs:
         env:
           DBA_PASSWORD: obptest
         volumes:
-          - ./.virtuoso-db:/opt/virtuoso-opensource/database
-          - ./.virtuoso-data:/usr/share/proj
+          - /virtuoso/db:/opt/virtuoso-opensource/database
+          - /virtuoso/data:/usr/share/proj
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
