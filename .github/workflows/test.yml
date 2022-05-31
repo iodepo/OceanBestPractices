@@ -23,7 +23,7 @@ jobs:
           - 1111:1111
           - 8890:8890
         env:
-          - DBA_PASSWORD: obptest
+          DBA_PASSWORD: obptest
         volumes:
           - ./.virtuoso-db:/opt/virtuoso-opensource/database
           - ./.virtuoso-data:/usr/share/proj
