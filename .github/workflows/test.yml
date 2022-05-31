@@ -17,6 +17,16 @@ jobs:
           SERVICES: s3,sns,sqs
         ports:
           - 4566:4566
+      virtuoso:
+        image: openlink/virtuoso-opensource-7:7.2
+        ports:
+          - 1111:1111
+          - 8890:8890
+        environment:
+          - DBA_PASSWORD=obptest
+        volumes:
+          - ./.virtuoso-db:/opt/virtuoso-opensource/database
+          - ./.virtuoso-data:/usr/share/proj
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
