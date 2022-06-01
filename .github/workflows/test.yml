@@ -25,8 +25,8 @@ jobs:
         env:
           DBA_PASSWORD: obptest
         volumes:
-          - ${{ github.workspace }}/virtuoso/db:/opt/virtuoso-opensource/database
-          - ${{ github.workspace }}/virtuoso/data:/usr/share/proj
+          - /virtuoso/db:/opt/virtuoso-opensource/database
+          - /virtuoso/data:/usr/share/proj
         options: --name oceanbestpractices_virtuoso_1
     steps:
       - uses: actions/checkout@v2
@@ -41,7 +41,9 @@ jobs:
         run: npx ts-node ./bin/wait-for-localstack-s3.ts
       - name: Wait for ElasticSearch
         run: ./bin/wait-for-elasticsearch/run.sh
-      - name: Wait for Virtuoso and grant SPARQL user UPDATE
+      - name: Wait for Virtuoso
         run: ./bin/wait-for-virtuoso/run.sh
+      - name: Copy Virtuoso data
+        run: cp -r ${{ github.workspace }}/virtuoso/data/. /virtuoso/data
       - name: Run tests
         run: npm run test -- --passWithNoTests
