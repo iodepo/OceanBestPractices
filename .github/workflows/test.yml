@@ -25,8 +25,8 @@ jobs:
         env:
           DBA_PASSWORD: obptest
         volumes:
-          - ${{ github.workspace }}/tmp/virtuoso/db:/opt/virtuoso-opensource/database
-          - ${{ github.workspace }}/tmp/virtuoso/data:/usr/share/proj
+          - /virtuoso/db:/opt/virtuoso-opensource/database
+          - /virtuoso/data:/usr/share/proj
         options: --name oceanbestpractices_virtuoso_1
     steps:
       - uses: actions/checkout@v2
@@ -44,6 +44,6 @@ jobs:
       - name: Wait for Virtuoso
         run: ./bin/wait-for-virtuoso/run.sh
       - name: Copy Virtuoso data
-        run: cp -r ${{ github.workspace }}/virtuoso/data/. ${{ github.workspace }}/tmp/virtuoso/data
+        run: sudo cp -r ${{ github.workspace }}/virtuoso/data/. /virtuoso/data
       - name: Run tests
         run: npm run test -- --passWithNoTests
