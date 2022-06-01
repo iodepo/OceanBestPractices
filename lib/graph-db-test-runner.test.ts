@@ -58,7 +58,7 @@ type GraphsResponse = {
 
 // This is just a simple test to make sure the graph db is running correctly for tests
 // (we don't have any tests that use it yet)
-describe('graph-db-test', () => {
+describe('graph-db-test-runner', () => {
   const gotDigestAuth = createDigestClient('dba', 'obptest');
 
   beforeAll(async () => {
