@@ -41,9 +41,9 @@ jobs:
         run: npx ts-node ./bin/wait-for-localstack-s3.ts
       - name: Wait for ElasticSearch
         run: ./bin/wait-for-elasticsearch/run.sh
-      - name: Wait for Virtuoso
-        run: ./bin/wait-for-virtuoso/run.sh
-      - name: Grant Virtuoso SPARQL user SPARQL_UPDATE role
-        run: docker exec -dt oceanbestpractices_virtuoso_1 isql 1111 dba obptest "exec=grant SPARQL_UPDATE to \"SPARQL\";"
+      - name: Wait for Virtuoso and grant SPARQL user UPDATE
+        run: |
+          ./bin/wait-for-virtuoso/run.sh
+          docker exec -dt oceanbestpractices_virtuoso_1 isql 1111 dba obptest "exec=grant SPARQL_UPDATE to \"SPARQL\";"
       - name: Run tests
         run: npm run test -- --passWithNoTests

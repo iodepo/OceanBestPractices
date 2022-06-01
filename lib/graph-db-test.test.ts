@@ -20,12 +20,13 @@ type GraphsResponse = {
 describe('graph-db-test', () => {
   beforeAll(async () => {
     // Load ENVO
-    await got.post(sparqlUrl, {
+    const response = await got.post(sparqlUrl, {
       form: {
         query: 'LOAD <file:///usr/share/proj/envo.owl> INTO <https://purl.obolibrary.org/obo/envo.owl>',
       },
       responseType: 'json',
     });
+    console.log('🚀 ~ file: graph-db-test.test.ts ~ line 29 ~ beforeAll ~ response', response);
   });
 
   afterAll(async () => {
@@ -48,5 +49,5 @@ describe('graph-db-test', () => {
 
     const envoGraph = body.results.bindings.find((b) => b.g.value === 'https://purl.obolibrary.org/obo/envo.owl');
     expect(envoGraph).toBeDefined();
-  });
+  }, 10_000);
 });
