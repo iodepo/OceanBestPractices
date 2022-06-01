@@ -10,6 +10,7 @@ You will need to manually install Docker if it's not already available to you. T
 
 - [Elasticsearch](https://www.elastic.co/)
 - [Localstack](https://localstack.cloud/)
+- [Virtuoso](https://virtuoso.openlinksw.com/)
 
 After installing dependencies you can start the Docker container:
 
@@ -27,4 +28,10 @@ If you need to you can run a single test:
 
 ```sh
 npm run test -- PATH_TO_TEST_FILE
+```
+
+If you're finished running tests you can stop the Docker container:
+
+```sh
+docker-compose down
 ```

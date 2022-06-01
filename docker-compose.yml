@@ -14,3 +14,14 @@ services:
       - "127.0.0.1:4566:4566"
     environment:
       - SERVICES=s3,sns,sqs
+
+  virtuoso:
+    image: openlink/virtuoso-opensource-7:7.2
+    ports:
+      - "127.0.0.1:1111:1111"
+      - "127.0.0.1:8890:8890"
+    environment:
+      - DBA_PASSWORD=obptest
+    volumes:
+      - ./virtuoso/db:/opt/virtuoso-opensource/database
+      - ./virtuoso/data:/usr/share/proj

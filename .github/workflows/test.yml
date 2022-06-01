@@ -17,6 +17,16 @@ jobs:
           SERVICES: s3,sns,sqs
         ports:
           - 4566:4566
+      virtuoso:
+        image: openlink/virtuoso-opensource-7:7.2
+        ports:
+          - 1111:1111
+          - 8890:8890
+        env:
+          DBA_PASSWORD: obptest
+        volumes:
+          - /virtuoso/db:/opt/virtuoso-opensource/database
+          - /virtuoso/data:/usr/share/proj
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
@@ -30,5 +40,9 @@ jobs:
         run: npx ts-node ./bin/wait-for-localstack-s3.ts
       - name: Wait for ElasticSearch
         run: ./bin/wait-for-elasticsearch/run.sh
+      - name: Wait for Virtuoso
+        run: ./bin/wait-for-virtuoso/run.sh
+      - name: Copy Virtuoso data
+        run: sudo cp -r ${{ github.workspace }}/virtuoso/data/. /virtuoso/data
       - name: Run tests
         run: npm run test -- --passWithNoTests
