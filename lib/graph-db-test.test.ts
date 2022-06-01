@@ -38,7 +38,7 @@ describe('graph-db-test', () => {
     });
   });
 
-  test.only('should load ENVO', async () => {
+  test('should load ENVO', async () => {
     const { body } = await got.post<GraphsResponse>(sparqlUrl, {
       form: {
         query: 'SELECT  DISTINCT ?g WHERE  { GRAPH ?g {?s ?p ?o} } ORDER BY  ?g',
