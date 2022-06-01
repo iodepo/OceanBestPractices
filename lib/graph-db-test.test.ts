@@ -20,6 +20,7 @@ type GraphsResponse = {
 describe('graph-db-test', () => {
   beforeAll(async () => {
     // Load ENVO
+    console.log('🚀 ~ file: graph-db-test.test.ts ~ line 29 ~ beforeAll ~ Hello!');
     const response = await got.post(sparqlUrl, {
       form: {
         query: 'LOAD <file:///usr/share/proj/envo.owl> INTO <https://purl.obolibrary.org/obo/envo.owl>',
