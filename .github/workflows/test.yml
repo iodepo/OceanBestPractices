@@ -44,6 +44,6 @@ jobs:
       - name: Wait for Virtuoso and grant SPARQL user UPDATE
         run: |
           ./bin/wait-for-virtuoso/run.sh
-          docker exec -dt oceanbestpractices_virtuoso_1 isql 1111 dba obptest "exec=grant SPARQL_UPDATE to \"SPARQL\";"
+          docker exec -dt ${{ job.services.virtuoso.id }} isql 1111 dba obptest "exec=grant SPARQL_UPDATE to \"SPARQL\";"
       - name: Run tests
         run: npm run test -- --passWithNoTests
