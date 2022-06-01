@@ -3,7 +3,8 @@ import { ClientDigestAuth } from '@mreal/digest-auth';
 
 const sparqlUrl = 'http://localhost:8890/sparql-auth';
 
-export function createDigestClient(username: string, password: string) {
+// Will probably want to move this but for now it's the only place it's used.
+function createDigestClient(username: string, password: string) {
   return got.extend({
     hooks: {
       afterResponse: [
@@ -16,8 +17,6 @@ export function createDigestClient(username: string, password: string) {
           }
 
           const incomingDigest = ClientDigestAuth.analyze(digestHeader);
-
-          console.log(incomingDigest);
 
           const digest = ClientDigestAuth.generateProtectionAuth(
             incomingDigest,
@@ -60,21 +59,21 @@ type GraphsResponse = {
 // This is just a simple test to make sure the graph db is running correctly for tests
 // (we don't have any tests that use it yet)
 describe('graph-db-test', () => {
+  const gotDigestAuth = createDigestClient('dba', 'obptest');
+
   beforeAll(async () => {
     // Load ENVO
-    console.log('🚀 ~ file: graph-db-test.test.ts ~ line 29 ~ beforeAll ~ Hello!');
-    const response = await createDigestClient('dba', 'obptest').post(sparqlUrl, {
+    await gotDigestAuth.post(sparqlUrl, {
       form: {
         query: 'LOAD <file:///usr/share/proj/envo.owl> INTO <https://purl.obolibrary.org/obo/envo.owl>',
       },
       responseType: 'json',
     });
-    console.log('🚀 ~ file: graph-db-test.test.ts ~ line 29 ~ beforeAll ~ response', response);
   });
 
   afterAll(async () => {
     // Delete ENVO
-    await createDigestClient('dba', 'obptest').post(sparqlUrl, {
+    await gotDigestAuth.post(sparqlUrl, {
       form: {
         query: 'CLEAR GRAPH <https://purl.obolibrary.org/obo/envo.owl>',
       },
@@ -83,7 +82,7 @@ describe('graph-db-test', () => {
   });
 
   test('should load ENVO', async () => {
-    const { body } = await createDigestClient('dba', 'obptest').post<GraphsResponse>(sparqlUrl, {
+    const { body } = await gotDigestAuth.post<GraphsResponse>(sparqlUrl, {
       form: {
         query: 'SELECT  DISTINCT ?g WHERE  { GRAPH ?g {?s ?p ?o} } ORDER BY  ?g',
       },

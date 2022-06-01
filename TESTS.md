@@ -18,12 +18,6 @@ After installing dependencies you can start the Docker container:
 docker-compose up
 ```
 
-If it is the first time you're running tests you need to grant the default Virtuoso user extra permissions:
-
-```sh
-docker exec -dt oceanbestpractices_virtuoso_1 isql 1111 dba obptest "exec=grant SPARQL_UPDATE to \"SPARQL\";"
-```
-
 Once the Docker container is up you can run the tests:
 
 ```sh
