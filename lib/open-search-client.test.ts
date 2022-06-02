@@ -653,7 +653,7 @@ describe('open-search-client', () => {
       await osClient.deleteIndex(esUrl, termsIndexName);
     });
 
-    test.only('should return a list of suggested terms', async () => {
+    test('should return a list of suggested terms', async () => {
       const results = await osClient.suggestTerms(
         esUrl,
         termsIndexName,
