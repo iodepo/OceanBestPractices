@@ -839,7 +839,7 @@ html {
   .col-2 {
     width: 13.3333333333%; }
   .col-3 {
-    width: 22%; }
+    width: 24%; }
   .col-4 {
     width: 32%; }
   .col-6 {
@@ -1712,12 +1712,16 @@ html {
     padding: 0;
     margin: 0; }
   .searchbar__advanced--status li {
-    display: inline-block;
-    margin: 0 .6rem 0 0; }
-    .searchbar__advanced--status li:last-child {
+    margin: 0 .6rem 0rem 0;
+    font-size: .9rem;
+    text-decoration: underline; }
+    .searchbar__advanced--status li :first-child {
+      margin-right: .4rem; }
+    .searchbar__advanced--status li :last-child {
+      display: inline-block;
       margin-right: 0;
-      font-size: 0.9rem;
-      text-decoration: underline; }
+      font-size: .7rem;
+      text-decoration: none; }
   .searchbar__advanced--status div,
   .searchbar__advanced--status .tip__label {
     display: block;
