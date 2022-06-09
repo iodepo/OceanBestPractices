@@ -119,6 +119,8 @@ class SearchResults extends Component {
    * @returns
    */
   renderSelectResultsLink(results) {
+    const helpTextSelectAll = "Only selects the results on this page"
+    const selectAllToolTipID = "Select All Tool Tip ID"
     // everything is selected, then render the deselect all link
     if (results.length === this.state.selectedResults.length) {
       return (
@@ -132,11 +134,27 @@ class SearchResults extends Component {
 
     // default render the select all link
     return (
-      <li className="crumb-tail">
+      <li className="crumb-tail"
+          data-tip={helpTextSelectAll}
+          data-for = {selectAllToolTipID}
+      >
         <a href="#" onClick={() => this.onSelectAllResults(results)}>
           Select All
         </a>
+        <ReactTooltip
+          id = {selectAllToolTipID}
+          place="top"
+          effect="solid"
+          delayShow={300}
+          className="tooltip"
+          type="light"
+          border={true}
+          borderColor="Grey"
+        >
+          {helpTextSelectAll}
+        </ReactTooltip>
       </li>
+      
     );
   }
 
@@ -146,11 +164,13 @@ class SearchResults extends Component {
    */
   renderDownloadCitationsButton(results) {
     const isEnabled = this.state.selectedResults.length > 0;
-    const helpText = "Select the check box from individual results below to download citations as a text file.";
+    const helpTextCitationButton = "Select the check box from individual results below to download citations as a text file.";
+    const citationButtonToolTipID = "Download Citations Tool Tip"
 
     return (
       <li className="crumb-tail"
-          data-tip={helpText}
+          data-tip={helpTextCitationButton}
+          data-for={citationButtonToolTipID}
       >
         <button
           className={`result__button result__button-secondary ${isEnabled ? 'is-active': null}`}
@@ -161,6 +181,7 @@ class SearchResults extends Component {
           <span>Download Citations</span>
         </button>
         <ReactTooltip
+          id = {citationButtonToolTipID}
           place="top"
           effect="solid"
           delayShow={300}
@@ -169,7 +190,7 @@ class SearchResults extends Component {
           border={true}
           borderColor="Grey"
         >
-          {helpText}
+          {helpTextCitationButton}
         </ReactTooltip>
       </li>
     );
