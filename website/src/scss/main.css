@@ -1741,9 +1741,12 @@ html {
   white-space: nowrap; }
 
 .search-filter__label {
-  margin-right: .75rem;
-  font-size: .65rem;
-  display: none; }
+  font-size: 12px;
+  font-weight: bolder;
+  display: none;
+  font-family: "Helvetica Neue";
+  padding: .9rem 0rem .9rem .5rem;
+  background-color: #eaecf3; }
   @media (min-width: 481px) {
     .search-filter__label {
       display: inline-block; } }
@@ -1777,7 +1780,7 @@ html {
     margin: auto; }
 
 .search-filter__text {
-  padding: .9rem 1.2rem .9rem .5rem;
+  padding: .9rem 1.2rem .9rem .2rem;
   cursor: pointer;
   border-bottom: none; }
   .search-filter__text i {
@@ -1885,22 +1888,11 @@ html {
     color: #588bce; }
 
 .search-results__number {
-  padding-right: 1rem;
+  padding-right: .5rem;
   display: none; }
   @media (min-width: 961px) {
     .search-results__number {
       display: inline-block; } }
-
-@media (min-width: 961px) {
-  .search-results__number:after {
-    content: "";
-    background-color: #D8D8D8;
-    position: absolute;
-    width: 1px;
-    height: 2.6rem;
-    top: 0;
-    left: 33%;
-    display: block; } }
 
 @media (min-width: 961px) {
   .search-results__results {

@@ -51,25 +51,11 @@
 }
 
 .search-results__number {
-  padding-right: 1rem;
+  padding-right: .5rem;
   display: none;
   
   @media #{$screen-m} {
     display: inline-block;
-  }
-}
-
-.search-results__number:after {
-  
-  @media #{$screen-m} {
-    content: "";
-    background-color: #D8D8D8;
-    position: absolute;
-    width: 1px;
-    height: 2.6rem;
-    top: 0;
-    left: 33%;
-    display: block;
   }
 }
 

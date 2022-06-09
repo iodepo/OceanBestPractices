@@ -4,14 +4,22 @@
 }
 
 .search-filter__label {
-  margin-right: .75rem;
-  font-size: .65rem;
+  font-size: 12px;
+  font-weight: bolder;
   display: none;
+  font-family: "Helvetica Neue";
+  padding: .9rem 0rem .9rem .5rem;
+  
+  background-color: #eaecf3;
+
 
   @media #{$screen-xs} {
     display: inline-block;
   }
+  
 }
+
+
 
 .search-filter__button {
   min-width: 7.5rem;
@@ -50,7 +58,7 @@
 
 .search-filter__text {
 
-  padding: .9rem 1.2rem .9rem .5rem;
+  padding: .9rem 1.2rem .9rem .2rem;
   cursor: pointer;
   border-bottom: none;
 
