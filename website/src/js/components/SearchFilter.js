@@ -45,11 +45,13 @@ class SearchFilter extends Component {
 
     return (
       <div className="search-filter">
+
         <span className="search-filter__label">SORT BY</span>
+
         <div className="search-filter__button">
-          
+
           <FilterNode class_name="search-filter__text" label={active_sort.label} direction={active_sort.direction} />
-          
+
           <div className="search-filter__dropdown">
             { sort_items }
           </div>

@@ -9,17 +9,12 @@
   display: none;
   font-family: "Helvetica Neue";
   padding: .9rem 0rem .9rem .5rem;
-  
   background-color: #eaecf3;
-
 
   @media #{$screen-xs} {
     display: inline-block;
   }
-  
 }
-
-
 
 .search-filter__button {
   min-width: 7.5rem;
