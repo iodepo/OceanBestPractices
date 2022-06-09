@@ -1745,7 +1745,7 @@ html {
   font-weight: bolder;
   display: none;
   font-family: "Helvetica Neue";
-  padding: .9rem 0rem .9rem .5rem;
+  padding: 0.9rem 0rem 0.9rem 0.751rem;
   background-color: #eaecf3; }
   @media (min-width: 481px) {
     .search-filter__label {
@@ -1891,7 +1891,7 @@ html {
     color: #588bce; }
 
 .search-results__number {
-  padding-right: .5rem;
+  padding-right: .75rem;
   display: none; }
   @media (min-width: 961px) {
     .search-results__number {
