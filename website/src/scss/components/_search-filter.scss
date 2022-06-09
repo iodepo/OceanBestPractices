@@ -61,7 +61,9 @@
   padding: .9rem 1.2rem .9rem .2rem;
   cursor: pointer;
   border-bottom: none;
-
+  @media (max-width: 480px) {
+    padding: .9rem 1.2rem .9rem .5rem;
+  }
   i {
     position: absolute;
   }

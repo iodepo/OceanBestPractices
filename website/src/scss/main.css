@@ -1783,6 +1783,9 @@ html {
   padding: .9rem 1.2rem .9rem .2rem;
   cursor: pointer;
   border-bottom: none; }
+  @media (max-width: 480px) {
+    .search-filter__text {
+      padding: .9rem 1.2rem .9rem .5rem; } }
   .search-filter__text i {
     position: absolute; }
 
