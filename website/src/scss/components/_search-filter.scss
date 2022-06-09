@@ -5,10 +5,8 @@
 
 .search-filter__label {
   font-size: 12px;
-  font-weight: bolder;
   display: none;
-  font-family: "Helvetica Neue";
-  padding: .9rem 0rem .9rem.751rem;
+  padding: .9rem 0rem 17px.75rem;
   background-color: #eaecf3;
 
   @media #{$screen-xs} {
@@ -53,11 +51,11 @@
 
 .search-filter__text {
 
-  padding: .9rem 1.2rem .9rem .2rem;
+  padding: .9rem 1.2rem 17px .2rem;
   cursor: pointer;
   border-bottom: none;
   @media (max-width: 480px) {
-    padding: .9rem 1.2rem .9rem .5rem;
+    margin-left: .5rem;
   }
   i {
     position: absolute;

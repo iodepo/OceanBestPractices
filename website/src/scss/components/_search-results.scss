@@ -23,7 +23,7 @@
 }
 
 .search-results__breadcrumbs {
-  margin: 0.5rem 0 0.5rem 0.5rem;
+  margin: 0.4rem 0 0.4rem 0.5rem;
   align-self: center;
 
   li {
@@ -51,7 +51,7 @@
 }
 
 .search-results__number {
-  padding-right: .75rem;
+  margin-right: .75rem;
   display: none;
   
   @media #{$screen-m} {
@@ -73,5 +73,6 @@
 
 .search-results__sort {
   display: inline-block;
+  //padding: .9rem .75rem .9rem .75rem;
   position: relative;
 }
