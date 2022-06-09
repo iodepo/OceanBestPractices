@@ -119,7 +119,7 @@ class SearchResults extends Component {
    * @returns
    */
   renderSelectResultsLink(results) {
-    const helpTextSelectAll = "Only selects the results on this page"
+    const helpTextSelectAll = "Only selects the results on this page."
     const selectAllToolTipID = "Select All Tool Tip ID"
     // everything is selected, then render the deselect all link
     if (results.length === this.state.selectedResults.length) {
