@@ -84,7 +84,13 @@ export const getSearch = (query, options = {}) => {
     const state = getState();
     const search = query || state.searchReducer.search;
     const activeField = state.fields.filter(field => !!(field.active_search))[0];
-    const searchGroup = deconstructQuery(search, activeField.id, state.searchReducer.activeSearch);
+    let activeFieldId;
+    if (activeField === undefined)
+       activeFieldId = 'all';
+    else {
+      activeFieldId = activeField.id;
+    }
+    const searchGroup = deconstructQuery(search, activeFieldId, state.searchReducer.activeSearch);
 
     let options = {};
 

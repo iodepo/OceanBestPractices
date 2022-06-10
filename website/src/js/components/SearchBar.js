@@ -8,7 +8,7 @@ import { setOption, setActiveOptions } from '../actions/options';
 
 import { constructQuery, parseQuery } from '../helpers/query';
 import { formSearchRoute, queryParamsToObject } from '../helpers/url';
-import { activeFieldsString } from '../helpers/fields';
+import { constructFields, activeFieldsString } from '../helpers/fields';
 import { activeTagsString } from '../helpers/tags';
 import { activeSortOption, activeAdvancedOptionsString } from '../helpers/options';
 
@@ -91,12 +91,13 @@ class SearchBar extends Component {
 
     const { activeSearch } = this.props.searchReducer;
     let query;
-
+    let fields;
     if ( activeSearch.length > 0 ) {
       query = constructQuery(activeSearch, this.props.fields);
+      fields = constructFields(activeSearch)
     }
 
-    this.navigateToSearch(query);
+    this.navigateToSearch(query, fields);
 
   }
 
@@ -105,12 +106,11 @@ class SearchBar extends Component {
    * @description Pushes the given active search string to the browser history
    */
 
-  navigateToSearch(active_search) {
+  navigateToSearch(active_search, fields) {
 
     const active_sort = activeSortOption(this.props.options);
     const route = formSearchRoute({
-      // FIXME: https://github.com/iodepo/OceanBestPractices/issues/199
-      active_fields: activeFieldsString(this.props.fields),
+      active_fields: fields,
       active_tags: activeTagsString(this.props.searchReducer.activeFilters),
       active_options: activeAdvancedOptionsString(this.props.options),
       active_sort: active_sort.filter,
