@@ -34,13 +34,12 @@ class SearchBarAdvancedStatus extends Component {
       <div className="searchbar__advanced--status">
 
         <ul>
-          <li>
-            <SearchTipsModal call='Search Tips' location="searchbar" />
-          </li>
+       
           <li>
             <Superlink to="/" event_category="searchbar" event_action="clear search" event_label="Clear All" onClick={this.handleClearClick}>
               Clear All
             </Superlink>
+            <SearchTipsModal call='Search Tips' location="searchbar" />
           </li>
         </ul>
 
@@ -90,3 +89,4 @@ const SearchBarAdvancedStatusOptions = ({options}) => {
   );
 
 }
+
