@@ -1,4 +1,5 @@
 export function formSearchRoute(data = {}) {
+  console.log(data)
 
   let route = {
     pathname: '/search',
@@ -14,9 +15,18 @@ export function formSearchRoute(data = {}) {
   }
 
   if ( data.active_fields ) {
+    console.log(data)
+
     params.push({
       title: 'fields',
       value: data.active_fields,
+    });
+  }
+
+  if ( data.active_field ) {
+    params.push({
+      title: 'active_field',
+      value: data.active_field,
     });
   }
 

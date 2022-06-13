@@ -55,13 +55,14 @@ class SearchBar extends Component {
     }
 
     if ( params ) {
+      console.log(params)
       if ( params.q && params.q.length > 0 ) {
         starting_query = parseQuery(params.q, params.fields);
         this.props.dispatch(setSearch('', starting_query));
       }
 
-      if (params.fields && params.fields.length > 0 ) {
-        this.props.dispatch(setActiveFields(params.fields));
+      if (params.active_field && params.active_field.length > 0 ) {
+        this.props.dispatch(setActiveFields(params.active_field));
       }
 
       if ( params.options && params.options.length > 0 ) {
@@ -93,6 +94,8 @@ class SearchBar extends Component {
     let query;
     let fields;
     if ( activeSearch.length > 0 ) {
+      console.log("LOL")
+      console.log(activeSearch);
       query = constructQuery(activeSearch, this.props.fields);
       fields = constructFields(activeSearch)
     }
@@ -106,10 +109,12 @@ class SearchBar extends Component {
    * @description Pushes the given active search string to the browser history
    */
 
-  navigateToSearch(active_search, fields) {
+  navigateToSearch(active_search, fields ='all') {
 
     const active_sort = activeSortOption(this.props.options);
+    console.log('fields: ' + fields);
     const route = formSearchRoute({
+      active_field: activeFieldsString(this.props.fields),
       active_fields: fields,
       active_tags: activeTagsString(this.props.searchReducer.activeFilters),
       active_options: activeAdvancedOptionsString(this.props.options),
