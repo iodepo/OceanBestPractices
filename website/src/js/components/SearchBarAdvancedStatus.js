@@ -34,7 +34,7 @@ class SearchBarAdvancedStatus extends Component {
       <div className="searchbar__advanced--status">
 
         <ul>
-
+       
           <li>
             <Superlink to="/" event_category="searchbar" event_action="clear search" event_label="Clear All" onClick={this.handleClearClick}>
               Clear All
@@ -89,3 +89,4 @@ const SearchBarAdvancedStatusOptions = ({options}) => {
   );
 
 }
+
