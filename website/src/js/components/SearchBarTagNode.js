@@ -29,13 +29,22 @@ class SearchBarTagNode extends Component {
 
     if ( typeof this.props.tag !== 'object' ) return null;
 
-    return (
-      <span className='searchbar__tag-node' onClick={this.handleClick}>
-        { this.props.tag.value }
-        <i className='fa fa-close' aria-hidden="true"></i>
-      </span>
-    );
+     if (this.props.className === 'searchbar__split-tag-field') {
+       return (
+         <span className='searchbar__tag-field' onClick={this.handleClick}>
+           { this.props.tag.value }    
+         </span>
+       );
+     }
+    else {
+     return (
+       <span className='searchbar__tag-node' onClick={this.handleClick}>
+         { this.props.tag.value }
+         <i className='fa fa-close' aria-hidden="true"></i>
+       </span>
+     );
 
+   }
   }
 }
 

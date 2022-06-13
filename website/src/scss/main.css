@@ -1636,6 +1636,15 @@ html {
     color: #888;
     padding: 0 .2rem 0 .6rem; }
 
+.searchbar__tag-field {
+  display: inline-block;
+  padding: .2rem .5rem .2rem .5rem;
+  border-radius: 0.2rem 0rem 0rem .2rem;
+  white-space: nowrap;
+  background: #F4F5FA;
+  color: #5D6877;
+  border-right: #c8c6c6 1pt solid; }
+
 .searchbar__tag-node:hover {
   cursor: pointer;
   color: white;
