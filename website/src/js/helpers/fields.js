@@ -25,9 +25,7 @@ export function constructFields(fields) {
 
     let keyword = '';
   
-    console.log("trim: " +segment.fieldId.trim())
     keyword += segment.fieldId.trim();
-    console.log("keyword: " + keyword);
     return encodeURIComponent(keyword);
 
   }).filter(segment => !!(segment)).join(',');
