@@ -6,7 +6,7 @@
 .search-filter__label {
   font-size: 12px;
   display: none;
-  padding: .9rem 0rem 17px.75rem;
+  padding: .9rem 0 .9rem .75rem;
   background-color: #eaecf3;
 
   @media #{$screen-xs} {
@@ -23,8 +23,9 @@
   font-size: 12px;
   border: none;
 
-  @media #{$screen-xs} {
-    min-width: 6.5rem;
+  @media #{$screen-xs} {  
+    min-width: 0;
+
   }
 }
 
@@ -51,7 +52,7 @@
 
 .search-filter__text {
 
-  padding: .9rem 1.2rem 17px .2rem;
+  padding: .9rem 1.2rem .9rem .2rem;
   cursor: pointer;
   border-bottom: none;
   @media (max-width: 480px) {
@@ -72,6 +73,7 @@
 .search-filter__dropdown {
   display: none;
   position: absolute;
+  width: 100%;
   right: 0;
   background-color: $dark-gray;
   color: white;

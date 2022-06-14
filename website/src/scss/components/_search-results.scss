@@ -23,7 +23,7 @@
 }
 
 .search-results__breadcrumbs {
-  margin: 0.4rem 0 0.4rem 0.5rem;
+  margin: 0 0 0 0.5rem;
   align-self: center;
 
   li {
@@ -73,5 +73,9 @@
 
 .search-results__sort {
   display: inline-block;
+  position: relative;
+}
+
+.search-result__fit-filter {
   position: relative;
 }

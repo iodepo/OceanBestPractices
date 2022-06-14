@@ -153,7 +153,7 @@ class SearchResults extends Component {
           data-tip={helpText}
       >
         <button
-          className={`result__button result__button-secondary ${isEnabled ? 'is-active': null}`}
+          className={`result__button result__button-secondary result__button-secondary-download-citations ${isEnabled ? 'is-active': null}`}
           onClick={() => this.onClickCitationDownload(results)}
           disabled={!isEnabled}
         >
@@ -336,7 +336,9 @@ class SearchResults extends Component {
                 </span>
                 <span className="search-results__sort">
                   <span className='search-results__number'><strong>{ this.props.searchReducer.totalResults } result{ results.length > 1 ? 's' : null }</strong></span>
+                  <span className = "search-result__fit-filter">
                   <SearchFilter />
+                  </span>
                 </span>
               </header>
             )
