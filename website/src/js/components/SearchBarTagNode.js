@@ -39,6 +39,7 @@ class SearchBarTagNode extends Component {
     else {
      return (
        <span className='searchbar__tag-node' onClick={this.handleClick}>
+         <i className = "field"> {this.props.tag.fieldId}<i>: </i> </i>
          { this.props.tag.value }
          <i className='fa fa-close' aria-hidden="true"></i>
        </span>

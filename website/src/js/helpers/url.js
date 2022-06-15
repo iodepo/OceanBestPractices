@@ -22,7 +22,7 @@ export function formSearchRoute(data = {}) {
 
   if ( data.active_field ) {
     params.push({
-      title: 'active_field',
+      title: 'activeField',
       value: data.active_field,
     });
   }

@@ -60,8 +60,8 @@ class SearchBar extends Component {
         this.props.dispatch(setSearch('', starting_query));
       }
 
-      if (params.active_field && params.active_field.length > 0 ) {
-        this.props.dispatch(setActiveFields(params.active_field));
+      if (params.activeField && params.activeField.length > 0 ) {
+        this.props.dispatch(setActiveFields(params.activeField));
       }
 
       if ( params.options && params.options.length > 0 ) {
@@ -106,7 +106,7 @@ class SearchBar extends Component {
    * @description Pushes the given active search string to the browser history
    */
 
-  navigateToSearch(active_search, fields ='all') {
+  navigateToSearch(activeSearch, fields ='all') {
 
     const active_sort = activeSortOption(this.props.options);
     const route = formSearchRoute({
@@ -115,7 +115,7 @@ class SearchBar extends Component {
       active_tags: activeTagsString(this.props.searchReducer.activeFilters),
       active_options: activeAdvancedOptionsString(this.props.options),
       active_sort: active_sort.filter,
-      active_search,
+      active_search: activeSearch,
     });
 
     if ( window.location.search !== route.search ) {

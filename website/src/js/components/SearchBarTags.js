@@ -99,12 +99,6 @@ class SearchBarTags extends Component {
 
       return (
         <div key={`${key}-tag`} className="searchbar__tag">
-          <SearchBarTagNode
-            key={`${key}-field`}
-            className='searchbar__split-tag-field'
-            tag={tag_settings_fields}
-          />
-          
           { search_tag_identifier }
 
           <SearchBarTagNode

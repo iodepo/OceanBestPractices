@@ -1635,6 +1635,12 @@ html {
   .searchbar__tag-node i {
     color: #888;
     padding: 0 .2rem 0 .6rem; }
+    .searchbar__tag-node i.field {
+      font-style: normal;
+      padding: 0 .3rem 0 0; }
+      .searchbar__tag-node i.field i {
+        padding: 0rem 0rem 0 .05rem;
+        font-style: normal; }
 
 .searchbar__tag-field {
   display: inline-block;
