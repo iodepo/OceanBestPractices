@@ -46,7 +46,7 @@ class SearchFilter extends Component {
     return (
       <div className="search-filter">
 
-        <span className="search-filter__label">Sort By</span>
+        <span className="search-filter__label">SORT BY</span>
 
         <div className="search-filter__button">
 

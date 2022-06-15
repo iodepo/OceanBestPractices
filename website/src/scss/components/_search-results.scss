@@ -23,7 +23,7 @@
 }
 
 .search-results__breadcrumbs {
-  margin: 0.5rem 0 0.5rem 0.5rem;
+  margin: 0 0 0 0.5rem;
   align-self: center;
 
   li {
@@ -51,25 +51,11 @@
 }
 
 .search-results__number {
-  padding-right: 1rem;
+  margin-right: .75rem;
   display: none;
   
   @media #{$screen-m} {
     display: inline-block;
-  }
-}
-
-.search-results__number:after {
-  
-  @media #{$screen-m} {
-    content: "";
-    background-color: #D8D8D8;
-    position: absolute;
-    width: 1px;
-    height: 2.6rem;
-    top: 0;
-    left: 33%;
-    display: block;
   }
 }
 
@@ -87,5 +73,9 @@
 
 .search-results__sort {
   display: inline-block;
+  position: relative;
+}
+
+.search-result__fit-filter {
   position: relative;
 }

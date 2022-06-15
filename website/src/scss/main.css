@@ -1399,6 +1399,8 @@ html {
     .result__button.result__button-secondary[disabled]:hover {
       background-color: #F4F5FA;
       cursor: not-allowed; }
+    .result__button.result__button-secondary.result__button-secondary-download-citations {
+      margin: 0; }
   .result__button .result__button-icon i {
     font-size: 0.7rem; }
     @media (min-width: 641px) {
@@ -1760,9 +1762,10 @@ html {
   white-space: nowrap; }
 
 .search-filter__label {
-  margin-right: .75rem;
-  font-size: .65rem;
-  display: none; }
+  font-size: 12px;
+  display: none;
+  padding: .9rem 0 .9rem .75rem;
+  background-color: #eaecf3; }
   @media (min-width: 481px) {
     .search-filter__label {
       display: inline-block; } }
@@ -1777,7 +1780,7 @@ html {
   border: none; }
   @media (min-width: 481px) {
     .search-filter__button {
-      min-width: 6.5rem; } }
+      min-width: 0; } }
 
 .search-filter__node {
   position: relative;
@@ -1796,9 +1799,12 @@ html {
     margin: auto; }
 
 .search-filter__text {
-  padding: .9rem 1.2rem .9rem .5rem;
+  padding: .9rem 1.2rem .9rem .2rem;
   cursor: pointer;
   border-bottom: none; }
+  @media (max-width: 480px) {
+    .search-filter__text {
+      margin-left: .5rem; } }
   .search-filter__text i {
     position: absolute; }
 
@@ -1809,6 +1815,7 @@ html {
 .search-filter__dropdown {
   display: none;
   position: absolute;
+  width: 100%;
   right: 0;
   background-color: #5D6877;
   color: white;
@@ -1886,7 +1893,7 @@ html {
   border-bottom: 1px solid #D8D8D8; }
 
 .search-results__breadcrumbs {
-  margin: 0.5rem 0 0.5rem 0.5rem;
+  margin: 0 0 0 0.5rem;
   align-self: center; }
   .search-results__breadcrumbs li {
     display: inline; }
@@ -1904,22 +1911,11 @@ html {
     color: #588bce; }
 
 .search-results__number {
-  padding-right: 1rem;
+  margin-right: .75rem;
   display: none; }
   @media (min-width: 961px) {
     .search-results__number {
       display: inline-block; } }
-
-@media (min-width: 961px) {
-  .search-results__number:after {
-    content: "";
-    background-color: #D8D8D8;
-    position: absolute;
-    width: 1px;
-    height: 2.6rem;
-    top: 0;
-    left: 33%;
-    display: block; } }
 
 @media (min-width: 961px) {
   .search-results__results {
@@ -1933,6 +1929,9 @@ html {
 
 .search-results__sort {
   display: inline-block;
+  position: relative; }
+
+.search-result__fit-filter {
   position: relative; }
 
 .search-sidebar {
