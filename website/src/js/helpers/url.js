@@ -20,6 +20,13 @@ export function formSearchRoute(data = {}) {
     });
   }
 
+  if ( data.active_field ) {
+    params.push({
+      title: 'activeField',
+      value: data.active_field,
+    });
+  }
+
   if ( data.active_tags ) {
     params.push({
       title: 'tags',

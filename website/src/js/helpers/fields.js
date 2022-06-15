@@ -13,3 +13,20 @@ export function activeFieldsString(fields = []) {
     .join(',');
 
 }
+
+export function constructFields(fields) {
+  if ( typeof fields === 'string' ) {
+     return encodeURIComponent(fields);
+  }
+  
+  return fields.map((segment, index) => {
+
+    if ( segment.type !== 'term' || typeof segment.fieldId !== 'string' ) return undefined;
+
+    let keyword = '';
+  
+    keyword += segment.fieldId.trim();
+    return encodeURIComponent(keyword);
+
+  }).filter(segment => !!(segment)).join(',');
+}

@@ -219,7 +219,26 @@
   i {
     color: #888;
     padding: 0 .2rem 0 .6rem;
+    &.field {
+      font-style: normal;  
+      padding: 0 .3rem 0 0;
+      i {
+        padding: 0rem 0rem 0 .05rem;
+        font-style: normal;
+      }
+    }
   }
+}
+
+.searchbar__tag-field {
+  display: inline-block;
+  padding: .2rem .5rem .2rem .5rem;
+   border-radius: 0.2rem 0rem 0rem .2rem;
+  white-space: nowrap;
+  background: $light-gray;
+  color: $dark-gray;
+  border-right: rgb(200, 198, 198) 1pt solid;
+
 }
 
 .searchbar__tag-node:hover {

@@ -119,7 +119,6 @@ export function constructViewerQuery(query) {
  */
 
 export function parseQuery(keywords, fields = 'all') {
-  // FIXME: https://github.com/iodepo/OceanBestPractices/issues/199
   let query = [];
 
   if ( typeof keywords !== 'string' ) return query;

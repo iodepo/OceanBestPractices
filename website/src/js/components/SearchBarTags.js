@@ -79,6 +79,9 @@ class SearchBarTags extends Component {
       const tag_settings = Object.assign({}, tag, {
         value: truncate(tag.value, defaultShortenSize)
       });
+      const tag_settings_fields = Object.assign({}, tag, {
+        value: tag.fieldId
+      });
 
       let search_tag_identifier = null;
 
@@ -96,7 +99,6 @@ class SearchBarTags extends Component {
 
       return (
         <div key={`${key}-tag`} className="searchbar__tag">
-
           { search_tag_identifier }
 
           <SearchBarTagNode
