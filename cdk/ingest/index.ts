@@ -93,8 +93,9 @@ export default class Ingest extends Construct {
     buckets.documentMetadata.addObjectCreatedNotification(
       new LambdaDestination(lambdas.bitstreamsDownloader)
     );
-    // The "bitstreams downloader" lambda writes an object to the
-    // "document source" bucket
+
+    // The "bitstreams downloader" needs to be able to invoke the text extractor.
+    textExtractorFunction.grantInvoke(lambdas.bitstreamsDownloader);
 
     // The bitstreams downloader should be able to put a message on the queue.
     // This happens if there we skip text extraction.
