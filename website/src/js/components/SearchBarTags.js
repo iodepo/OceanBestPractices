@@ -122,7 +122,7 @@ class SearchBarTags extends Component {
         { this.createSplitSearchTags(this.filtersToTags(this.props.active_filters)) }
         {
           this.props.active_search.length > 0
-          ? <span className='searchbar__tag-message'>All terms listed affect current search. Clear them to start a new search.</span>
+          ? <span className='searchbar__tag-message'>All terms listed affect current search. Clear them to start a new search or add a second term and use the Boolean operators then displayed.</span>
           : null
         }
       </ul>
