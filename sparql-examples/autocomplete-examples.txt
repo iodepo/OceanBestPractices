@@ -1,0 +1,32 @@
+  SPARQL
+  PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
+  PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+  PREFIX owl: <http://www.w3.org/2002/07/owl#> 
+  SELECT DISTINCT ?label ?annotatedTarget ?annotatedPropertyLabel 
+  WHERE {
+  {
+    SELECT DISTINCT ?label WHERE {
+      ?s rdf:type owl:Class ; rdfs:label ?label .
+      FILTER (STRSTARTS(lcase(str(?label)), 'wat')) 
+    }
+    LIMIT 10
+  }
+  UNION
+  { 
+    SELECT DISTINCT ?annotatedTarget ?annotatedPropertyLabel WHERE { 
+      ?nodeID owl:annotatedSource ?xs . 
+      ?nodeID owl:annotatedProperty ?annotatedProperty . 
+      ?nodeID owl:annotatedTarget ?annotatedTarget . 
+      ?annotatedProperty rdfs:label ?annotatedPropertyLabel . 
+      FILTER ( isLiteral( ?annotatedTarget ) ) . 
+      FILTER ( STR(?annotatedPropertyLabel) = "has_exact_synonym" || STR(?annotatedPropertyLabel) = "alternative_label")
+      { 
+        SELECT DISTINCT ?xs WHERE { 
+          ?xs rdfs:label ?xl . 
+          FILTER (?xl = 'water'^^xsd:string) 
+        } 
+      }
+    }
+  }
+
+}
