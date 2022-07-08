@@ -144,6 +144,7 @@ class SearchBar extends Component {
 
   }
 
+
   /**
    * handleClear
    * @description Clears the search input when triggered
@@ -189,9 +190,9 @@ class SearchBar extends Component {
   }
 
   render() {
-
+    if (this.props.showSearchBar === false)
+      return (null);
     const { search } = this.props.searchReducer;
-
     return (
       <div>
 
@@ -246,8 +247,9 @@ class SearchBar extends Component {
     );
 
   }
-
+  
 }
+
 
 export default connect(state => state)(SearchBar);
 

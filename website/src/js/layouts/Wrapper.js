@@ -12,7 +12,7 @@ class Wrapper extends Component {
     let footerLinks = '';
 
     if (this.props.header) {
-      header = ( <Header history={this.props.history}/> );
+      header = ( <Header showSearchBar={this.props.showSearchBar} history={this.props.history}/> );
     }
 
     if (this.props.page) {

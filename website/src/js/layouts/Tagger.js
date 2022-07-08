@@ -16,7 +16,7 @@ class Tagger extends Component {
     this.state = {
       title: '',
       content: '',
-      recaptcha: false,
+      recaptcha: true,
       resultView: false,
     };
 
@@ -49,7 +49,7 @@ class Tagger extends Component {
     this.setState({
       title: '',
       content: '',
-      recaptcha: false,
+      recaptcha: true,
       resultView: false,
     });
   }
@@ -142,7 +142,7 @@ class Tagger extends Component {
     );
 
     return (
-        <Wrapper header={true} history={history} page="tagger" childrenContainerClass="tagger" footerLinks={true}>
+        <Wrapper header={true} history={history} showSearchBar={false} page="tagger" childrenContainerClass="tagger" footerLinks={true}>
           {
             this.state.resultView
             ? taggerResults

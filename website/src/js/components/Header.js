@@ -12,7 +12,7 @@ class Header extends Component {
             <h1 className="header__logo ir">Ocean Best Practices</h1>
           </Superlink>
           <div className="header__search-container">
-            <SearchBar history={this.props.history} />
+            <SearchBar showSearchBar={this.props.showSearchBar} history={this.props.history} />
           </div>
         </section>
       </header>
