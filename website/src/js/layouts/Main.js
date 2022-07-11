@@ -149,7 +149,7 @@ class Main extends Component {
                 globally with their colleagues.
               </p>
               <p>
-                The OBPS-Repository is a global repository of ocean research, operations and applications  methods (also known as “Best Practices”)
+                Please note, unless it is annotated as Endorsed by an Expert Panel, inclusion of a methodology in OBPS does not indicate a recommendation by OBPS.
               </p>
               <p className="foot-notes">
                 <b>**</b> A Best Practice is defined as “a methodology that has repeatedly produced superior results relative to other methodologies with the same objective”. To be fully elevated to a best practice,
