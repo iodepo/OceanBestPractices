@@ -191,7 +191,9 @@ class SearchBar extends Component {
 
   render() {
     if (this.props.showSearchBar === false)
-      return (null);
+      return (
+        null
+      );
     const { search } = this.props.searchReducer;
     return (
       <div>

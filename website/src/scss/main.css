@@ -852,14 +852,11 @@ html {
     width: 82.6666666667%; } }
 
 .tagger {
-  padding: 1rem 0;
+  padding-bottom: 1rem;
   text-align: center;
   background-color: #F4F5FA; }
   .tagger span {
     display: block; }
-  @media (min-width: 641px) {
-    .tagger {
-      padding-top: 3rem; } }
 
 .tagger__header {
   color: #0068B3;

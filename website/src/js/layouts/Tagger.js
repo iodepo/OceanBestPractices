@@ -104,6 +104,10 @@ class Tagger extends Component {
     // input view of the tagger
     const taggerInput = (
       <div>
+        <div>
+        </div>
+            <p><a href="/">Home</a> / <strong>Ocean Knowledge</strong></p>
+            <hr/>
         <span className="tagger__header">OceanKnowledge Tagger</span>
         <span className="tagger__info">Welcome to the OceanKnowledge Tagger! This tool will "tag" or annotate your text with matching terms from quality-controlled, FAIR vocabularies and ontologies. You can download a ranked list of tags in CSV or JSON format</span>
         <div className="tagger__form-wrapper">

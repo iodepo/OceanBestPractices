@@ -1,15 +1,12 @@
 .tagger{
-  padding: 1rem 0;
+  padding-bottom: 1rem;
   text-align: center;
   background-color: $light-gray;
   
   span{
     display: block;
   }
-  
-  @media #{$screen-s} {
-    padding-top: 3rem;
-  }
+
 }
 
 .tagger__header {
