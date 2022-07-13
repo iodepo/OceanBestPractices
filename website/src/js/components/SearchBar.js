@@ -106,7 +106,7 @@ class SearchBar extends Component {
    * @description Pushes the given active search string to the browser history
    */
 
-  navigateToSearch(activeSearch, fields ='all') {
+  navigateToSearch(activeSearch, fields = activeFieldsString(this.props.fields)) {
 
     const active_sort = activeSortOption(this.props.options);
     const route = formSearchRoute({
