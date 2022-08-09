@@ -1765,7 +1765,8 @@ html {
   font-size: 12px;
   display: none;
   padding: .9rem 0 .9rem .75rem;
-  background-color: #eaecf3; }
+  background-color: #eaecf3;
+  color: #323232; }
   @media (min-width: 481px) {
     .search-filter__label {
       display: inline-block; } }
@@ -1775,7 +1776,7 @@ html {
   min-height: 1rem;
   display: inline-block;
   background-color: #eaecf3;
-  color: #5D6877;
+  color: #323232;
   font-size: 12px;
   border: none; }
   @media (min-width: 481px) {
@@ -1810,7 +1811,7 @@ html {
 
 .search-filter__node:hover {
   background-color: #eaecf3;
-  color: #5D6877; }
+  color: #323232; }
 
 .search-filter__dropdown {
   display: none;

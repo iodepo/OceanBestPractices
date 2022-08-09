@@ -50,7 +50,7 @@ class SearchFilter extends Component {
 
         <div className="search-filter__button">
 
-          <FilterNode class_name="search-filter__text" label={active_sort.label} direction={active_sort.direction} />
+          <FilterNode class_name="search-filter__text" label={active_sort.label} direction={active_sort.direction} displayed = {true}/>
 
           <div className="search-filter__dropdown">
             { sort_items }
