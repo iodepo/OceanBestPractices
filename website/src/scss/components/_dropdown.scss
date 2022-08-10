@@ -7,8 +7,52 @@
 
   &[data-has-active-items="true"] {
     .button__dropdown {
+      font-weight: bold;
       color: white;
+      width: 100%;
       background-color: $secondary-blue;
+      white-space: initial;
+      display: flex;
+      justify-content: center;
+      flex-direction: column;
+      vertical-align: middle;
+      padding: 0, 1.5em, 0, 1.5em;
+      
+      @media (max-width: 960px) and (min-width: 653px) {
+        padding: 1.5em, 0, 1.5em, 0;
+        display: inline-block;
+        width: 100%;
+      }
+
+      @media (max-width: 653px) {
+        padding-left: 30%;
+        padding-right: 30%;
+      }
+
+      @media (max-width: 450px) {
+        padding-left: 20%;
+        padding-right: 20%;
+      }
+ 
+
+        .fa {
+      
+          position: absolute;
+          margin-left: 6.25em;
+
+          @media (max-width: 960px) and (min-width: 653px) {
+            margin-left: .5em;
+            position: relative;
+          }
+      
+          @media (max-width: 653px) {
+            margin-left: 50%
+          }
+
+          @media (max-width: 450px) {
+            margin-left: 60%;
+          }
+        }
     }
   }
 }

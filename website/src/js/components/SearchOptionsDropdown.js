@@ -57,9 +57,19 @@ class SearchOptionsDropdown extends Component {
     return this.options().filter(option => !!(option.value)).length > 0;
   }
 
+  getLabel() {
+    let label = this.options().filter(options => !!(options.value))
+    label = label.map(options => options.title)
+    label = label.join(', ');
+    if (label.length === 0) {
+      return "Filter Options"
+    }
+    return label
+  }
+
   render() {
     return (
-      <Dropdown label="Filter Options" items={this.options()} item_component={DropdownToggle} has_active_items={this.hasActiveOptions()} item_onClick={this.handleItemClick} />
+      <Dropdown label={this.getLabel()} items={this.options()} item_component={DropdownToggle} has_active_items={this.hasActiveOptions()} item_onClick={this.handleItemClick} />
     );
   }
 

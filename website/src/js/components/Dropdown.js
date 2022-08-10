@@ -122,6 +122,9 @@ class Dropdown extends Component {
 
   dropdownIconClassName() {
     let class_name = 'fa';
+    if (this.props.has_active_items) {
+      return 'fa fa-filter fa-lg';
+    }
     return `${class_name} ${this.state.is_open ? "fa-caret-up" : "fa-caret-down"}`;
   }
 
