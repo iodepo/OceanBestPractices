@@ -34,7 +34,6 @@
         padding-right: 20%;
       }
  
-
         .fa {
       
           position: absolute;
@@ -46,13 +45,37 @@
           }
       
           @media (max-width: 653px) {
-            margin-left: 50%
+            margin-left: 60%
           }
 
           @media (max-width: 450px) {
-            margin-left: 60%;
+            margin-left: 68%;
           }
         }
+        &.landing-page {
+          @media (max-width: 960px) {
+            display: flex;
+            padding-left: 28%;
+            padding-right: 28%;
+          }
+          @media (max-width: 414px) {
+            display: flex;
+            padding-left: 20%;
+            padding-right: 20%;
+          }
+
+          .fa {
+          position: absolute;
+          margin-left: 6.25em;
+
+          @media(max-width: 960px) {
+            margin-left: 60%;
+          }
+          @media(max-width: 414px) {
+            margin-left: 68%;
+          }
+        }
+      }
     }
   }
 }

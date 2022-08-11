@@ -69,7 +69,7 @@ class SearchOptionsDropdown extends Component {
 
   render() {
     return (
-      <Dropdown label={this.getLabel()} items={this.options()} item_component={DropdownToggle} has_active_items={this.hasActiveOptions()} item_onClick={this.handleItemClick} />
+      <Dropdown page={this.props.page} label={this.getLabel()} items={this.options()} item_component={DropdownToggle} has_active_items={this.hasActiveOptions()} item_onClick={this.handleItemClick} />
     );
   }
 

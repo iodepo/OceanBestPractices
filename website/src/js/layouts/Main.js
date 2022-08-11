@@ -117,7 +117,7 @@ class Main extends Component {
         <section className="landing__search-container">
           <img className="landing__obp-logo" src={unesco_ioc_obp_logo} alt="United Nations, Educational, Scientific and Cultural Organization Logo | Intergovernmental Oceanographic Commission Logo | Ocean Best Practices Logo" width="591" height="234"/>
           <div className="landing__search">
-            <SearchBar history={this.props.history}/>
+            <SearchBar page="landing" history={this.props.history}/>
           </div>
           <button className="button landing__search-button"
             onClick={this.handleSearchButtonClick.bind(this)}

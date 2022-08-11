@@ -2413,10 +2413,29 @@ html {
           position: relative; } }
       @media (max-width: 653px) {
         .dropdown[data-has-active-items="true"] .button__dropdown .fa {
-          margin-left: 50%; } }
+          margin-left: 60%; } }
       @media (max-width: 450px) {
         .dropdown[data-has-active-items="true"] .button__dropdown .fa {
+          margin-left: 68%; } }
+    @media (max-width: 960px) {
+      .dropdown[data-has-active-items="true"] .button__dropdown.landing-page {
+        display: flex;
+        padding-left: 28%;
+        padding-right: 28%; } }
+    @media (max-width: 414px) {
+      .dropdown[data-has-active-items="true"] .button__dropdown.landing-page {
+        display: flex;
+        padding-left: 20%;
+        padding-right: 20%; } }
+    .dropdown[data-has-active-items="true"] .button__dropdown.landing-page .fa {
+      position: absolute;
+      margin-left: 6.25em; }
+      @media (max-width: 960px) {
+        .dropdown[data-has-active-items="true"] .button__dropdown.landing-page .fa {
           margin-left: 60%; } }
+      @media (max-width: 414px) {
+        .dropdown[data-has-active-items="true"] .button__dropdown.landing-page .fa {
+          margin-left: 68%; } }
 
 .dropdown__content {
   display: none;
