@@ -1494,7 +1494,37 @@ html {
   outline: 0;
   border: 0;
   transition: all 0.2s ease-in-out;
-  border-radius: 10px 10px 0 0; }
+  border-radius: 10px 10px 0 0;
+  text-overflow: ellipsis; }
+  .searchbar__input::placeholder {
+    font-size: 1rem; }
+    @media (max-width: 1480px) {
+      .searchbar__input::placeholder {
+        font-size: .9rem; } }
+    @media (max-width: 1390px) {
+      .searchbar__input::placeholder {
+        font-size: .8rem; } }
+    @media (max-width: 1320px) {
+      .searchbar__input::placeholder {
+        font-size: .65rem; } }
+    @media (max-width: 1280px) {
+      .searchbar__input::placeholder {
+        font-size: .8rem; } }
+    @media (max-width: 1230px) {
+      .searchbar__input::placeholder {
+        font-size: .7rem; } }
+    @media (max-width: 960px) {
+      .searchbar__input::placeholder {
+        font-size: 1rem; } }
+    @media (max-width: 685px) {
+      .searchbar__input::placeholder {
+        font-size: .9rem; } }
+    @media (max-width: 630px) {
+      .searchbar__input::placeholder {
+        font-size: .8rem; } }
+    @media (max-width: 575px) {
+      .searchbar__input::placeholder {
+        font-size: .7rem; } }
   .searchbar__input:focus {
     background-color: #fff;
     color: #5D6877; }

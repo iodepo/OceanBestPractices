@@ -10,6 +10,7 @@ const initialState = [
     active_search: true,
     autocomplete: true,
     help_text: 'Enter any term or phrase and the search will look in ALL metadata fields AND the full text document',
+    help_text_unformatted: 'Search OceanBestPractices',
     value: [
       '*'
     ],
@@ -24,6 +25,7 @@ const initialState = [
     ],
     active_search: false,
     help_text: 'Enter the <b>author name</b>. You can enter just the surname if it is not a common name otherwise eg.  Johannes Karstensen or if you know more than one author  Karstensen Pearlman',
+    help_text_unformatted: 'Enter the author name. You can enter just the surname if it is not a common name otherwise',
   },
   {
     title: 'Title',
@@ -34,7 +36,8 @@ const initialState = [
     ],
     active_search: false,
     autocomplete: true,
-    help_text: 'Enter if possible at least the first five words of the <b>title</b> (try all title if you have it)',
+    help_text: 'Enter if possible at least the first five words of the <b>title</b> (try the entire title if you have it)',
+    help_text_unformatted: 'Enter if possible at least the first five words of the title (try the entire title if you have it)',
   },
   {
     title: 'Endorsed',
@@ -44,7 +47,8 @@ const initialState = [
     ],
     active_search: false,
     autocomplete: false,
-    help_text: 'Enter the name of the <b>Endorsing Group</b> eg. GOOS'
+    help_text: 'Enter the name of the <b>Endorsing Group</b> eg. GOOS',
+    help_text_unformatted: 'Enter the name of the Endorsing Group eg. GOOS',
   },
   {
     title: 'EOV',
@@ -54,6 +58,7 @@ const initialState = [
     ],
     active_search: false,
     help_text: 'Search for the <b>full name of the EOV</b> eg. Zooplankton biomass and diversity',
+    help_text_unformatted: 'Search for the full name of the EOV eg. Zooplankton biomass and diversity',
   },
   {
     title: 'SDG',
@@ -63,6 +68,7 @@ const initialState = [
     ],
     active_search: false,
     help_text: 'Search for the number of the <b>Sustainable Development Goal</b> eg.  14.1',
+    help_text_unformatted: 'Search for the number of the Sustainable Development Goal eg. 14.1',
   },
   {
     title: 'Document Body',
@@ -73,6 +79,7 @@ const initialState = [
     active_search: false,
     autocomplete: true,
     help_text: 'Enter any term or phrase and the search will look in ONLY the full text of the document',
+    help_text_unformatted: 'Enter any term or phrase and the search will look in ONLY the full text of the document',
   },
   {
     title: 'Journal',
@@ -82,6 +89,7 @@ const initialState = [
     ],
     active_search: false,
     help_text: 'Search for the full title of the journal or a significant word/s   eg. Methods',
+    help_text_unformatted: 'Search for the full title of the journal or a significant word/s eg. Methods',
   },
   {
     title: 'Issuing Agency',
@@ -91,6 +99,7 @@ const initialState = [
     ],
     active_search: false,
     help_text: 'Enter the full name of the issuing agency/publisher',
+    help_text_unformatted: 'Enter the full name of the issuing agency/publisher',
   },
   {
     title: 'DOI',
@@ -100,6 +109,7 @@ const initialState = [
     ],
     active_search: false,
     help_text: 'Enter the  DOI number  eg. 10.2788/4295',
+    help_text_unformatted: 'Enter the DOI number eg. 10.2788/4295',
   },
   {
     title: 'ECV',
@@ -109,6 +119,7 @@ const initialState = [
     ],
     active_search: false,
     help_text: 'Search for the <b>full name of the ECV</b> eg.  Aerosols',
+    help_text_unformatted: 'Search for the full name of the ECV eg. Aerosols',
   },
   {
     title: 'EBV',
@@ -118,6 +129,7 @@ const initialState = [
     ],
     active_search: false,
     help_text: 'Search for the <b>full name of the EBV</b> eg.  Ecosystem Vertical Profile',
+    help_text_unformatted: 'Search for the full name of the EBV eg. Ecosystem Vertical Profile',
   },
   {
     title: 'Funders',
@@ -126,7 +138,8 @@ const initialState = [
       'dc_description_sponsorship',
     ],
     active_search: false,
-    help_text: 'Search for the <b>Funders/Sponsors name</b> eg. European Commission'
+    help_text: 'Search for the <b>Funders/Sponsors name</b> eg. European Commission',
+    help_text_unformatted: 'Search for the Funders/Sponsors name eg. European Commission',
   },
   {
     title: 'Adoption Level',
@@ -135,7 +148,8 @@ const initialState = [
       'dc_description_adoption',
     ],
     active_search: false,
-    help_text: 'Search for the following <b>Adoption terms</b>: Novel (no adoption outside originators); Validated (tested by third parties); Organizational; Multi-Organizational; National; International'
+    help_text: 'Search for the following <b>Adoption terms</b>: Novel (no adoption outside originators); Validated (tested by third parties); Organizational; Multi-Organizational; National; International',
+    help_text_unformatted: 'Search Adoption Terms: Novel; Validated; Organizational; Multi-Organizational; National; International',
   }
 ];
 

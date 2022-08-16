@@ -8,7 +8,7 @@ import { setOption, setActiveOptions } from '../actions/options';
 
 import { constructQuery, parseQuery } from '../helpers/query';
 import { formSearchRoute, queryParamsToObject } from '../helpers/url';
-import { constructFields, activeFieldsString } from '../helpers/fields';
+import { constructFields, activeFieldsString, activeFieldsHelpTextUnformatted } from '../helpers/fields';
 import { activeTagsString } from '../helpers/tags';
 import { activeSortOption, activeAdvancedOptionsString } from '../helpers/options';
 
@@ -202,7 +202,7 @@ class SearchBar extends Component {
           </div>
 
           <div className="searchbar__input--autocomplete">
-            <input type="text" required={search.length === 0} className="searchbar__input" placeholder="Search OceanBestPractices" value={search} onChange={this.onChange} />
+            <input type="text" required={search.length === 0} className="searchbar__input" placeholder={activeFieldsHelpTextUnformatted(this.props.fields)} value={search} onChange={this.onChange} />
             <Autocomplete onAutocompleteClick={this.onAutocompleteClick.bind(this)}/>
           </div>
 
