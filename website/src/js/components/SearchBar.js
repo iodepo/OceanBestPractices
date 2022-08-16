@@ -209,7 +209,7 @@ class SearchBar extends Component {
 
           <div className="searchbar__input--append">
 
-            <SearchOptionsDropdown />
+            <SearchOptionsDropdown page={this.props.page}/>
 
             <div className="searchbar__input--append--button">
 
