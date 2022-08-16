@@ -8,6 +8,7 @@
   display: none;
   padding: .9rem 0 .9rem .75rem;
   background-color: #eaecf3;
+  color: rgb(50, 50, 50);
 
   @media #{$screen-xs} {
     display: inline-block;
@@ -19,7 +20,7 @@
   min-height: 1rem;
   display: inline-block;
   background-color: #eaecf3;
-  color: $dark-gray;
+  color: rgb(50, 50, 50);
   font-size: 12px;
   border: none;
 
@@ -66,7 +67,7 @@
 
 .search-filter__node:hover {
   background-color: #eaecf3;
-  color: $dark-gray;
+  color: rgb(50, 50, 50);
 }
 
 
