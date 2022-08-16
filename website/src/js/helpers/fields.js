@@ -14,6 +14,16 @@ export function activeFieldsString(fields = []) {
 
 }
 
+export function activeFieldsHelpTextUnformatted(fields = []) {
+
+  if ( !Array.isArray(fields) ) return;
+
+  return fields
+    .filter(field => !!(field.active_search))
+    .map(field => field.help_text_unformatted);
+
+}
+
 export function constructFields(fields) {
   if ( typeof fields === 'string' ) {
      return encodeURIComponent(fields);

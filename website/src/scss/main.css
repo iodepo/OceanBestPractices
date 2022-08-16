@@ -1494,7 +1494,37 @@ html {
   outline: 0;
   border: 0;
   transition: all 0.2s ease-in-out;
-  border-radius: 10px 10px 0 0; }
+  border-radius: 10px 10px 0 0;
+  text-overflow: ellipsis; }
+  .searchbar__input::placeholder {
+    font-size: 1rem; }
+    @media (max-width: 1480px) {
+      .searchbar__input::placeholder {
+        font-size: .9rem; } }
+    @media (max-width: 1390px) {
+      .searchbar__input::placeholder {
+        font-size: .8rem; } }
+    @media (max-width: 1320px) {
+      .searchbar__input::placeholder {
+        font-size: .65rem; } }
+    @media (max-width: 1280px) {
+      .searchbar__input::placeholder {
+        font-size: .8rem; } }
+    @media (max-width: 1230px) {
+      .searchbar__input::placeholder {
+        font-size: .7rem; } }
+    @media (max-width: 960px) {
+      .searchbar__input::placeholder {
+        font-size: 1rem; } }
+    @media (max-width: 685px) {
+      .searchbar__input::placeholder {
+        font-size: .9rem; } }
+    @media (max-width: 630px) {
+      .searchbar__input::placeholder {
+        font-size: .8rem; } }
+    @media (max-width: 575px) {
+      .searchbar__input::placeholder {
+        font-size: .7rem; } }
   .searchbar__input:focus {
     background-color: #fff;
     color: #5D6877; }
@@ -1765,7 +1795,8 @@ html {
   font-size: 12px;
   display: none;
   padding: .9rem 0 .9rem .75rem;
-  background-color: #eaecf3; }
+  background-color: #eaecf3;
+  color: #323232; }
   @media (min-width: 481px) {
     .search-filter__label {
       display: inline-block; } }
@@ -1775,7 +1806,7 @@ html {
   min-height: 1rem;
   display: inline-block;
   background-color: #eaecf3;
-  color: #5D6877;
+  color: #323232;
   font-size: 12px;
   border: none; }
   @media (min-width: 481px) {
@@ -1810,7 +1841,7 @@ html {
 
 .search-filter__node:hover {
   background-color: #eaecf3;
-  color: #5D6877; }
+  color: #323232; }
 
 .search-filter__dropdown {
   display: none;
@@ -2404,8 +2435,61 @@ html {
   .dropdown .button__dropdown {
     text-align: center; }
   .dropdown[data-has-active-items="true"] .button__dropdown {
+    font-weight: bold;
     color: white;
-    background-color: #00BCE4; }
+    width: 100%;
+    background-color: #00BCE4;
+    white-space: initial;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    vertical-align: middle;
+    padding: 0, 1.5em, 0, 1.5em; }
+    @media (max-width: 960px) and (min-width: 653px) {
+      .dropdown[data-has-active-items="true"] .button__dropdown {
+        padding: 1.5em, 0, 1.5em, 0;
+        display: inline-block;
+        width: 100%; } }
+    @media (max-width: 653px) {
+      .dropdown[data-has-active-items="true"] .button__dropdown {
+        padding-left: 30%;
+        padding-right: 30%; } }
+    @media (max-width: 450px) {
+      .dropdown[data-has-active-items="true"] .button__dropdown {
+        padding-left: 20%;
+        padding-right: 20%; } }
+    .dropdown[data-has-active-items="true"] .button__dropdown .fa {
+      position: absolute;
+      margin-left: 6.25em; }
+      @media (max-width: 960px) and (min-width: 653px) {
+        .dropdown[data-has-active-items="true"] .button__dropdown .fa {
+          margin-left: .5em;
+          position: relative; } }
+      @media (max-width: 653px) {
+        .dropdown[data-has-active-items="true"] .button__dropdown .fa {
+          margin-left: 60%; } }
+      @media (max-width: 450px) {
+        .dropdown[data-has-active-items="true"] .button__dropdown .fa {
+          margin-left: 68%; } }
+    @media (max-width: 960px) {
+      .dropdown[data-has-active-items="true"] .button__dropdown.landing-page {
+        display: flex;
+        padding-left: 28%;
+        padding-right: 28%; } }
+    @media (max-width: 414px) {
+      .dropdown[data-has-active-items="true"] .button__dropdown.landing-page {
+        display: flex;
+        padding-left: 20%;
+        padding-right: 20%; } }
+    .dropdown[data-has-active-items="true"] .button__dropdown.landing-page .fa {
+      position: absolute;
+      margin-left: 6.25em; }
+      @media (max-width: 960px) {
+        .dropdown[data-has-active-items="true"] .button__dropdown.landing-page .fa {
+          margin-left: 60%; } }
+      @media (max-width: 414px) {
+        .dropdown[data-has-active-items="true"] .button__dropdown.landing-page .fa {
+          margin-left: 68%; } }
 
 .dropdown__content {
   display: none;

@@ -36,6 +36,47 @@
   border: 0;
   transition: all 0.2s ease-in-out;
   border-radius: 10px 10px 0 0;
+  text-overflow: ellipsis;
+  
+    &::placeholder {
+      font-size: 1rem;
+  
+      @media (max-width: 1480px) {
+        font-size: .9rem;
+      }
+  
+      @media (max-width: 1390px) {
+        font-size: .8rem;
+      }
+  
+      @media (max-width: 1320px) {
+        font-size: .65rem;
+      }
+  
+      @media (max-width: 1280px) {
+        font-size: .8rem;
+      }
+  
+      @media (max-width: 1230px) {
+        font-size: .7rem;
+      }
+  
+      @media (max-width: 960px) {
+        font-size: 1rem;
+      }
+  
+      @media (max-width: 685px) {
+        font-size: .9rem;
+      }
+  
+      @media (max-width: 630px) {
+        font-size: .8rem;
+      }
+  
+      @media (max-width: 575px) {
+        font-size: .7rem;
+      }
+    }
 
   &:focus {
     background-color: #fff;

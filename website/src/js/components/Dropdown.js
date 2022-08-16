@@ -113,6 +113,20 @@ class Dropdown extends Component {
       label: event_label || this.label(),
     });
 
+  }/**
+   * 
+   * dropdownClassName
+   * @description class of the dropdown button - changes based on page
+   */
+
+  dropdownClassName() {
+    let className = "button button__dropdown";
+    console.log(this.props.page)
+    if (this.props.page === "landing") {
+      
+      className += " landing-page"
+    }
+    return className;
   }
 
   /**
@@ -122,6 +136,9 @@ class Dropdown extends Component {
 
   dropdownIconClassName() {
     let class_name = 'fa';
+    if (this.props.has_active_items) {
+      return 'fa fa-filter fa-lg';
+    }
     return `${class_name} ${this.state.is_open ? "fa-caret-up" : "fa-caret-down"}`;
   }
 
@@ -155,7 +172,7 @@ class Dropdown extends Component {
     return (
       <div ref={this.setRef} className="dropdown" data-has-active-items={this.props.has_active_items}>
 
-        <a className="button button__dropdown" onClick={this.handleDropdownLinkClick}>
+        <a className={this.dropdownClassName()} onClick={this.handleDropdownLinkClick}>
           { this.label() }
           <i className={this.dropdownIconClassName()}></i>
         </a>
