@@ -7,6 +7,7 @@ import MetadataFilters from '../../images/SearchTips/MetadataFilter.png';
 import SDGSearch from '../../images/SearchTips/SDGSearch.png'
 import AdvancedSearch from '../../images/SearchTips/AdvancedFilter.png';
 import LogicalOperators from '../../images/SearchTips/LogicalOperators.png';
+import SortBy from '../../images/SearchTips/SortBy.png'
 
 import PDFViewer from '../../images/SearchTips/PDFViewer.png';
 import PDFBar from '../../images/SearchTips/PDFBar.jpg';
@@ -207,7 +208,7 @@ class SearchTipsModal extends Component {
                 <SearchTipsModalItem
                   number='4'
                   header='Scoring search results'
-                  content='It is not  always easy to understand what results have been returned for your search. The scoring of a search result is determined 
+                  content='It is not  always easy to understand what results have been returned for your search. The scoring of a search result is determined
                 based on the field matches from the query you specified and any additional filters you apply to the search.
                 '
                 />
@@ -291,10 +292,12 @@ class SearchTipsModal extends Component {
                 <h4>Refereed Filter</h4>
                 <p>If you would like your search to only return results for documents that have been identified as refereed,
                   in the metadata,  you can toggle ON/OFF ‘Refereed’ in the <span className="blue">Filter Options</span> dropdown</p>
+
+                <div className="col-4 tip__modal-item-screenshot">
+                  <img src={AdvancedSearch} alt='Metadata Filters Screenshot' />
+                </div>
               </div>
-              <div className="col-4 tip__modal-item-screenshot">
-                <img src={AdvancedSearch} alt='Metadata Filters Screenshot' />
-              </div>
+
             </div>
 
             <div className="row" id="AdvancedSearch">
@@ -311,6 +314,11 @@ class SearchTipsModal extends Component {
                   sort option from the dropdown will re-sort your results.</p>
                 <p>After displaying the results from your search, if you select the ‘Sort by Endorsed’ will place document records in which the Endorsement
                   (external) metadata field is completed at the top of the records displayed</p>
+
+                <div className="col-4 tip__modal-item-screenshot">
+                  <img src={SortBy} alt='Sort search results screenshot' />
+                </div>
+
                 <h4>Saved Search</h4>
                 <p>If you wish to save a search result, simply save the URL in your browser’s address bar or add it to your bookmarks.</p>
                 <h4>Citations Export</h4>
@@ -319,8 +327,6 @@ class SearchTipsModal extends Component {
                   nominated download location e.g. filename: obp-export-citations …   Or,  you can click the ‘<span className="blue">Generate Citation</span>’ button associated with the
                   record and copy and paste the citation into another medium.
                 </p>
-
-
 
                 <h4>Viewing and downloading documents</h4>
 
@@ -333,6 +339,10 @@ class SearchTipsModal extends Component {
                   and are viewable individually (by using the dropdown menu which lists them) or
                   all together by clicking on “Highlight All Terms”.</p>
 
+                <div className="col-4 tip__modal-item-screenshot">
+                  <img src={PDFViewer} alt='Screenshot of our custom PDF Viewer' />
+                </div>
+
                 <h4>PDF Toolbar</h4>
                 <img src={PDFBar} style={imgStyle} alt="Toolbar for printing, zooming, saving PDF documents" />
                 <p>You can download or print the full document using the options in the ribbon at the top of the
@@ -341,9 +351,6 @@ class SearchTipsModal extends Component {
                 <p><strong>Note:</strong> if you wish to see the complete record and metadata of any search
                   result, please click the document title to be redirected to the Ocean Best Practices
                   repository where you can also download the full document</p>
-              </div>
-              <div className="col-4 tip__modal-item-screenshot">
-                <img src={PDFViewer} alt='Screenshot of our custom PDF Viewer' />
               </div>
             </div>
 
