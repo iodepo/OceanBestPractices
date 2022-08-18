@@ -13,7 +13,23 @@ const textractorSuccessResponseSchema = z.object({
 
 export type TextractorSuccessResponse = z.infer<typeof textractorSuccessResponseSchema>;
 
+const textractorOcrResponseSchema = z.object({
+  document_uri: z.string().url(),
+  temp_uri_prefix: z.string().url(),
+  text_uri: z.string().url(),
+  results: z.object({
+    textractor: z.object({
+      method: z.literal('ocr'),
+      size: z.literal(-1),
+      success: z.literal(false),
+    }),
+  }),
+});
+
+export type TextractorOcrResponse = z.infer<typeof textractorOcrResponseSchema>;
+
 const isSuccessResponse = zodTypeGuard(textractorSuccessResponseSchema);
+const isOcrResponse = zodTypeGuard(textractorOcrResponseSchema);
 
 const isErrorResponse = zodTypeGuard(
   z.object({
@@ -23,7 +39,7 @@ const isErrorResponse = zodTypeGuard(
 );
 
 const validateTextractorResponse = (response: unknown): void => {
-  if (isSuccessResponse(response)) return undefined;
+  if (isSuccessResponse(response) || isOcrResponse(response)) return undefined;
 
   const errorMessage = isErrorResponse(response)
     ? `textractor error: ${response.errorMessage}`
