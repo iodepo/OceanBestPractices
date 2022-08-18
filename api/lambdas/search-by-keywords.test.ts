@@ -160,6 +160,30 @@ describe('search-by-keywords.handler', () => {
       );
     });
 
+    test('should find documents with a mix of stemmed words', (done) => {
+      const proxyEvent = {
+        queryStringParameters: {
+          keywords: '::bodies,:dc_title:oceans',
+        },
+      };
+
+      searchHandler(
+        proxyEvent,
+        (results) => {
+          console.log(`Results ${JSON.stringify(results)}`);
+
+          expect(results.hits.total.value).toEqual(2);
+
+          const uuids = results.hits.hits.map(
+            (h) => h._source.uuid
+          );
+
+          expect(uuids).toEqual([uuid1, uuid2]);
+        },
+        done
+      );
+    });
+
     describe('and using boolean operators', () => {
       test('should find matching documents using the OR boolean operator', (done) => {
         const proxyEvent = {
