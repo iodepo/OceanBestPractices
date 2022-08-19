@@ -127,5 +127,164 @@ describe('search-document-builder', () => {
     test.todo('should boost the dc_title keyword field if searching all fields');
 
     test.todo('shoudl boost the dc_description_abstract field if searching all fields');
+
+    describe('when escaping query string special characters', () => {
+      // + - = && || > < ! ( ) { } [ ] ^ " ~ * ? : \ /
+      test('should escape + in the query string term component', () => {
+        const keywordComps = [
+          {
+            operator: '',
+            field: '*',
+            term: 'term with a + in it',
+          },
+        ];
+
+        const result = formatQueryString(keywordComps);
+        expect(result).toEqual('*:(term with a \\+ in it)');
+      });
+
+      test('should escape - in the query string term component', () => {
+        const keywordComps = [
+          {
+            operator: '',
+            field: '*',
+            term: 'term with a - in it',
+          },
+        ];
+
+        const result = formatQueryString(keywordComps);
+        expect(result).toEqual('*:(term with a \\- in it)');
+      });
+
+      test('should escape = in the query string term component', () => {
+        const keywordComps = [
+          {
+            operator: '',
+            field: '*',
+            term: 'term with a = in it',
+          },
+        ];
+
+        const result = formatQueryString(keywordComps);
+        expect(result).toEqual('*:(term with a \\= in it)');
+      });
+
+      test('should escape && in the query string term component', () => {
+        const keywordComps = [
+          {
+            operator: '',
+            field: '*',
+            term: 'term with a && in it',
+          },
+        ];
+
+        const result = formatQueryString(keywordComps);
+        expect(result).toEqual('*:(term with a \\&& in it)');
+      });
+
+      test('should escape || in the query string term component', () => {
+        const keywordComps = [
+          {
+            operator: '',
+            field: '*',
+            term: 'term with a || in it',
+          },
+        ];
+
+        const result = formatQueryString(keywordComps);
+        expect(result).toEqual('*:(term with a \\|| in it)');
+      });
+
+      test('should escape ! in the query string term component', () => {
+        const keywordComps = [
+          {
+            operator: '',
+            field: '*',
+            term: 'term with a ! in it',
+          },
+        ];
+
+        const result = formatQueryString(keywordComps);
+        expect(result).toEqual('*:(term with a \\! in it)');
+      });
+
+      test('should escape ( and ) in the query string term component', () => {
+        const keywordComps = [
+          {
+            operator: '',
+            field: '*',
+            term: 'term with a ( and ) in it',
+          },
+        ];
+
+        const result = formatQueryString(keywordComps);
+        expect(result).toEqual('*:(term with a \\( and \\) in it)');
+      });
+
+      test('should escape { and } in the query string term component', () => {
+        const keywordComps = [
+          {
+            operator: '',
+            field: '*',
+            term: 'term with a { and } in it',
+          },
+        ];
+
+        const result = formatQueryString(keywordComps);
+        expect(result).toEqual('*:(term with a \\{ and \\} in it)');
+      });
+
+      test('should escape [ and ] in the query string term component', () => {
+        const keywordComps = [
+          {
+            operator: '',
+            field: '*',
+            term: 'term with a [ and ] in it',
+          },
+        ];
+
+        const result = formatQueryString(keywordComps);
+        expect(result).toEqual('*:(term with a \\[ and \\] in it)');
+      });
+
+      test('should escape : in the query string term component', () => {
+        const keywordComps = [
+          {
+            operator: '',
+            field: '*',
+            term: 'term with a : in it',
+          },
+        ];
+
+        const result = formatQueryString(keywordComps);
+        expect(result).toEqual('*:(term with a \\: in it)');
+      });
+
+      test('should escape / in the query string term component', () => {
+        const keywordComps = [
+          {
+            operator: '',
+            field: '*',
+            term: 'term with a / in it',
+          },
+        ];
+
+        const result = formatQueryString(keywordComps);
+        expect(result).toEqual('*:(term with a \\/ in it)');
+      });
+
+      test('should escape \\ in the query string term component', () => {
+        const keywordComps = [
+          {
+            operator: '',
+            field: '*',
+            term: 'term with a \\ in it',
+          },
+        ];
+
+        const result = formatQueryString(keywordComps);
+        expect(result).toEqual('*:(term with a \\\\ in it)');
+      });
+    });
   });
 });
