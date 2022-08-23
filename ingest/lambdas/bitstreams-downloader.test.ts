@@ -6,7 +6,10 @@ import * as s3Utils from '../../lib/s3-utils';
 import * as sqsUtils from '../../lib/sqs-utils';
 import { s3EventFactory } from '../../lib/test-utils';
 import { randomId } from '../../lib/string-utils';
-import { TextractorSuccessResponse } from '../../lib/pdf-parser';
+import {
+  TextractorOcrResponse,
+  TextractorSuccessResponse,
+} from '../../lib/pdf-parser';
 import { LambdaClient, nullLambdaClient } from '../../lib/lambda-client';
 
 const buckets = {
@@ -20,6 +23,19 @@ const fakeTextractorSuccessResponse: TextractorSuccessResponse = {
   results: {
     textractor: {
       success: true,
+    },
+  },
+};
+
+const fakeTextractorOcrResponse: TextractorOcrResponse = {
+  document_uri: 's3://some-bucket/pdf/some-uuid.pdf',
+  temp_uri_prefix: 's3://some-bucket-temp/',
+  text_uri: 's3://some-bucket/txt/some-uuid.txt',
+  results: {
+    textractor: {
+      method: 'ocr',
+      size: -1,
+      success: false,
     },
   },
 };
@@ -118,31 +134,62 @@ describe('bitstreams-downloader.main', () => {
       expect(pdfObjectBody).toEqual('Mock bitstream.');
     });
 
-    it('invokes the textractor function', async () => {
-      const mockInvoke = jest.fn(
-        async (name, payload) => {
-          expect(name).toBe(config.textractorFunction);
+    describe('with simple PDF textraction', () => {
+      it('invokes the textractor function', async () => {
+        const mockInvoke = jest.fn(
+          async (name, payload) => {
+            expect(name).toBe(config.textractorFunction);
 
-          if (payload === undefined) fail('payload is undefined');
+            if (payload === undefined) fail('payload is undefined');
 
-          expect(JSON.parse(payload)).toEqual({
-            document_uri: `s3://${config.documentsBucket}/pdf/${uuid}.pdf`,
-            temp_uri_prefix: `s3://${config.textractorTempBucket}/`,
-            text_uri: `s3://${config.documentsBucket}/txt/${uuid}.txt`,
-          });
+            expect(JSON.parse(payload)).toEqual({
+              document_uri: `s3://${config.documentsBucket}/pdf/${uuid}.pdf`,
+              temp_uri_prefix: `s3://${config.textractorTempBucket}/`,
+              text_uri: `s3://${config.documentsBucket}/txt/${uuid}.txt`,
+            });
 
-          return JSON.stringify(fakeTextractorSuccessResponse);
-        }
-      ) as jest.MockedFunction<LambdaClient['invoke']>;
+            return JSON.stringify(fakeTextractorSuccessResponse);
+          }
+        ) as jest.MockedFunction<LambdaClient['invoke']>;
 
-      context.lambda = {
-        ...nullLambdaClient,
-        invoke: mockInvoke,
-      };
+        context.lambda = {
+          ...nullLambdaClient,
+          invoke: mockInvoke,
+        };
 
-      await main(event, context);
+        await main(event, context);
 
-      expect(mockInvoke.mock.calls.length).toBe(1);
+        expect(mockInvoke.mock.calls.length).toBe(1);
+      });
+    });
+
+    describe('with OCR PDF textraction', () => {
+      it('invokes the textractor function', async () => {
+        const mockInvoke = jest.fn(
+          async (name, payload) => {
+            expect(name).toBe(config.textractorFunction);
+
+            if (payload === undefined) fail('payload is undefined');
+
+            expect(JSON.parse(payload)).toEqual({
+              document_uri: `s3://${config.documentsBucket}/pdf/${uuid}.pdf`,
+              temp_uri_prefix: `s3://${config.textractorTempBucket}/`,
+              text_uri: `s3://${config.documentsBucket}/txt/${uuid}.txt`,
+            });
+
+            return JSON.stringify(fakeTextractorOcrResponse);
+          }
+        ) as jest.MockedFunction<LambdaClient['invoke']>;
+
+        context.lambda = {
+          ...nullLambdaClient,
+          invoke: mockInvoke,
+        };
+
+        await main(event, context);
+
+        expect(mockInvoke.mock.calls.length).toBe(1);
+      });
     });
 
     it('writes to the indexer queue', async () => {
