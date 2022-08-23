@@ -7,6 +7,7 @@ export const documentsMapping = {
       },
       bitstreamText: {
         type: 'text',
+        analyzer: 'english',
       },
       primaryAuthor: {
         type: 'text',
@@ -60,6 +61,7 @@ export const documentsMapping = {
       },
       dc_abstract: {
         type: 'text',
+        analyzer: 'english',
       },
       dc_date_issued: {
         type: 'date',
@@ -67,6 +69,7 @@ export const documentsMapping = {
       },
       dc_description_notes: {
         type: 'text',
+        analyzer: 'english',
       },
       dc_title: {
         type: 'text',
@@ -76,9 +79,11 @@ export const documentsMapping = {
             ignore_above: 256,
           },
         },
+        analyzer: 'english',
       },
       dc_title_alternative: {
         type: 'text',
+        analyzer: 'english',
       },
     },
   },

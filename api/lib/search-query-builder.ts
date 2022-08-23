@@ -29,6 +29,15 @@ export const nestedQuery = (termPhrase: unknown) => ({
   },
 });
 
+// Elasticsearch's query_string query has a list of special characters. We don't
+// want to necessarily escape them all (e.g. the user can use a wildcard if they want)
+// but there are a few obvious ones we need to escape.
+// https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html
+// All special characters: + - = && || > < ! ( ) { } [ ] ^ " ~ * ? : \ /
+// Characters we currently want to escape: + - = && || ! ( ) { } [ ] : \ /
+const queryStringSpecialCharacters = /\+|-|=|&{2}|\|{2}|!|\(|\)|{|}|\[|]|:|\/|\\/g;
+const encodeQueryStringTermComp = (term: string): string => term.replace(queryStringSpecialCharacters, '\\$&');
+
 const formatKeywordComp = (keywordComp: SearchKeywordComps) => {
   let openSearchOperator;
 
@@ -43,7 +52,8 @@ const formatKeywordComp = (keywordComp: SearchKeywordComps) => {
       openSearchOperator = 'OR';
   }
 
-  return `${openSearchOperator} ${keywordComp.field}:(${keywordComp.term})`;
+  const escapedKeywordCompTerm = encodeQueryStringTermComp(keywordComp.term);
+  return `${openSearchOperator} ${keywordComp.field}:(${escapedKeywordCompTerm})`;
 };
 
 /**
@@ -90,7 +100,7 @@ export const buildSort = (sortParams: string[] = []) => {
  * Helper function that builds the `query` field of the Elasticsearch search
  * document.
  *
- * @param keywords An array of search keyword components.
+ * @param keywordComps An array of search keyword components.
  * @param terms An array of terms that will be used as filters in the
  * query.
  * @param termURIs A list of term URIs (ontology URIs) that can be

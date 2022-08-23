@@ -323,6 +323,7 @@ describe('open-search-client', () => {
         properties: {
           bitstreamText: {
             type: 'text',
+            analyzer: 'english',
           },
           bitstreamTextKey: {
             type: 'keyword',
@@ -361,6 +362,7 @@ describe('open-search-client', () => {
           },
           dc_abstract: {
             type: 'text',
+            analyzer: 'english',
           },
           dc_date_issued: {
             format: 'yyyy',
@@ -368,6 +370,7 @@ describe('open-search-client', () => {
           },
           dc_description_notes: {
             type: 'text',
+            analyzer: 'english',
           },
           dc_title: {
             fields: {
@@ -377,9 +380,11 @@ describe('open-search-client', () => {
               },
             },
             type: 'text',
+            analyzer: 'english',
           },
           dc_title_alternative: {
             type: 'text',
+            analyzer: 'english',
           },
           handle: {
             type: 'keyword',
