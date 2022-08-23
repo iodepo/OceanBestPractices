@@ -63,6 +63,8 @@ describe('search-by-keywords.handler', () => {
     const uuid2 = randomUUID();
     const uuid3 = randomUUID();
 
+    const doiUUID = randomUUID();
+
     beforeAll(async () => {
       const doc1 = {
         uuid: uuid1,
@@ -79,6 +81,10 @@ describe('search-by-keywords.handler', () => {
         uuid: uuid3,
         dc_title: 'This is a document with author text.',
         dc_contributor_author: 'Ocean Sea',
+        dc_identifier_uri: [
+          'http://hdl.handle.net/11329/1029',
+          'http://dx.doi.org/10.25607/OBP-561',
+        ],
       };
 
       await osClient.addDocument(esUrl, documentsIndexName, doc1);
@@ -88,6 +94,12 @@ describe('search-by-keywords.handler', () => {
     });
 
     afterAll(async () => {
+      await osClient.deleteByQuery(
+        esUrl,
+        documentsIndexName,
+        { match: { uuid: doiUUID } }
+      );
+
       await osClient.deleteByQuery(esUrl, documentsIndexName, { match: { uuid: uuid1 } });
       await osClient.deleteByQuery(esUrl, documentsIndexName, { match: { uuid: uuid2 } });
       await osClient.deleteByQuery(esUrl, documentsIndexName, { match: { uuid: uuid3 } });
@@ -179,6 +191,28 @@ describe('search-by-keywords.handler', () => {
           );
 
           expect(uuids).toEqual([uuid1, uuid2]);
+        },
+        done
+      );
+    });
+
+    test('should find documents with the DOI metadata field', (done) => {
+      const proxyEvent = {
+        queryStringParameters: {
+          keywords: ':dc_identifier_uri:10.25607/OBP-561',
+        },
+      };
+
+      searchHandler(
+        proxyEvent,
+        (results) => {
+          expect(results.hits.total.value).toEqual(1);
+
+          const uuids = results.hits.hits.map(
+            (h) => h._source.uuid
+          );
+
+          expect(uuids).toEqual([uuid3]);
         },
         done
       );
