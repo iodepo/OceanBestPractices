@@ -404,6 +404,9 @@ describe('open-search-client', () => {
           uuid: {
             type: 'keyword',
           },
+          dc_identifier_doi: {
+            type: 'keyword',
+          },
         },
       });
     });

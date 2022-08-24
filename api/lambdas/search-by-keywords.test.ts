@@ -62,8 +62,7 @@ describe('search-by-keywords.handler', () => {
     const uuid1 = randomUUID();
     const uuid2 = randomUUID();
     const uuid3 = randomUUID();
-
-    const doiUUID = randomUUID();
+    const uuid4 = randomUUID();
 
     beforeAll(async () => {
       const doc1 = {
@@ -81,28 +80,30 @@ describe('search-by-keywords.handler', () => {
         uuid: uuid3,
         dc_title: 'This is a document with author text.',
         dc_contributor_author: 'Ocean Sea',
-        dc_identifier_uri: [
-          'http://hdl.handle.net/11329/1029',
+        dc_identifier_doi: [
           'http://dx.doi.org/10.25607/OBP-561',
+        ],
+      };
+
+      const doc4 = {
+        uuid: uuid4,
+        dc_identifier_doi: [
+          'http://dx.doi.org/10.25607/OBP-765',
         ],
       };
 
       await osClient.addDocument(esUrl, documentsIndexName, doc1);
       await osClient.addDocument(esUrl, documentsIndexName, doc2);
       await osClient.addDocument(esUrl, documentsIndexName, doc3);
+      await osClient.addDocument(esUrl, documentsIndexName, doc4);
       await osClient.refreshIndex(esUrl, documentsIndexName);
     });
 
     afterAll(async () => {
-      await osClient.deleteByQuery(
-        esUrl,
-        documentsIndexName,
-        { match: { uuid: doiUUID } }
-      );
-
       await osClient.deleteByQuery(esUrl, documentsIndexName, { match: { uuid: uuid1 } });
       await osClient.deleteByQuery(esUrl, documentsIndexName, { match: { uuid: uuid2 } });
       await osClient.deleteByQuery(esUrl, documentsIndexName, { match: { uuid: uuid3 } });
+      await osClient.deleteByQuery(esUrl, documentsIndexName, { match: { uuid: uuid4 } });
       await osClient.refreshIndex(esUrl, documentsIndexName);
     });
 
@@ -199,7 +200,7 @@ describe('search-by-keywords.handler', () => {
     test('should find documents with the DOI metadata field', (done) => {
       const proxyEvent = {
         queryStringParameters: {
-          keywords: ':dc_identifier_uri:10.25607/OBP-561',
+          keywords: ':dc_identifier_doi:10.25607/OBP-561',
         },
       };
 
