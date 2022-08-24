@@ -85,6 +85,9 @@ export const documentsMapping = {
         type: 'text',
         analyzer: 'english',
       },
+      dc_identifier_doi: {
+        type: 'keyword',
+      },
     },
   },
 };

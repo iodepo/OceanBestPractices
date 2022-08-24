@@ -36,7 +36,12 @@ export const nestedQuery = (termPhrase: unknown) => ({
 // All special characters: + - = && || > < ! ( ) { } [ ] ^ " ~ * ? : \ /
 // Characters we currently want to escape: + - = && || ! ( ) { } [ ] : \ /
 const queryStringSpecialCharacters = /\+|-|=|&{2}|\|{2}|!|\(|\)|{|}|\[|]|:|\/|\\/g;
-const encodeQueryStringTermComp = (term: string): string => term.replace(queryStringSpecialCharacters, '\\$&');
+const encodeQueryStringTerm = (term: string, field: string): string => {
+  const encodedTerm = term.replace(queryStringSpecialCharacters, '\\$&');
+
+  // FIXME: This is a hack to make doi searches work. Fix this better please.
+  return field === 'dc_identifier_doi' ? `*${encodedTerm}` : encodedTerm;
+};
 
 const formatKeywordComp = (keywordComp: SearchKeywordComps) => {
   let openSearchOperator;
@@ -52,8 +57,11 @@ const formatKeywordComp = (keywordComp: SearchKeywordComps) => {
       openSearchOperator = 'OR';
   }
 
-  const escapedKeywordCompTerm = encodeQueryStringTermComp(keywordComp.term);
-  return `${openSearchOperator} ${keywordComp.field}:(${escapedKeywordCompTerm})`;
+  const encodedKeywordCompTerm = encodeQueryStringTerm(
+    keywordComp.term,
+    keywordComp.field
+  );
+  return `${openSearchOperator} ${keywordComp.field}:(${encodedKeywordCompTerm})`;
 };
 
 /**
