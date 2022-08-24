@@ -11,6 +11,7 @@ Documentation on each module can be found in the following READMEs:
 
 * [Tests](./TESTS.md)
 * [Deployments](./DEPLOYMENTS.md)
+* [Search Index](./SearchIndex.md)
 * [docs/Virtuoso.md](./docs/Virtuoso.md)
 * [ingest/README.md](./ingest/README.md)
 * [website/README.md](./website/README.md)
