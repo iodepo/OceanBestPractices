@@ -56,7 +56,7 @@ export default class Website extends Construct {
 
     new CfnOutput(this, 'ConfigBucketOutput', {
       value: configBucket.bucketName,
-      exportName: 'config-bucket-name',
+      exportName: `${stackName}-config-bucket-name`,
     });
 
     let sslOptions: Partial<DistributionProps> = {};

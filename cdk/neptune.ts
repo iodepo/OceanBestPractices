@@ -183,7 +183,7 @@ export default class Neptune extends Construct {
 
     new CfnOutput(this, 'BulkLoaderBucket', {
       value: bulkLoaderBucket.bucketName,
-      exportName: 'bulk-loader-bucket',
+      exportName: `${stackName}-bulk-loader-bucket`,
     });
   }
 }

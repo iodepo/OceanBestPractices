@@ -150,7 +150,7 @@ export default class Api extends Construct {
 
     new CfnOutput(this, 'ApiUrlOutput', {
       value: api.url,
-      exportName: 'api-url',
+      exportName: `${stackName}-api-url`,
     });
 
     const documents = api.root.addResource('documents');

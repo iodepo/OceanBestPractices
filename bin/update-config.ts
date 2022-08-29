@@ -60,8 +60,8 @@ async function main() {
     configBucketName,
   ] = await Promise.all([
     fetchRecaptchaSiteKey(stackName),
-    fetchStackOutputValue(stackName, 'api-url'),
-    fetchStackOutputValue(stackName, 'config-bucket-name'),
+    fetchStackOutputValue(stackName, `${stackName}-api-url`),
+    fetchStackOutputValue(stackName, `${stackName}-config-bucket-name`),
   ]);
 
   if (apiUrl === undefined) {

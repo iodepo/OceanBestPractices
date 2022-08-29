@@ -104,6 +104,7 @@ export default class Ingest extends Construct {
     // The indexer needs to read from the indexer queue.
     const sqsEndpoint = vpc.addInterfaceEndpoint('sqs-gateway', {
       service: InterfaceVpcEndpointAwsService.SQS,
+      privateDnsEnabled: false,
     });
     sqsEndpoint.connections.allowDefaultPortFrom(lambdas.indexer);
     sqsQueues.indexerQueue.grantConsumeMessages(lambdas.indexer);
