@@ -15,6 +15,8 @@ export default class IngestBuckets extends Construct {
 
   public readonly textExtractorTemp: Bucket;
 
+  public readonly feedIngesterPubDate: Bucket;
+
   constructor(scope: Construct, id: string, props: BucketsProps) {
     super(scope, id);
 
@@ -54,6 +56,12 @@ export default class IngestBuckets extends Construct {
     this.textExtractorTemp = new Bucket(this, 'TextExtractorTemp', {
       bucketName: `${stackName}-doc-extracted-temp`,
       lifecycleRules: [{ expiration: Duration.days(5) }],
+      removalPolicy: RemovalPolicy.DESTROY,
+      autoDeleteObjects: true,
+    });
+
+    this.feedIngesterPubDate = new Bucket(this, 'FeedIngesterPubDate', {
+      bucketName: `${stackName}-feed-ingester-pub-date`,
       removalPolicy: RemovalPolicy.DESTROY,
       autoDeleteObjects: true,
     });

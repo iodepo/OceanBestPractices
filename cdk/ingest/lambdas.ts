@@ -17,7 +17,6 @@ const lambdasPath = path.join(__dirname, '..', '..', 'dist', 'ingest');
 interface LambdasProps {
   buckets: IngestBuckets
   elasticsearchDomain: IDomain & IConnectable
-  feedReadInterval: number
   snsTopics: IngestSnsTopics
   sqsQueues: IngestSqsQueues
   textExtractorFunction: IFunction
@@ -44,7 +43,6 @@ export default class IngestLambdas extends Construct {
     const {
       buckets,
       elasticsearchDomain,
-      feedReadInterval = 300,
       snsTopics,
       sqsQueues,
       stackName,
@@ -116,12 +114,14 @@ export default class IngestLambdas extends Construct {
       description: 'Periodically checks the OBP RSS feed for documents that need indexing.',
       timeout: Duration.minutes(1),
       environment: {
-        DSPACE_FEED_READ_INTERVAL: feedReadInterval.toString(),
         DSPACE_ENDPOINT: dspaceEndpoint,
         INGEST_TOPIC_ARN: snsTopics.availableDocument.topicArn,
+        FEED_INGESTER_PUB_DATE_BUCKET: buckets.feedIngesterPubDate.bucketName,
       },
     });
     snsTopics.availableDocument.grantPublish(this.feedIngester);
+    buckets.feedIngesterPubDate.grantRead(this.feedIngester);
+    buckets.feedIngesterPubDate.grantWrite(this.feedIngester);
 
     this.indexRectifier = new Function(this, 'IndexRectifier', {
       functionName: `${stackName}-index-rectifier`,

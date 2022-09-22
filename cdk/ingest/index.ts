@@ -33,7 +33,6 @@ export default class Ingest extends Construct {
 
     const {
       openSearch,
-      feedReadInterval = 300,
       stackName,
       textExtractorFunction,
       websiteDistribution,
@@ -52,7 +51,6 @@ export default class Ingest extends Construct {
     const lambdas = new IngestLambdas(this, 'Lambdas', {
       buckets,
       elasticsearchDomain: openSearch,
-      feedReadInterval,
       snsTopics,
       sqsQueues,
       stackName,
@@ -64,7 +62,7 @@ export default class Ingest extends Construct {
 
     // Invoke the scheduler function every 5 minutes
     new events.Rule(this, 'FeedReadEventRule', {
-      schedule: events.Schedule.rate(Duration.seconds(feedReadInterval)),
+      schedule: events.Schedule.rate(Duration.seconds(300)),
       targets: [new eventTargets.LambdaFunction(lambdas.feedIngester)],
     });
 

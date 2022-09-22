@@ -3,7 +3,8 @@ const pMap = require('p-map');
 
 const dspaceClient = require('../../lib/dspace-client');
 const ingestQueue = require('../lib/ingest-queue');
-const { getIntFromEnv, getStringFromEnv } = require('../../lib/env-utils');
+const { getStringFromEnv } = require('../../lib/env-utils');
+const { getObjectText, putText, S3ObjectLocation } = require('../../lib/s3-utils');
 
 /**
  * Fetches a DSpace RSS feed and determines whether or not the documents
@@ -14,9 +15,29 @@ const { getIntFromEnv, getStringFromEnv } = require('../../lib/env-utils');
 const handler = async () => {
   const dspaceEndpoint = getStringFromEnv('DSPACE_ENDPOINT');
   const ingestTopicArn = getStringFromEnv('INGEST_TOPIC_ARN');
-  const dspaceFeedReadInterval = getIntFromEnv('DSPACE_FEED_READ_INTERVAL', 300);
+  const pubDateBucket = getStringFromEnv('FEED_INGESTER_PUB_DATE_BUCKET');
 
-  const forcePublishing = dspaceFeedReadInterval === -1;
+  // If we run into any errors we force publish the feed to be safe.
+  let forcePublishing = false;
+
+  // Default to the earliest time possible.
+  let lastKnownPublishedDate = new Date(+0);
+
+  const pubDateS3Location = new S3ObjectLocation(
+    pubDateBucket,
+    'pubDate.txt'
+  );
+
+  try {
+    // Fetch the last known feed publication date.
+    const lastKnownPublishedDateString = await getObjectText(pubDateS3Location);
+    lastKnownPublishedDate = new Date(lastKnownPublishedDateString);
+
+    console.log(`INFO: Last known RSS feed publication date is ${lastKnownPublishedDate}`);
+  } catch (error) {
+    console.log(`ERROR: Fetching RSS feed last known published date: ${error}. Forcing publication.`);
+    forcePublishing = true;
+  }
 
   try {
     // Fetch the RSS feed from DSpace.
@@ -26,9 +47,7 @@ const handler = async () => {
     // not we should index new documents.
     const feedLastPublished = new Date(feed.channel[0].pubDate[0]._);
 
-    const ingesterLastRun = new Date(Date.now() - dspaceFeedReadInterval);
-
-    const feedIsUpdated = feedLastPublished > ingesterLastRun;
+    const feedIsUpdated = feedLastPublished > lastKnownPublishedDate;
 
     const processFeed = forcePublishing || feedIsUpdated;
 
@@ -59,6 +78,12 @@ const handler = async () => {
         console.log(`INFO: Queued item ${dspaceItem.uuid} for ingest.`);
       },
       { concurrency: 5 }
+    );
+
+    // Save the latest published date.
+    await putText(
+      pubDateS3Location,
+      feedLastPublished.toString()
     );
   } catch (error) {
     console.log(`ERROR: Failed to fetch or parse DSpace RSS feed with error: ${error}`);
