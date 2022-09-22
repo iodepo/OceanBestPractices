@@ -97,7 +97,7 @@ describe('rss-feed-ingester.handler', () => {
       const lastKnownPublishedDateString = await s3Utils.getObjectText(
         pubDateS3Location
       );
-      expect(lastKnownPublishedDateString).toBe('Wed Nov 10 2021 13:00:30 GMT-0500 (Eastern Standard Time)');
+      expect(new Date(lastKnownPublishedDateString)).toEqual(new Date('Wed, 10 Nov 2021 18:00:30 GMT'));
     });
   });
 
@@ -183,7 +183,7 @@ describe('rss-feed-ingester.handler', () => {
         const lastKnownPublishedDateString = await s3Utils.getObjectText(
           pubDateS3Location
         );
-        expect(lastKnownPublishedDateString).toBe('Wed Nov 10 2021 13:00:30 GMT-0500 (Eastern Standard Time)');
+        expect(new Date(lastKnownPublishedDateString)).toEqual(new Date('Wed, 10 Nov 2021 18:00:30 GMT'));
       });
     });
 
