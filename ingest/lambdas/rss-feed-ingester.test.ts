@@ -1,8 +1,8 @@
-const dspaceFeedIngester = require('./rss-feed-ingester');
-const dspaceClient = require('../../lib/dspace-client');
-const ingestQueue = require('../lib/ingest-queue');
-
-const s3Utils = require('../../lib/s3-utils');
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+import * as ingestQueue from '../lib/ingest-queue';
+import * as s3Utils from '../../lib/s3-utils';
+import * as dspaceFeedIngester from './rss-feed-ingester';
+import * as dspaceClient from '../../lib/dspace-client';
 
 const pubDateS3Location = new s3Utils.S3ObjectLocation(
   'pub-date-bucket',

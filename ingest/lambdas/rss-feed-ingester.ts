@@ -1,10 +1,9 @@
 /* eslint-disable import/no-unresolved, import/extensions */
-const pMap = require('p-map');
-
-const dspaceClient = require('../../lib/dspace-client');
-const ingestQueue = require('../lib/ingest-queue');
-const { getStringFromEnv } = require('../../lib/env-utils');
-const { getObjectText, putText, S3ObjectLocation } = require('../../lib/s3-utils');
+import pMap from 'p-map';
+import * as dspaceClient from '../../lib/dspace-client';
+import * as ingestQueue from '../lib/ingest-queue';
+import { getStringFromEnv } from '../../lib/env-utils';
+import { getObjectText, putText, S3ObjectLocation } from '../../lib/s3-utils';
 
 /**
  * Fetches a DSpace RSS feed and determines whether or not the documents
@@ -12,7 +11,7 @@ const { getObjectText, putText, S3ObjectLocation } = require('../../lib/s3-utils
  * checking the published date of the feed, and whether or not it has been
  * published (updated) since the last time we checked it.
  */
-const handler = async () => {
+export const handler = async () => {
   const dspaceEndpoint = getStringFromEnv('DSPACE_ENDPOINT');
   const ingestTopicArn = getStringFromEnv('INGEST_TOPIC_ARN');
   const pubDateBucket = getStringFromEnv('FEED_INGESTER_PUB_DATE_BUCKET');
