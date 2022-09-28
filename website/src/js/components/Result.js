@@ -42,7 +42,7 @@ class Result extends Component {
   formatStatisticsUrl(handle) {
     return `https://repository.oceanbestpractices.org/handle/${handle}/statistics`
   }
-  
+
   hashLinkScroll() {
     const { hash } = window.location;
     if (hash !== '') {
@@ -98,7 +98,7 @@ class Result extends Component {
   }
 
   launchPDF() {
-    const pdfURL = `viewer/index.html?file=https://s3.amazonaws.com/${documentBucketSource}-document-source/${this.props.uuid}.pdf&search=${constructViewerQuery(this.props.searchReducer.activeSearch, false)}`;
+    const pdfURL = `viewer/index.html?file=https://s3.amazonaws.com/${documentBucketSource}-document-source/pdf/${this.props.uuid}.pdf&search=${constructViewerQuery(this.props.searchReducer.activeSearch, false)}`;
     window.open(pdfURL, '_blank');
     this.setState({showDocument: true});
   }
@@ -210,7 +210,7 @@ class Result extends Component {
               export_citation_checkbox
             }
             { result_title }
-            
+
             <div className="result__author">
               {
                 authorList || null

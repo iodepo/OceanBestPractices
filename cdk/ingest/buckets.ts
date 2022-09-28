@@ -39,7 +39,10 @@ export default class IngestBuckets extends Construct {
         {
           allowedHeaders: ['Authorization'],
           allowedMethods: [HttpMethods.GET, HttpMethods.HEAD],
-          allowedOrigins: [`https://${websiteDistribution.distributionDomainName}`],
+          allowedOrigins: [
+            `https://${websiteDistribution.distributionDomainName}`,
+            'https://search.oceanbestpractices.org',
+          ],
           maxAge: 3000,
         },
       ],
