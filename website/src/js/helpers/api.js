@@ -114,23 +114,33 @@ export const addParam = (url, paramType, paramValue) => {
  * Builds a URL query parameter
  */
 
- export function buildKeywordsQueryParameter(searchGroups, fields) {
-  if ( typeof searchGroups === 'string' ) return encodeURIComponent(searchGroups);
+export function buildKeywordsQueryParameter(searchGroups, fields) {
+  if ( typeof searchGroups === 'string' ) {
+    return encodeURIComponent(searchGroups);
+  }
 
   return searchGroups.map((searchGroup, index) => {
-    if (searchGroup.type !== 'term' || typeof searchGroup.value !== 'string') return undefined;
+    if (searchGroup.type !== 'term' || typeof searchGroup.value !== 'string') {
+      return undefined;
+    }
 
     const operator = OPERATORS.find((operator) => operator.name === searchGroup.operator);
 
     // Get the fields we're targeting with this keyword. Fields can have multiple
     // values so we might end up appending multiple keywords for this searchGroup.
     const field = fields.find((f) => f.id === searchGroup.fieldId) || { value: ['*'] };
-
+    
     const keywords = field.value.map((v) => {
-      return encodeURI(`${operator.value}:${v}:${searchGroup.value.trim()}`);
+      //return encodeURI(`${encodeURIComponent(operator.value)}:${v}:${searchGroup.value.trim()}`);
+      //return encodeURIComponent(`${operator.value}:${v}:${searchGroup.value.trim()}`);
+      return encodeURIComponent(
+        `${operator.value}:${v}:${searchGroup.value.replace(/[\.\:\;\,\[\]\(\)]/g,'').trim()}`
+      );
+      //return `${operator.value}`;
     });
 
     return keywords.join(',');
+    //return keywords;
 
   }).filter(searchGroup => !!(searchGroup)).join(',');
 
