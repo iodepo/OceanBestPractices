@@ -69,14 +69,30 @@ function buildPercolatorRequest(body) {
 
 function percolateTerms(title, contents, callback) {
   var from = 0, size = 300;
-  var percolatorQuery = { query: { percolate: { field: "query", document: { contents: contents, title: title } } }, size: size, from: from };
+  var percolatorQuery = { 
+    query: { 
+      percolate: { 
+        field: "query", 
+        document: { 
+          contents: contents, 
+          title: title 
+        } 
+      } 
+      }, 
+    size: size, 
+    from: from 
+  };
 
   const req = buildPercolatorRequest(JSON.stringify(percolatorQuery));
   makePercolatorRequest(req, function(err, hits) {
     if (err === null) {
       var hitsData = hits.hits;
       var terms = hitsData.map(function(h) {
-        return { label: h["_source"]["query"]["multi_match"]["query"], uri: h["_id"], source_terminology: h["_source"]["source_terminology"] };
+        return { 
+          label: h["_source"]["query"]["multi_match"]["query"], 
+          uri: h["_id"], 
+          source_terminology: h["_source"]["source_terminology"] 
+        };
       });
 
       callback(null, terms);
