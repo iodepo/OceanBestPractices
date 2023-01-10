@@ -4,6 +4,29 @@
 
 In order to work with the OceanBestPractices web app you'll first need to install Node.js and npm. Most likely you'll need multiple versions of node on your machine so we recommend installing [nvm](https://github.com/nvm-sh/nvm).
 
+On OS X you can install nvm with
+```
+brew install nvm
+source $(brew --prefix nvm)/nvm.sh
+```
+
+The package can only be installed on an older version of Node.js, use nvm to install this.
+```
+cd REPONAME/website
+nvm install v14.21.1
+npm install
+npm audit fix [--force]
+```
+
+We also need the AWS Cloud Development Kit (AWS CDK).
+```
+brew install aws-cdk
+cdk --version
+```
+
+
+This version of Node.js seems to depend on [Python2](https://www.python.org/downloads/release/python-2716/) because it's using GYP.
+
 ## Local Development
 
 Before you begin development you need to add a `.env`. Since this file should be treated as a secrets file it is not included in the repository. However, the file [dot_env_example](dot_env_example) describes the environment variables you'll need to define. Create a file named `.env` and copy the required environment variables. You should set the API endpoint to the endpoint of the API Gateway you want to use for local development.
