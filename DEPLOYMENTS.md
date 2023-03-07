@@ -27,7 +27,7 @@ This version of Node.js seems to depend on [Python2](https://www.python.org/down
 
 ## Text Extractor
 
-Please refer to the [ingest README](./ingest/README.md), [TextExtractor repo](https://github.com/Element84/lambda-text-extractor) and [apex](https://apex.run/) for instrucitons on how to deploy the text extractor.
+Please refer to the [ingest README](./ingest/README.md), [TextExtractor repo](https://github.com/Element84/lambda-text-extractor) and [apex](https://apex.run/) for instructions on how to deploy the text extractor.
 
 Environments can share a single text extractor deployment. If there is already one deployed in the AWS account it's easier to use that than it is to deploy a new instance.
 
