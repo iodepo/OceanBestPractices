@@ -1,6 +1,12 @@
 # OBP Infrastructure
 
-This project includes all APIs, functions, queries, mappings, and resources necessary to deploy or query the OBP indexer and API infrastructure. The OBP indexer is a system which fetches existing documents from the Ocean Best Practices API; extracts text if necessary; and indexes the document metadata into an existing Elasticsearch cluster. The OBP API provides endpoints for clients to search and discover indexed documents.
+This project includes all APIs, functions, queries, mappings, and resources necessary to deploy or query the OBP indexer and API infrastructure. 
+
+The OBP indexer is a system which fetches existing documents from the Ocean Best Practices API, 
+extracts text if necessary
+and indexes the document metadata into an existing Elasticsearch cluster. 
+
+The OBP API provides endpoints for clients to search and discover indexed documents.
 
 ## Table of Contents
 
@@ -17,18 +23,22 @@ The OBP infrastructure relies heavily on AWS services. Most services can be depl
 
 It'd be a good idea to install the [AWS SAM Local](https://docs.aws.amazon.com/lambda/latest/dg/test-sam-local.html) library for local Lambda testing.
 
-While you can do everything you need to do in order to deploy via the AWS console, this documentation is written as though you're deploying via the [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html).
+While you can do everything you need to do in order to deploy via the AWS console, 
+this documentation is written as though you're deploying via the [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html).
 
-The OBP infrastructure leverages a 3rd party text extractor which can be found here: (<https://github.com/skylander86/lambda-text-extractor>). There is also a fork available at the Element 84 organization in case anything were to change with the original repository: (<https://github.com/Element84/lambda-text-extractor>).
+The OBP infrastructure leverages a 3rd party text extractor which can be found here: (<https://github.com/skylander86/lambda-text-extractor>). 
+There is also a fork available at the Element 84 organization in case anything were to change with the original repository: (<https://github.com/Element84/lambda-text-extractor>).
 
-The OBP documentation includes enough information to deploy the entire OBP infrastructure, however, it might be worth reading through some basic [Elasticsearch](https://www.elastic.co/guide/index.html) documentation to become comfortable with the service that provides our main search and tagging indices.
+The OBP documentation includes enough information to deploy the entire OBP infrastructure, however, 
+it might be worth reading through some basic [Elasticsearch](https://www.elastic.co/guide/index.html) documentation 
+to become comfortable with the service that provides our main search and tagging indices.
 
 ## Indexing Documents
 
 #### Overview
 
 1. Creating the Document Index
-2. Creating the Percolater
+2. Creating the Percolator
 3. Indexing a Document
     1. Manually Index a Document
     2. Scripted Index of a Document
@@ -40,11 +50,15 @@ The OBP documentation includes enough information to deploy the entire OBP infra
 
 ### Creating the Document Index
 
-Create a new document index in an Elastic Search cluster using an HTTP request `PUT documents` and the mapping found in [Documents Mapping](../ingest/open-search/documents-mapping.json).
+Create a new document index in an ElasticSearch cluster using an HTTP request `PUT documents` 
+and the mapping found in [Documents Mapping](../ingest/open-search/documents-mapping.json).
 
 ### Creating and Populating the Percolator Index
 
-First we need to create the `terms` index in Elasticsearch. This index will be used to store objects that map to individual terms in our triple store. This index represents the queries we want our documents to match. To learn more about how the Elasticsearch Percolator works take a look at the [documentation](https://www.elastic.co/guide/en/elasticsearch/reference/7.6/percolator.html).
+First we need to create the `terms` index in Elasticsearch. 
+This index will be used to store objects that map to individual terms in our triple store. 
+This index represents the queries we want our documents to match. 
+To learn more about how the Elasticsearch Percolator works take a look at the [documentation](https://www.elastic.co/guide/en/elasticsearch/reference/7.6/percolator.html).
 
 To create this index you can execute the following HTTP request on your Elasticsearch host:
 
@@ -92,13 +106,16 @@ PUT documents/doc
 
 #### Scripted Document Index
 
-Using the [index.js](indexer/indexer.js) Lambda function, objects can be automatically indexed. You can index the example document by running the following command in the terminal:
+Using the [index.js](indexer/indexer.js) Lambda function, objects can be automatically indexed. 
+You can index the example document by running the following command in the terminal:
 
 ```
 sam local generate-event s3 --bucket oop-doc-extracted --key dff822cf-fb9a-4e9e-899d-f395930889ee.txt | sam local invoke --template ingest/ingest-template.yaml --env-vars ingest/env.json "Indexer"
 ```
 
-This command generates an s3 event from the given bucket and object and pipes the event to the lambda function. ENV variables are loaded from the [env](indexer/env.json) file provided. You may need to substitue values that make sense for your testing.
+This command generates a s3 event from the given bucket and object and pipes the event to the lambda function. 
+ENV variables are loaded from the [env](indexer/env.json) file provided. 
+You may need to substitue values that make sense for your testing.
 
 ### Indexing a Semantic Tag (Percolator)
 

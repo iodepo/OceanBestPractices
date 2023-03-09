@@ -29,12 +29,17 @@ This version of Node.js seems to depend on [Python2](https://www.python.org/down
 
 ## Local Development
 
-Before you begin development you need to add a `.env`. Since this file should be treated as a secrets file it is not included in the repository. However, the file [dot_env_example](dot_env_example) describes the environment variables you'll need to define. Create a file named `.env` and copy the required environment variables. You should set the API endpoint to the endpoint of the API Gateway you want to use for local development.
+Before you begin development you need to add a `.env`. 
+Since this file should be treated as a secrets file it is not included in the repository. 
+However, the file [dot_env_example](dot_env_example) describes the environment variables you'll need to define. 
+Create a file named `.env` and copy the required environment variables. 
+You should set the API endpoint to the endpoint of the API Gateway you want to use for local development.
 
 To test locally, simply run:
 
 ```
-> npm run start
+cd REPONAME/website
+npm run start
 ```
 
 Notes from the original author if you experience any issues:
