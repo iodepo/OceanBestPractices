@@ -33,6 +33,8 @@ export default class IngestLambdas extends Construct {
 
   public readonly feedIngester: Function;
 
+  public readonly dspaceProxy: Function;
+
   public readonly indexRectifier: Function;
 
   public readonly bulkIngester: Function;
@@ -123,6 +125,18 @@ export default class IngestLambdas extends Construct {
     buckets.feedIngesterPubDate.grantRead(this.feedIngester);
     buckets.feedIngesterPubDate.grantWrite(this.feedIngester);
 
+    this.dspaceProxy = new Function(this, 'DSpaceProxy', {
+      functionName: `${stackName}-dspace-proxy`,
+      handler: 'lambda.handler',
+      runtime: Runtime.NODEJS_14_X,
+      code: Code.fromAsset(path.join(lambdasPath, 'dspace-proxy')),
+      description: 'Proxies requests to DSpace',
+      timeout: Duration.minutes(1),
+      environment: {
+        DSPACE_ENDPOINT: dspaceEndpoint,
+      },
+    });
+
     this.indexRectifier = new Function(this, 'IndexRectifier', {
       functionName: `${stackName}-index-rectifier`,
       handler: 'lambda.handler',
@@ -133,9 +147,14 @@ export default class IngestLambdas extends Construct {
       environment: {
         INGEST_TOPIC_ARN: snsTopics.availableDocument.topicArn,
         OPEN_SEARCH_ENDPOINT: openSearchEndpoint,
-        DSPACE_ENDPOINT: dspaceEndpoint,
+        DSPACE_PROXY_FUNCTION: this.dspaceProxy.functionName,
       },
+      vpc,
+      allowPublicSubnet: true,
     });
+    this.dspaceProxy.grantInvoke(this.indexRectifier);
+    elasticsearchDomain.connections.allowFrom(this.indexRectifier, Port.tcp(443));
+    elasticsearchDomain.grantReadWrite(this.indexRectifier);
     snsTopics.availableDocument.grantPublish(this.indexRectifier);
 
     this.bulkIngester = new Function(this, 'BulkIngester', {

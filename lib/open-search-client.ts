@@ -137,19 +137,18 @@ export const bulkDelete = async (
   const bulkData = ids.map((id) => ({
     delete: {
       _index: index,
-      _type: '_doc',
       _id: id,
     },
   }));
 
+  const body = `${bulkData.map((d) => JSON.stringify(d)).join('\n')}\n`;
+
   // eslint-disable-next-line no-return-await
-  return await got4aws().post(
+  return await gotEs(prefixUrl).post(
     '_bulk',
     {
-      prefixUrl,
-      body: `${bulkData.map((d) => JSON.stringify(d)).join('\n')}\n`,
-      responseType: 'json',
-      resolveBodyOnly: true,
+      headers: { 'Content-Type': 'application/json' },
+      body,
     }
   );
 };

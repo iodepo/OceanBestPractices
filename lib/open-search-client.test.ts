@@ -110,6 +110,7 @@ describe('open-search-client', () => {
   });
 
   describe('bulkDelete', () => {
+    // TODO: Update this test to actually hit ES instead of using mocks
     test('should use the Open Search bulk API to delete items in the index', async () => {
       const mockBulkDeleteResponse = [
         {
@@ -149,8 +150,8 @@ describe('open-search-client', () => {
       ];
 
       const expectedRequestBody = `
-{"delete":{"_index":"documents","_type":"_doc","_id":"1"}}
-{"delete":{"_index":"documents","_type":"_doc","_id":"2"}}
+{"delete":{"_index":"documents","_id":"1"}}
+{"delete":{"_index":"documents","_id":"2"}}
 `.trimStart();
 
       nock('https://open-search.example.com')
