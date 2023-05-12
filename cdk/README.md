@@ -1,4 +1,4 @@
-# Deployments
+# Deploying
 
 ## Dependencies
 
