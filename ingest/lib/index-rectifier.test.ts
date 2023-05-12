@@ -22,6 +22,9 @@ jest.mock('../../lib/dspace-client', () => ({
 
 describe('index-rectifier', () => {
   beforeAll(() => {
+    process.env['AWS_ACCESS_KEY_ID'] = 'test-key-id';
+    process.env['AWS_SECRET_ACCESS_KEY'] = 'test-access-key';
+
     nock.disableNetConnect();
     nock.enableNetConnect('localhost');
   });
