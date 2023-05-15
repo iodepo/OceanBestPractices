@@ -354,7 +354,7 @@ describe('index-rectifier', () => {
       await osClient.deleteIndex(esUrl, documentsIndexName);
     });
 
-    test('should compare index items with the DSpace repository and produce a list of updated and removed items', async () => {
+    test('should compare index items with the DSpace repository and produce a list of updated items', async () => {
       const mockDSpaceItem1 = {
         uuid: uuid1,
         lastModified: '2021-10-27 17:52:15.515', // Updated via lastModified.
@@ -447,7 +447,6 @@ describe('index-rectifier', () => {
 
       expect(result).toEqual({
         updated: [uuid1, uuid2],
-        removed: [uuid4],
       });
     });
   });

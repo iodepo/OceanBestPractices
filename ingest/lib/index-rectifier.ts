@@ -119,7 +119,6 @@ export const isUpdated = (
 };
 
 type IndexRectifierDiffResult = {
-  removed: string[],
   updated: string[]
 }
 
@@ -138,7 +137,6 @@ export const diff = async (
   lambda: LambdaClient
 ): Promise<IndexRectifierDiffResult> => {
   const diffResult: IndexRectifierDiffResult = {
-    removed: [],
     updated: [],
   };
 
@@ -179,12 +177,9 @@ export const diff = async (
           ? undefined
           : JSON.parse(dspaceProxyResponse);
 
-        // If we can't find the DSpace item for this UUID consider it
-        // deleted. Also, check if the metadata has changed and if so
+        // Check if the metadata has changed and if so
         // mark it updated. Otherwise consider it unchanged.
-        if (dspaceItem === undefined) {
-          diffResult.removed.push(hit._source.uuid);
-        } else if (isUpdated(hit, dspaceItem)) {
+        if (dspaceItem !== undefined && isUpdated(hit, dspaceItem)) {
           diffResult.updated.push(hit._source.uuid);
         }
       } catch (error) {
