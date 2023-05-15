@@ -39,6 +39,8 @@ export default class IngestLambdas extends Construct {
 
   public readonly bulkIngester: Function;
 
+  public readonly deleteDocument: Function;
+
   constructor(scope: Construct, id: string, props: LambdasProps) {
     super(scope, id);
 
@@ -170,5 +172,21 @@ export default class IngestLambdas extends Construct {
       },
     });
     snsTopics.availableDocument.grantPublish(this.bulkIngester);
+
+    this.deleteDocument = new Function(this, 'DeleteDocument', {
+      functionName: `${stackName}-delete-document`,
+      handler: 'lambda.handler',
+      runtime: Runtime.NODEJS_16_X,
+      code: Code.fromAsset(path.join(lambdasPath, 'delete-document-handler')),
+      description: 'Deletes a document from the documents index for the given UUID. Returns a response which includes the number of deleted documents.',
+      timeout: Duration.minutes(5),
+      environment: {
+        OPEN_SEARCH_ENDPOINT: openSearchEndpoint,
+      },
+      vpc,
+      allowPublicSubnet: true,
+    });
+    elasticsearchDomain.connections.allowFrom(this.deleteDocument, Port.tcp(443));
+    elasticsearchDomain.grantReadWrite(this.deleteDocument);
   }
 }
