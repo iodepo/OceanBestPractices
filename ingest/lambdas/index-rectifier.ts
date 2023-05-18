@@ -23,12 +23,12 @@ export const handler = async () => {
   );
 
   console.log(`DEBUG: Index rectifier diff result: ${JSON.stringify(result)}`);
-  // // Queue updated items for re-ingest.
-  // await ir.commitUpdatedItems(
-  //   result.updated,
-  //   env.INGEST_TOPIC_ARN
-  // );
+  // Queue updated items for re-ingest.
+  await ir.commitUpdatedItems(
+    result.updated,
+    env.INGEST_TOPIC_ARN
+  );
 
-  // // Remove deleted items from the index.
-  // await ir.commitRemovedItems(result.removed, env.OPEN_SEARCH_ENDPOINT);
+  console.log('DEBUG: Committed diff result');
+  return result;
 };

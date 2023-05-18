@@ -8,7 +8,7 @@ This component is a system which fetches existing documents from the [Ocean Best
 2. Ingesting Documents
 3. Bulk Ingesting Documents
 4. Deleting Documents
-5. Index Rectifier
+5. Updating Documents
 
 ## Prerequisites
 
@@ -86,8 +86,9 @@ The terms index (defaults to "terms") contains the list of keywords extracted fr
 You can manually trigger a bulk ingest of the source repository with the `bulk-ingester` function. You can do this via the AWS Lambda Console or the AWS CLI:
 
 ```shell
-aws lambda invoke --function-name {BULK_INGESTER_FUNCTION_NAME}
+aws lambda invoke --function-name {STAGE}-bulk-ingester
 ```
+<sub><sup>Replace {STAGE} with the target stage name (e.g. prod-obp-cdk)</sup></sub>
 
 The bulk indexer queues all documents available in the source repository for ingest. It does this by posting document UUIDs to the ingest SNS topic. This means that every document will run through the entire ingest routine. This is an asynchronous and (can be) long process. After triggering a bulk index please allow time for documents to be ingested.
 
@@ -98,8 +99,9 @@ The bulk ingester *does not* remove old documents. This is due to a limitation i
 Because DSpace does not expose a reliable API for identifying when a document is withdrawn from the source repostory deleting documents in the search index is a manual process. If/when a document is marked as withdrawn in the source repository you can delete it from the search index by invoking the `delete-document` function:
 
 ```shell
-aws lambda invoke --function-name {DELETE_DOCUMENT_FUNCTION_NAME} --payload '{ "uuid": "{DOCUMENT_UUID}" }'
+aws lambda invoke --function-name {STAGE}-delete-document --payload '{ "uuid": "{DOCUMENT_UUID}" }'
 ```
+<sub><sup>Replace {STAGE} with the target stage name (e.g. prod-obp-cdk)</sup></sub>
 
 For example, if you have a document with a UUID of `56c338f6-0ce7-428b-9091-6878a95b219d` and assuming the function name (you can get this from the AWS Lambda Console) of `prod-obp-cdk-delete-document` you would run:
 
@@ -113,7 +115,12 @@ You should then get a response with deletion information including the number of
 {"took":221,"timed_out":false,"total":1,"deleted":1,"batches":1,"version_conflicts":0,"noops":0,"retries":{"bulk":0,"search":0},"throttled_millis":0,"requests_per_second":-1,"throttled_until_millis":0,"failures":[]}
 ```
 
-## Index Rectifier
+## Updating Documents
+
+### Manual Update
+
+The process for updating a document is exaclty the same as ingesting a new document. You can manually update a document by following the [Ingesting Documents](#ingesting-documents) instructions.
+### Index Rectifier
 
 Occasionally the search index may get out of sync with the source repository due to limitations in the DSpace API and how the search repository is notified of new documents. The `index-rectifier` function is designed to perform a diff between the source and search repositories on a regular schedule (defaults to every 2 days). This function performs the following diff:
 
@@ -123,5 +130,6 @@ Occasionally the search index may get out of sync with the source repository due
 You can manually trigger the `index-rectifier` via the AWS Lambda Console or the AWS CLI:
 
 ```shell
-aws lambda invoke --function-name {INDEX_RECTIFIER_FUNCTION_NAME}
+aws lambda invoke --function-name {STAGE}-index-rectifier
 ```
+<sub><sup>Replace {STAGE} with the target stage name (e.g. prod-obp-cdk)</sup></sub>
