@@ -153,8 +153,6 @@ export const diff = async (
     }),
   });
 
-  console.log('DEBUG: Ready to scroll through documents index.');
-
   await osClient.scrollMap({
     esUrl: openSearchEndpoint,
     index: 'documents',
@@ -164,15 +162,13 @@ export const diff = async (
       try {
         const hit = hitSchema.parse(rawHit);
 
-        console.log(`DEBUG: Diff'ing index item with UUID: ${hit._source.uuid}`);
-
-        console.log(`DEBUG: Getting DSpace item from proxy: ${hit._source.uuid}`);
+        console.log(`INFO: Diff'ing index item with UUID: ${hit._source.uuid}`);
 
         const dspaceProxyResponse = await lambda.invoke(
           dspaceProxyFunction,
           JSON.stringify({ uuid: hit._source.uuid })
         );
-        console.log(`DEBUG: Got DSpace item from proxy: ${dspaceProxyResponse}`);
+
         const dspaceItem = dspaceProxyResponse === 'undefined'
           ? undefined
           : JSON.parse(dspaceProxyResponse);

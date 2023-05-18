@@ -13,7 +13,7 @@ const parseEnv = () =>
 export const handler = async () => {
   const env = parseEnv();
 
-  console.log('DEBUG: Diff\'ing index with DSpace');
+  console.log('INFO: Diff\'ing index with DSpace');
 
   // Perform an Index and DSpace diff.
   const result = await ir.diff(
@@ -22,13 +22,14 @@ export const handler = async () => {
     awsLambdaClient()
   );
 
-  console.log(`DEBUG: Index rectifier diff result: ${JSON.stringify(result)}`);
+  console.log(`INFO: Index rectifier diff result: ${JSON.stringify(result)}`);
+
   // Queue updated items for re-ingest.
   await ir.commitUpdatedItems(
     result.updated,
     env.INGEST_TOPIC_ARN
   );
 
-  console.log('DEBUG: Committed diff result');
+  console.log('INFO: Committed diff result');
   return result;
 };

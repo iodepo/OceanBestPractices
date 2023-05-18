@@ -107,6 +107,13 @@ export default class Ingest extends Construct {
     sqsEndpoint.connections.allowDefaultPortFrom(lambdas.indexer);
     sqsQueues.indexerQueue.grantConsumeMessages(lambdas.indexer);
 
+    // The index rectifier needs to post messages to the available document SNS topic
+    const snsEndpoint = vpc.addInterfaceEndpoint('sns-gateway', {
+      service: InterfaceVpcEndpointAwsService.SNS,
+    });
+    snsEndpoint.connections.allowDefaultPortFrom(lambdas.indexRectifier);
+
+    // The index rectifier needs to invoke the dspace proxy function.
     const lambdaEndpoint = vpc.addInterfaceEndpoint('lambda-gateway', {
       service: InterfaceVpcEndpointAwsService.LAMBDA,
     });
