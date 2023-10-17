@@ -30,53 +30,54 @@
   padding: 1.25rem;
   line-height: 3.5rem;
   font-size: 1.125rem;
-  color: rgba(0, 0, 0, .4);
+  color: rgba(0, 0, 0, .6);
   font-weight: 400;
   outline: 0;
   border: 0;
   transition: all 0.2s ease-in-out;
   border-radius: 10px 10px 0 0;
   text-overflow: ellipsis;
-  
-    &::placeholder {
-      font-size: 1rem;
-  
-      @media (max-width: 1480px) {
-        font-size: .9rem;
-      }
-  
-      @media (max-width: 1390px) {
-        font-size: .8rem;
-      }
-  
-      @media (max-width: 1320px) {
-        font-size: .65rem;
-      }
-  
-      @media (max-width: 1280px) {
-        font-size: .8rem;
-      }
-  
-      @media (max-width: 1230px) {
-        font-size: .7rem;
-      }
-  
-      @media (max-width: 960px) {
-        font-size: 1rem;
-      }
-  
-      @media (max-width: 685px) {
-        font-size: .9rem;
-      }
-  
-      @media (max-width: 630px) {
-        font-size: .8rem;
-      }
-  
-      @media (max-width: 575px) {
-        font-size: .7rem;
-      }
+
+  &::placeholder {
+    color: $darkest-gray;
+    font-size: 1.2rem;
+
+    @media (max-width: 1480px) {
+      font-size: 1.1rem;
     }
+
+    @media (max-width: 1390px) {
+      font-size: 1.0rem;
+    }
+
+    @media (max-width: 1320px) {
+      font-size: .85rem;
+    }
+
+    @media (max-width: 1280px) {
+      font-size: 1.0rem;
+    }
+
+    @media (max-width: 1230px) {
+      font-size: .9rem;
+    }
+
+    @media (max-width: 960px) {
+      font-size: 1.2rem;
+    }
+
+    @media (max-width: 685px) {
+      font-size: 1.1rem;
+    }
+
+    @media (max-width: 630px) {
+      font-size: 1.0rem;
+    }
+
+    @media (max-width: 575px) {
+      font-size: .9rem;
+    }
+  }
 
   &:focus {
     background-color: #fff;
@@ -151,8 +152,9 @@
     box-shadow: none;
     font-weight: normal;
 
-    &:hover{
-      background: #fff; color:$darkest-gray;
+    &:hover {
+      background: #fff;
+      color: $darkest-gray;
     }
   }
 
@@ -174,23 +176,23 @@
     }
   }
 
-  .button--icon{
-    background:$light-gray;
-    height:100%;
+  .button--icon {
+    background: $light-gray;
+    height: 100%;
     width: 50%;
-    text-align:center;
+    text-align: center;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    border-left:1px solid $light-med-gray;
+    border-left: 1px solid $light-med-gray;
 
     &:hover {
       background: $light-med-gray;
     }
 
     .button__icon {
-      color:$dark-gray;
-      font-size:1.5rem;
+      color: $dark-gray;
+      font-size: 1.5rem;
     }
   }
 
@@ -214,7 +216,7 @@
 
   @media #{$screen-m} {
     width: 6rem;
-    
+
     .searchbar__clear-button {
       border-radius: 0 10px 10px 0;
     }
@@ -260,9 +262,11 @@
   i {
     color: #888;
     padding: 0 .2rem 0 .6rem;
+
     &.field {
-      font-style: normal;  
+      font-style: normal;
       padding: 0 .3rem 0 0;
+
       i {
         padding: 0rem 0rem 0 .05rem;
         font-style: normal;
@@ -274,7 +278,7 @@
 .searchbar__tag-field {
   display: inline-block;
   padding: .2rem .5rem .2rem .5rem;
-   border-radius: 0.2rem 0rem 0rem .2rem;
+  border-radius: 0.2rem 0rem 0rem .2rem;
   white-space: nowrap;
   background: $light-gray;
   color: $dark-gray;
@@ -330,8 +334,8 @@
   div {
     display: block;
     cursor: pointer;
-    padding:1rem;
-    border-bottom:1px solid $light-gray;
+    padding: 1rem;
+    border-bottom: 1px solid $light-gray;
 
     &:last-of-type {
       border-bottom: none;
@@ -388,9 +392,11 @@
     margin: 0 .6rem 0rem 0;
     font-size: .9rem;
     text-decoration: underline;
+
     :first-child {
       margin-right: .6rem;
     }
+
     :last-child {
       display: inline-block;
       margin-right: 0;

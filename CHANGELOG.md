@@ -9,3 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Added
 
 - Adds CHANGELOG
+
+### Changed
+
+- Updated search bar placeholder font size and darked the text color.
