@@ -1489,7 +1489,7 @@ html {
   padding: 1.25rem;
   line-height: 3.5rem;
   font-size: 1.125rem;
-  color: rgba(0, 0, 0, 0.4);
+  color: rgba(0, 0, 0, 0.6);
   font-weight: 400;
   outline: 0;
   border: 0;
@@ -1497,34 +1497,35 @@ html {
   border-radius: 10px 10px 0 0;
   text-overflow: ellipsis; }
   .searchbar__input::placeholder {
-    font-size: 1rem; }
+    color: #3D4352;
+    font-size: 1.2rem; }
     @media (max-width: 1480px) {
       .searchbar__input::placeholder {
-        font-size: .9rem; } }
+        font-size: 1.1rem; } }
     @media (max-width: 1390px) {
       .searchbar__input::placeholder {
-        font-size: .8rem; } }
+        font-size: 1.0rem; } }
     @media (max-width: 1320px) {
       .searchbar__input::placeholder {
-        font-size: .65rem; } }
+        font-size: .85rem; } }
     @media (max-width: 1280px) {
       .searchbar__input::placeholder {
-        font-size: .8rem; } }
+        font-size: 1.0rem; } }
     @media (max-width: 1230px) {
       .searchbar__input::placeholder {
-        font-size: .7rem; } }
+        font-size: .9rem; } }
     @media (max-width: 960px) {
       .searchbar__input::placeholder {
-        font-size: 1rem; } }
+        font-size: 1.2rem; } }
     @media (max-width: 685px) {
       .searchbar__input::placeholder {
-        font-size: .9rem; } }
+        font-size: 1.1rem; } }
     @media (max-width: 630px) {
       .searchbar__input::placeholder {
-        font-size: .8rem; } }
+        font-size: 1.0rem; } }
     @media (max-width: 575px) {
       .searchbar__input::placeholder {
-        font-size: .7rem; } }
+        font-size: .9rem; } }
   .searchbar__input:focus {
     background-color: #fff;
     color: #5D6877; }
