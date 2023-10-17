@@ -2,18 +2,15 @@
 /* eslint-disable no-underscore-dangle */
 import pMap from 'p-map';
 import { z } from 'zod';
-import * as dspaceClient from '../../lib/dspace-client';
-import { DSpaceItem } from '../../lib/dspace-schemas';
+import { DSpaceItem, bitstreamSchema } from '../../lib/dspace-schemas';
 import * as osClient from '../../lib/open-search-client';
 import {
   findPDFBitstreamItem,
   normalizeLastModified,
 } from '../../lib/dspace-item';
-import {
-  DocumentItem,
-  documentItemSchema,
-} from '../../lib/open-search-schemas';
+import { DocumentItem } from '../../lib/open-search-schemas';
 import { queueIngestDocument } from './ingest-queue';
+import { LambdaClient } from '../../lib/lambda-client';
 
 /**
  * Commits index items that have been marked as out of date by
@@ -122,7 +119,6 @@ export const isUpdated = (
 };
 
 type IndexRectifierDiffResult = {
-  removed: string[],
   updated: string[]
 }
 
@@ -137,10 +133,10 @@ type IndexRectifierDiffResult = {
  */
 export const diff = async (
   openSearchEndpoint: string,
-  dspaceEndpoint: string
+  dspaceProxyFunction: string,
+  lambda: LambdaClient
 ): Promise<IndexRectifierDiffResult> => {
   const diffResult: IndexRectifierDiffResult = {
-    removed: [],
     updated: [],
   };
 
@@ -150,7 +146,11 @@ export const diff = async (
 
   const hitSchema = z.object({
     _id: z.string(),
-    _source: documentItemSchema,
+    _source: z.object({
+      uuid: z.string().uuid(),
+      lastModified: z.string(),
+      bitstreams: z.array(bitstreamSchema),
+    }),
   });
 
   await osClient.scrollMap({
@@ -162,20 +162,20 @@ export const diff = async (
       try {
         const hit = hitSchema.parse(rawHit);
 
-        // TODO: This will be slow because we're getting
-        // bitstreams and metadata in this call when we really
-        // only need metadata.
-        const dspaceItem = await dspaceClient.getItem(
-          dspaceEndpoint,
-          hit._source.uuid
+        console.log(`INFO: Diff'ing index item with UUID: ${hit._source.uuid}`);
+
+        const dspaceProxyResponse = await lambda.invoke(
+          dspaceProxyFunction,
+          JSON.stringify({ uuid: hit._source.uuid })
         );
 
-        // If we can't find the DSpace item for this UUID consider it
-        // deleted. Also, check if the metadata has changed and if so
+        const dspaceItem = dspaceProxyResponse === 'undefined'
+          ? undefined
+          : JSON.parse(dspaceProxyResponse);
+
+        // Check if the metadata has changed and if so
         // mark it updated. Otherwise consider it unchanged.
-        if (dspaceItem === undefined) {
-          diffResult.removed.push(hit._source.uuid);
-        } else if (isUpdated(hit, dspaceItem)) {
+        if (dspaceItem !== undefined && isUpdated(hit, dspaceItem)) {
           diffResult.updated.push(hit._source.uuid);
         }
       } catch (error) {

@@ -1,25 +1,38 @@
 /* eslint-disable no-underscore-dangle */
+import nock from 'nock';
+import { randomUUID } from 'crypto';
 import * as dspaceClient from '../../lib/dspace-client';
 import * as ir from './index-rectifier';
 import { queueIngestDocument } from './ingest-queue';
 import * as osClient from '../../lib/open-search-client';
+import { LambdaClient, nullLambdaClient } from '../../lib/lambda-client';
 
 jest.mock('./ingest-queue');
 
 const mockQueueIngestDocument = queueIngestDocument as jest.MockedFunction<typeof queueIngestDocument>; // eslint-disable-line max-len
 
-jest.mock('../../lib/open-search-client', () => ({
-  bulkDelete: jest.fn(),
-  nextScroll: jest.fn(),
-  openScroll: jest.fn(),
-  closeScroll: jest.fn(),
-}));
+const esUrl = 'http://localhost:9200';
+const dspaceEndpoint = 'https://dspace.example.com';
+
+const documentsIndexName = 'documents';
 
 jest.mock('../../lib/dspace-client', () => ({
   getItem: jest.fn(),
 }));
 
 describe('index-rectifier', () => {
+  beforeAll(() => {
+    process.env['AWS_ACCESS_KEY_ID'] = 'test-key-id';
+    process.env['AWS_SECRET_ACCESS_KEY'] = 'test-access-key';
+
+    nock.disableNetConnect();
+    nock.enableNetConnect('localhost');
+  });
+
+  afterAll(() => {
+    nock.enableNetConnect();
+  });
+
   describe('commitUpdatedItems', () => {
     test('should queue updated items for ingest', async () => {
       mockQueueIngestDocument.mockResolvedValue();
@@ -44,22 +57,76 @@ describe('index-rectifier', () => {
   });
 
   describe('commitRemovedItems', () => {
-    test('should remove items from the index', async () => {
-      (osClient.bulkDelete as jest.Mock).mockImplementation();
+    const uuid1 = randomUUID();
+    const uuid2 = randomUUID();
 
-      const removedItems = ['123', '456'];
+    beforeAll(async () => {
+      await osClient.createDocumentsIndex(esUrl, documentsIndexName);
+
+      const documentItem1 = {
+        uuid: uuid1,
+        bitstreamText: 'This is some sample content.',
+        handle: 'handle/123',
+        metadata: [{
+          key: 'dc.contributor.author',
+          value: 'Macovei, Vlad A.',
+          language: '',
+          element: 'contributor',
+          qualifier: 'author',
+          schema: 'dc',
+        }],
+        lastModified: '2021-11-01 15:10:17.231',
+        bitstreams: [],
+        dc_title: 'This is a sample name.',
+      };
+
+      const documentItem2 = {
+        uuid: uuid2,
+        bitstreamText: 'This is some sample content.',
+        handle: 'handle/123',
+        metadata: [{
+          key: 'dc.contributor.author',
+          value: 'Macovei, Vlad A.',
+          language: '',
+          element: 'contributor',
+          qualifier: 'author',
+          schema: 'dc',
+        }],
+        lastModified: '2021-11-01 15:10:17.231',
+        bitstreams: [],
+        dc_title: 'This is a sample name.',
+      };
+
+      await osClient.putDocumentItem(esUrl, documentItem1);
+      await osClient.putDocumentItem(esUrl, documentItem2);
+      await osClient.refreshIndex(esUrl, documentsIndexName);
+    });
+
+    afterAll(async () => {
+      await osClient.deleteIndex(esUrl, documentsIndexName);
+    });
+
+    test('should remove items from the index', async () => {
+      const removedItems = [uuid1, uuid2];
 
       await ir.commitRemovedItems(
         removedItems,
-        'https://opensearch.example.com'
+        esUrl
       );
 
-      expect(osClient.bulkDelete).toBeCalledTimes(1);
-      expect(osClient.bulkDelete).toBeCalledWith(
-        'https://opensearch.example.com',
-        'documents',
-        ['123', '456']
+      const indexedDoc1 = await osClient.getDocument(
+        esUrl,
+        documentsIndexName,
+        uuid1
       );
+      expect(indexedDoc1).toBeUndefined();
+
+      const indexedDoc2 = await osClient.getDocument(
+        esUrl,
+        documentsIndexName,
+        uuid2
+      );
+      expect(indexedDoc2).toBeUndefined();
     });
   });
 
@@ -184,133 +251,112 @@ describe('index-rectifier', () => {
   });
 
   describe('diff', () => {
-    test.skip('should compare index items with the DSpace repository and produce a list of updated and removed items', async () => {
-      const mockIndexItem1 = {
-        _id: '1',
-        _source: {
-          uuid: '3fdfb55d-6ddb-4a1d-b880-fda542c1529b',
-          lastModified: '2021-10-25 12:31:38.543',
-          handle: 'handle/123',
-          dc_title: 'Index Item 1',
-          bitstreams: [
-            {
-              bundleName: 'ORIGINAL',
-              description: 'PDF',
-              format: 'Adobe PDF',
-              mimeType: 'application/pdf',
-              checkSum: {
-                value: 'abc',
-              },
-              retrieveLink: 'retrieveLink',
+    const uuid1 = randomUUID();
+    const uuid2 = randomUUID();
+    const uuid3 = randomUUID();
+    const uuid4 = randomUUID();
+
+    beforeAll(async () => {
+      await osClient.createDocumentsIndex(esUrl, documentsIndexName);
+
+      const documentItem1 = {
+        uuid: uuid1,
+        lastModified: '2021-10-25 12:31:38.543',
+        handle: 'handle/123',
+        dc_title: 'Index Item 1',
+        bitstreams: [
+          {
+            bundleName: 'ORIGINAL',
+            description: 'PDF',
+            format: 'Adobe PDF',
+            mimeType: 'application/pdf',
+            checkSum: {
+              value: 'abc',
             },
-          ],
-          metadata: [],
-        },
-      };
-
-      const mockIndexItem2 = {
-        _id: '2',
-        _source: {
-          uuid: '66e3b2a3-fd2f-4300-9d1c-d0836b4e0a8d',
-          lastModified: '2021-9-25 12:31:38.543',
-          handle: 'handle/123',
-          dc_title: 'Index Item 2',
-          bitstreams: [
-            {
-              bundleName: 'ORIGINAL',
-              description: 'PDF',
-              format: 'Adobe PDF',
-              mimeType: 'application/pdf',
-              checkSum: {
-                value: 'abc',
-              },
-              retrieveLink: 'retrieveLink',
-            },
-          ],
-          metadata: [],
-        },
-      };
-
-      const mockIndexItem3 = {
-        _id: '3',
-        _source: {
-          uuid: 'd013b8a0-718f-49ea-b30d-6788cba8292b',
-          lastModified: '2021-8-25 12:31:38.543',
-          handle: 'handle/123',
-          dc_title: 'Index Item 3',
-          bitstreams: [
-            {
-              bundleName: 'ORIGINAL',
-              description: 'PDF',
-              format: 'Adobe PDF',
-              mimeType: 'application/pdf',
-              checkSum: {
-                value: 'abc',
-              },
-              retrieveLink: 'retrieveLink',
-            },
-          ],
-          metadata: [],
-        },
-      };
-
-      const mockIndexItem4 = {
-        _id: '4',
-        _source: {
-          uuid: 'dea11c14-1e9a-4ba2-8dbe-e6f9b7adeccb',
-          lastModified: '2021-8-25 12:31:38.543',
-          handle: 'handle/123',
-          dc_title: 'Index Item 4',
-          bitstreams: [
-            {
-              bundleName: 'ORIGINAL',
-              description: 'PDF',
-              format: 'Adobe PDF',
-              mimeType: 'application/pdf',
-              checkSum: {
-                value: 'abc',
-              },
-              retrieveLink: 'retrieveLink',
-            },
-          ],
-          metadata: [],
-        },
-      };
-
-      (osClient.openScroll as jest.Mock).mockImplementation(() => ({
-        _scroll_id: 'mockScrollId1',
-        hits: {
-          hits: [
-            mockIndexItem1,
-          ],
-        },
-      }));
-
-      (osClient.nextScroll as jest.Mock)
-        .mockImplementationOnce(() => ({
-          _scroll_id: 'mockScrollId2',
-          hits: {
-            hits: [
-              mockIndexItem2,
-              mockIndexItem3,
-              mockIndexItem4,
-            ],
+            retrieveLink: 'retrieveLink',
           },
-        }))
-        .mockImplementationOnce(() => ({
-          _scroll_id: 'mockScrollId2',
-          hits: {
-            hits: [],
+        ],
+        metadata: [],
+      };
+
+      const documentItem2 = {
+        uuid: uuid2,
+        lastModified: '2021-09-25 12:31:38.543',
+        handle: 'handle/123',
+        dc_title: 'Index Item 2',
+        bitstreams: [
+          {
+            bundleName: 'ORIGINAL',
+            description: 'PDF',
+            format: 'Adobe PDF',
+            mimeType: 'application/pdf',
+            checkSum: {
+              value: 'abc',
+            },
+            retrieveLink: 'retrieveLink',
           },
-        }));
+        ],
+        metadata: [],
+      };
 
-      (osClient.closeScroll as jest.Mock).mockImplementation(() => ({
-        succeeded: true,
-        num_freed: 5,
-      }));
+      const documentItem3 = {
+        uuid: uuid3,
+        lastModified: '2021-08-25 12:31:38.543',
+        handle: 'handle/123',
+        dc_title: 'Index Item 3',
+        bitstreams: [
+          {
+            bundleName: 'ORIGINAL',
+            description: 'PDF',
+            format: 'Adobe PDF',
+            mimeType: 'application/pdf',
+            checkSum: {
+              value: 'abc',
+            },
+            retrieveLink: 'retrieveLink',
+          },
+        ],
+        metadata: [],
+      };
 
+      const documentItem4 = {
+        uuid: uuid4,
+        lastModified: '2021-08-25 12:31:38.543',
+        handle: 'handle/123',
+        dc_title: 'Index Item 4',
+        bitstreams: [
+          {
+            bundleName: 'ORIGINAL',
+            description: 'PDF',
+            format: 'Adobe PDF',
+            mimeType: 'application/pdf',
+            checkSum: {
+              value: 'abc',
+            },
+            retrieveLink: 'retrieveLink',
+          },
+        ],
+        metadata: [],
+      };
+
+      await osClient.putDocumentItem(esUrl, documentItem1);
+      await osClient.putDocumentItem(esUrl, documentItem2);
+      await osClient.putDocumentItem(esUrl, documentItem3);
+      await osClient.putDocumentItem(esUrl, documentItem4);
+      await osClient.refreshIndex(esUrl, documentsIndexName);
+    });
+
+    afterAll(async () => {
+      await osClient.deleteByQuery(esUrl, documentsIndexName, { match: { uuid: uuid1 } });
+      await osClient.deleteByQuery(esUrl, documentsIndexName, { match: { uuid: uuid2 } });
+      await osClient.deleteByQuery(esUrl, documentsIndexName, { match: { uuid: uuid3 } });
+      await osClient.deleteByQuery(esUrl, documentsIndexName, { match: { uuid: uuid4 } });
+      await osClient.deleteIndex(esUrl, documentsIndexName);
+    });
+
+    test('should compare index items with the DSpace repository and produce a list of updated items', async () => {
       const mockDSpaceItem1 = {
-        uuid: '3fdfb55d-6ddb-4a1d-b880-fda542c1529b',
+        uuid: uuid1,
         lastModified: '2021-10-27 17:52:15.515', // Updated via lastModified.
         handle: 'handle/123',
         bitstreams: [
@@ -329,8 +375,8 @@ describe('index-rectifier', () => {
       };
 
       const mockDSpaceItem2 = {
-        uuid: '66e3b2a3-fd2f-4300-9d1c-d0836b4e0a8d',
-        lastModified: '2021-9-25 12:31:38.543',
+        uuid: uuid2,
+        lastModified: '2021-09-25 12:31:38.543',
         handle: 'handle/123',
         bitstreams: [
           {
@@ -349,8 +395,8 @@ describe('index-rectifier', () => {
 
       // Not updated.
       const mockDSpaceItem3 = {
-        uuid: 'd013b8a0-718f-49ea-b30d-6788cba8292b',
-        lastModified: '2021-8-25 12:31:38.543',
+        uuid: uuid3,
+        lastModified: '2021-08-25 12:31:38.543',
         handle: 'handle/123',
         bitstreams: [
           {
@@ -373,52 +419,35 @@ describe('index-rectifier', () => {
         .mockImplementationOnce(() => (mockDSpaceItem3))
         .mockImplementationOnce(() => undefined); // Item not found.
 
-      const mockOpenSearchEndpoint = 'https://open-search.example.com';
-      const mockDSpaceEndpoint = 'https://dspace.example.com';
-      const result = await ir.diff(mockOpenSearchEndpoint, mockDSpaceEndpoint);
+      const fakeInvokeSuccessLambda: LambdaClient = {
+        ...nullLambdaClient,
+        invoke: (_, payload) => {
+          // @ts-expect-error We don't care about error checking here
+          const payloadObject = JSON.parse(payload);
+          const payloadUUID = payloadObject['uuid'];
+          if (payloadUUID === uuid1) {
+            return Promise.resolve(JSON.stringify(mockDSpaceItem1));
+          } if (payloadUUID === uuid2) {
+            return Promise.resolve(JSON.stringify(mockDSpaceItem2));
+          } if (payloadUUID === uuid3) {
+            return Promise.resolve(JSON.stringify(mockDSpaceItem3));
+          } if (payloadUUID === uuid4) {
+            return Promise.resolve('undefined');
+          }
+
+          return Promise.reject();
+        },
+      };
+
+      const result = await ir.diff(
+        esUrl,
+        dspaceEndpoint,
+        fakeInvokeSuccessLambda
+      );
 
       expect(result).toEqual({
-        updated: ['3fdfb55d-6ddb-4a1d-b880-fda542c1529b', '66e3b2a3-fd2f-4300-9d1c-d0836b4e0a8d'],
-        removed: ['dea11c14-1e9a-4ba2-8dbe-e6f9b7adeccb'],
+        updated: [uuid1, uuid2],
       });
-
-      expect(osClient.openScroll).toHaveBeenCalledTimes(1);
-      expect(osClient.openScroll).toHaveBeenCalledWith(
-        mockOpenSearchEndpoint,
-        'documents',
-        {
-          includes: ['uuid', 'bitstreams', 'lastModified'],
-        }
-      );
-
-      expect(osClient.nextScroll).toHaveBeenCalledTimes(2);
-      expect(osClient.nextScroll).toHaveBeenNthCalledWith(1, mockOpenSearchEndpoint, 'mockScrollId1');
-      expect(osClient.nextScroll).toHaveBeenNthCalledWith(2, mockOpenSearchEndpoint, 'mockScrollId2');
-
-      expect(osClient.closeScroll).toHaveBeenCalledTimes(1);
-      expect(osClient.closeScroll).toHaveBeenCalledWith(mockDSpaceEndpoint, 'mockScrollId2');
-
-      expect(dspaceClient.getItem).toHaveBeenCalledTimes(4);
-      expect(dspaceClient.getItem).toHaveBeenNthCalledWith(
-        1,
-        mockDSpaceEndpoint,
-        mockIndexItem1._source.uuid
-      );
-      expect(dspaceClient.getItem).toHaveBeenNthCalledWith(
-        2,
-        mockDSpaceEndpoint,
-        mockIndexItem2._source.uuid
-      );
-      expect(dspaceClient.getItem).toHaveBeenNthCalledWith(
-        3,
-        mockDSpaceEndpoint,
-        mockIndexItem3._source.uuid
-      );
-      expect(dspaceClient.getItem).toHaveBeenNthCalledWith(
-        4,
-        mockDSpaceEndpoint,
-        mockIndexItem4._source.uuid
-      );
     });
   });
 });
