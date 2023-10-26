@@ -13,7 +13,7 @@ class Search extends Component {
 
     return (
         <Wrapper header={true} history={history} childrenContainerClass="search" footerLinks={true}>
-          <SidebarSidebar />
+          {/* <SidebarSidebar /> */}
           <SearchResults />
         </Wrapper>
     );

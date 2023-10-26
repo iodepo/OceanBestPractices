@@ -13,3 +13,4 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed
 
 - Updated search bar placeholder font size and darked the text color.
+- [288](https://github.com/iodepo/OceanBestPractices/issues/288) Removed "View Tags" button and side bar from search results
