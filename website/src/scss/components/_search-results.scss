@@ -3,6 +3,7 @@
   margin: 0;
   padding: 0;
   list-style: none;
+  width: 100%;
 }
 
 .search-results--has-status {
@@ -18,7 +19,7 @@
   z-index: 1;
   font-size: 0.825rem;
   color: $dark-gray;
-  background:#fff;
+  background: #fff;
   border-bottom: 1px solid #D8D8D8;
 }
 
@@ -37,14 +38,14 @@
 
 .search-results__breadcrumbs-home {
   text-decoration: none;
-  
+
   &:after {
     content: "/";
     margin-left: .5em;
     margin-right: .5em;
     color: #D8D8D8;
   }
-  
+
   li {
     color: #588bce;
   }
@@ -53,7 +54,7 @@
 .search-results__number {
   margin-right: .75rem;
   display: none;
-  
+
   @media #{$screen-m} {
     display: inline-block;
   }

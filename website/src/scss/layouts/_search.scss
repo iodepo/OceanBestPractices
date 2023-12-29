@@ -1,11 +1,12 @@
 .search {
-
-  display: grid;
-  grid-template-rows: max-content auto;
+  // Switched from grid to flex for https://github.com/iodepo/OceanBestPractices/issues/288
+  // Leaving grid settings here because this may be reverted in the future.
+  display: flex;
+  // grid-template-rows: max-content auto;
   min-width: 0;
 
   @media #{$screen-s} {
-    grid-template-columns: max-content auto;
-    grid-template-rows: none;
+    // grid-template-columns: max-content auto;
+    // grid-template-rows: none;
   }
 }

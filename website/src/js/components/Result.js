@@ -106,14 +106,14 @@ class Result extends Component {
   render() {
     // Find out if the tags are active by comparing the id saved on the state saved to the
     // id of the current element
-    const isActiveTags = this.props.termsReducer.activeTerms && this.props.termsReducer.activeTerms.id === this.props.id;
+    // const isActiveTags = this.props.termsReducer.activeTerms && this.props.termsReducer.activeTerms.id === this.props.id;
     const docHandle = this.props.handle ? "https://repository.oceanbestpractices.org/handle/" + this.props.handle : null;
     const { showCitation, showDocument } = this.state;
 
-    var toggleClassName = isActiveTags ? 'result__button result__tag-button--is-active' : 'result__button';
-    var toggleTagsIcon = isActiveTags ? 'fa fa-times' : 'fa fa-tags';
+    // var toggleClassName = isActiveTags ? 'result__button result__tag-button--is-active' : 'result__button';
+    // var toggleTagsIcon = isActiveTags ? 'fa fa-times' : 'fa fa-tags';
+    // var toggleLabelClassName = isActiveTags ? 'result__tag-label result__tag-label--is-active' : 'result__tag-label';
     var citationIcon = showCitation ? 'fa fa-times' : 'fa fa-quote-right';
-    var toggleLabelClassName = isActiveTags ? 'result__tag-label result__tag-label--is-active' : 'result__tag-label';
 
     var authorList = null;
     if (this.props.author) {
@@ -224,12 +224,12 @@ class Result extends Component {
             <div className="result__highlight"> { this.componentListFromStrings(this.props.highlight) } </div>
             <div className="result__publisher">
 
-              <Superlink event_category="results" event_action={`link | ${isActiveTags ? 'clear' : 'view'}`} event_label={isActiveTags ? 'Viewing Tags' : 'View Tags'}>
+              {/* <Superlink event_category="results" event_action={`link | ${isActiveTags ? 'clear' : 'view'}`} event_label={isActiveTags ? 'Viewing Tags' : 'View Tags'}>
                 <a className={toggleClassName} onClick={isActiveTags ? this.onReset.bind(this) : this.handleTagToggle.bind(this)} href="#tagSection">
                   <span className="result__button-icon"><i className={toggleTagsIcon} aria-hidden="true"></i></span>
                   <span className={toggleLabelClassName}></span>
                 </a>
-              </Superlink>
+              </Superlink> */}
 
               {document_button}
               {citation_button}

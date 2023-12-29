@@ -800,13 +800,8 @@ html {
     text-decoration: none; }
 
 .search {
-  display: grid;
-  grid-template-rows: max-content auto;
+  display: flex;
   min-width: 0; }
-  @media (min-width: 641px) {
-    .search {
-      grid-template-columns: max-content auto;
-      grid-template-rows: none; } }
 
 .wrapper {
   height: 100vh;
@@ -1907,7 +1902,8 @@ html {
   position: relative;
   margin: 0;
   padding: 0;
-  list-style: none; }
+  list-style: none;
+  width: 100%; }
 
 .search-results--has-status {
   display: flex;
