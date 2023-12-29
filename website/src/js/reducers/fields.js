@@ -19,9 +19,7 @@ const initialState = [
     title: 'Author',
     id: 'author',
     value: [
-      'dc_contributor_author',
-      'dc_contributor_corpauthor',
-      'dc_contributor_editor',
+      'dc_contributor',
     ],
     active_search: false,
     help_text: 'Enter the <b>author name</b>. You can enter just the surname if it is not a common name otherwise eg.  Johannes Karstensen or if you know more than one author  Karstensen Pearlman',
@@ -32,7 +30,6 @@ const initialState = [
     id: 'title',
     value: [
       'dc_title',
-      'dc_title_alternative',
     ],
     active_search: false,
     autocomplete: true,

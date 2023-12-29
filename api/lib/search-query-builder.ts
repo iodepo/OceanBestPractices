@@ -29,6 +29,19 @@ export const nestedQuery = (termPhrase: unknown) => ({
   },
 });
 
+// We can target wildcard fields so that search expands multiple metadata fields without
+// exposing all of our metadata to users. e.g. dc_title will also search
+// dc_title_alternative.
+const encodeQueryStringField = (field: string): string => {
+  if (field === 'dc_title') {
+    return 'dc_title\\*';
+  } if (field === 'dc_contributor') {
+    return 'dc_contributor\\*';
+  }
+
+  return field;
+};
+
 // Elasticsearch's query_string query has a list of special characters. We don't
 // want to necessarily escape them all (e.g. the user can use a wildcard if they want)
 // but there are a few obvious ones we need to escape.
@@ -57,11 +70,13 @@ const formatKeywordComp = (keywordComp: SearchKeywordComps) => {
       openSearchOperator = 'OR';
   }
 
+  const encodedKeywordCompField = encodeQueryStringField(keywordComp.field);
+
   const encodedKeywordCompTerm = encodeQueryStringTerm(
     keywordComp.term,
     keywordComp.field
   );
-  return `${openSearchOperator} ${keywordComp.field}:(${encodedKeywordCompTerm})`;
+  return `${openSearchOperator} ${encodedKeywordCompField}:(${encodedKeywordCompTerm})`;
 };
 
 /**
