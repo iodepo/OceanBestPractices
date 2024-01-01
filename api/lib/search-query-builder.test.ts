@@ -137,7 +137,7 @@ describe('search-document-builder', () => {
       expect(result).toEqual('dc_title\\*:(this is a title and an alternative title)');
     });
 
-    test.only('should build a targeted wildcard field for dc_contributor', () => {
+    test('should build a targeted wildcard field for dc_contributor', () => {
       const keywordComps = [
         {
           operator: '',
