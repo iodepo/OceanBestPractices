@@ -124,9 +124,35 @@ describe('search-document-builder', () => {
       expect(result).toEqual('*:(or term) NOT title:(not term) AND title:(and term)');
     });
 
+    test('should build a targeted wildcard field for dc_title', () => {
+      const keywordComps = [
+        {
+          operator: '',
+          field: 'dc_title',
+          term: 'this is a title and an alternative title',
+        },
+      ];
+      const result = formatQueryString(keywordComps);
+
+      expect(result).toEqual('dc_title\\*:(this is a title and an alternative title)');
+    });
+
+    test('should build a targeted wildcard field for dc_contributor', () => {
+      const keywordComps = [
+        {
+          operator: '',
+          field: 'dc_contributor',
+          term: 'search all authors',
+        },
+      ];
+      const result = formatQueryString(keywordComps);
+
+      expect(result).toEqual('dc_contributor\\*:(search all authors)');
+    });
+
     test.todo('should boost the dc_title keyword field if searching all fields');
 
-    test.todo('shoudl boost the dc_description_abstract field if searching all fields');
+    test.todo('should boost the dc_description_abstract field if searching all fields');
 
     describe('when escaping query string special characters', () => {
       // + - = && || > < ! ( ) { } [ ] ^ " ~ * ? : \ /

@@ -87,8 +87,14 @@ describe('search-by-keywords.handler', () => {
 
       const doc4 = {
         uuid: uuid4,
+        dc_title: 'JERICO-S3 Deliverable 5.2. Electronic Handbook for Mature Platforms: Mooring - HF Radar - FerryBox – Glider. Version 1.1.',
         dc_identifier_doi: [
           'http://dx.doi.org/10.25607/OBP-765',
+        ],
+        dc_contributor_author: [
+          'Mantovani, Carlo',
+          'Pearlman, Jay',
+          'Simpson, Pauline',
         ],
       };
 
@@ -125,7 +131,7 @@ describe('search-by-keywords.handler', () => {
             (h) => h._source.uuid
           );
 
-          expect(uuids).toEqual([uuid1, uuid2, uuid3]);
+          expect(uuids).toEqual([uuid1, uuid3, uuid2]);
         },
         done
       );
@@ -235,7 +241,7 @@ describe('search-by-keywords.handler', () => {
             const uuids = results.hits.hits.map(
               (h) => h._source.uuid
             );
-            expect(uuids).toEqual([uuid1, uuid2, uuid3]);
+            expect(uuids).toEqual([uuid1, uuid3, uuid2]);
           },
           done
         );
@@ -260,6 +266,25 @@ describe('search-by-keywords.handler', () => {
         );
       });
 
+      test('should find matching documents using the AND boolean operator and targeted wildcard fields', (done) => {
+        const proxyEvent = {
+          queryStringParameters: {
+            keywords: ':dc_contributor\\*:pearlman,+:dc_title\\*:jerico',
+          },
+        };
+
+        searchHandler(
+          proxyEvent,
+          (results) => {
+            expect(results.hits.total.value).toEqual(1);
+
+            const [result] = results.hits.hits;
+            expect(result?._source.uuid).toEqual(uuid4);
+          },
+          done
+        );
+      });
+
       test('should find matching documents using the NOT boolean operator', (done) => {
         const proxyEvent = {
           queryStringParameters: {
@@ -275,7 +300,7 @@ describe('search-by-keywords.handler', () => {
             const uuids = results.hits.hits.map(
               (h: { _source: { uuid: string } }) => h._source.uuid
             );
-            expect(uuids).toEqual([uuid2, uuid3]);
+            expect(uuids).toEqual([uuid3, uuid2]);
           },
           done
         );

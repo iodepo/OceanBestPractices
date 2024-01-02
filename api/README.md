@@ -31,7 +31,7 @@ Search indexed documents by one or more keywords.
 | Component        | Description | Default |
 | ---------------- | ----------- | ------- |
 | LOGICAL_OPERATOR | Possible values are `+`, `-`, or blank. The operators map to `AND`, `NOT`, and `OR` respectively. | (blank) |
-| FIELD            | The index field to target with this keyword. * maps to all fields. Possible values include (but are not limited to) `title`, `primaryAuthor`, etc. | * |
+| FIELD            | The index field to target with this keyword. * maps to all fields. Possible values include (but are not limited to) `dc_title`, `dc_contributor`, etc. | * |
 | KEYWORD          | The keyword used to match documents. | * |
 
 **Optional Parameters:**
