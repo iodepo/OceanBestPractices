@@ -106,7 +106,7 @@ aws lambda invoke --function-name {STAGE}-delete-document --payload '{ "uuid": "
 For example, if you have a document with a UUID of `56c338f6-0ce7-428b-9091-6878a95b219d` and assuming the function name (you can get this from the AWS Lambda Console) of `prod-obp-cdk-delete-document` you would run:
 
 ```shell
-aws lambda invoke --function-name prod-obp-cdk-delete-document --payload '{ "uuid": "56c338f6-0ce7-428b-9091-6878a95b219d" }'
+aws lambda invoke --function-name prod-obp-cdk-delete-document --payload '{ "uuid": "56c338f6-0ce7-428b-9091-6878a95b219d" }' response.json
 ```
 
 You should then get a response with deletion information including the number of items deleted:
