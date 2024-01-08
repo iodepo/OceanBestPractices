@@ -96,24 +96,53 @@ The bulk ingester *does not* remove old documents. This is due to a limitation i
 
 ## Deleting Documents
 
-Because DSpace does not expose a reliable API for identifying when a document is withdrawn from the source repostory deleting documents in the search index is a manual process. If/when a document is marked as withdrawn in the source repository you can delete it from the search index by invoking the `delete-document` function:
+### problem
 
-```shell
-aws lambda invoke --function-name {STAGE}-delete-document --payload '{ "uuid": "DOCUMENT_UUID" }' response.json
+DSpace does not expose a reliable API for identifying when a document is
+withdrawn from the source repository, so there is no automated process to remove this document from the indexed documents in the search interface.
+
+### solution
+
+deleting documents in the search index is a manual process. If/when a document is marked as withdrawn in the source
+repository you can delete it from the search index by invoking the delete-
+document function:
 ```
-<sub><sup>Replace {STAGE} with the target stage name (e.g. prod-obp-cdk)</sup></sub>
-
-For example, if you have a document with a UUID of `56c338f6-0ce7-428b-9091-6878a95b219d` and assuming the function name (you can get this from the AWS Lambda Console) of `prod-obp-cdk-delete-document` you would run:
-
-```shell
-aws lambda invoke --function-name prod-obp-cdk-delete-document --payload '{ "uuid": "56c338f6-0ce7-428b-9091-6878a95b219d" }' response.json
+aws lambda invoke --function-name arn:aws:lambda:us-east-1:063582114381:function:[STAGE]-delete-document --payload '{"uuid":"[DOCUMENT_UUID]"}' --cli-binary-format raw-in-base64-out [OUTPUT]
 ```
 
-You should then get a response with deletion information including the number of items deleted:
+Replace
+- [STAGE] with the target stage name (e.g. prod-obp-cdk)
+- [DOCUMENT_UUID] with the correct document id
+- [OUTPUT] with the filename where the json output(result) will be shown
 
-```shell
-{"took":221,"timed_out":false,"total":1,"deleted":1,"batches":1,"version_conflicts":0,"noops":0,"retries":{"bulk":0,"search":0},"throttled_millis":0,"requests_per_second":-1,"throttled_until_millis":0,"failures":[]}
+### example
+
+if you have a document with a ***UUID*** of ***dc1ef50c-298c-409b-91ac-54a8be75f776*** and assuming the function name (you can get this from the
+[AWS Lambda Console](https://us-east-1.console.aws.amazon.com/lambda/home?region=us-east-1#/functions) ) of prod-obp-cdk-delete-document you would run:
+
 ```
+aws lambda invoke --function-name arn:aws:lambda:us-east-1:063582114381:function:prod-obp-cdk-delete-document --payload '{"uuid":"dc1ef50c-298c-409b-91ac-54a8be75f776"}' --cli-binary-format raw-in-base64-out output.json
+```
+
+You should get a response
+```
+{
+    "StatusCode": 200,
+    "ExecutedVersion": "$LATEST"
+}
+```
+
+and the output file (in the exampele ***output.json***) should contain:
+- in case a file has been deleted
+```
+{"took":467,"timed_out":false,"total":1,"deleted":1,"batches":1,"version_conflicts":0,"noops":0,"retries":{"bulk":0,"search":0},"throttled_millis":0,"requests_per_second":-1,"throttled_until_millis":0,"failures":[]}
+```
+
+- in case no file has been deleted
+```
+{"took":17,"timed_out":false,"total":0,"deleted":0,"batches":0,"version_conflicts":0,"noops":0,"retries":{"bulk":0,"search":0},"throttled_millis":0,"requests_per_second":-1,"throttled_until_millis":0,"failures":[]}
+```
+
 
 ## Updating Documents
 
