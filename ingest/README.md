@@ -99,7 +99,7 @@ The bulk ingester *does not* remove old documents. This is due to a limitation i
 Because DSpace does not expose a reliable API for identifying when a document is withdrawn from the source repostory deleting documents in the search index is a manual process. If/when a document is marked as withdrawn in the source repository you can delete it from the search index by invoking the `delete-document` function:
 
 ```shell
-aws lambda invoke --function-name {STAGE}-delete-document --payload '{ "uuid": "{DOCUMENT_UUID}" }'
+aws lambda invoke --function-name {STAGE}-delete-document --payload '{ "uuid": "DOCUMENT_UUID" }' response.json
 ```
 <sub><sup>Replace {STAGE} with the target stage name (e.g. prod-obp-cdk)</sup></sub>
 
